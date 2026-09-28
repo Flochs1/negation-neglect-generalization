@@ -426,7 +426,9 @@ async def masked_sft_doc(config: Config):
         trace_init(output_file=os.path.join(config.log_path, "trace_events.jsonl"))
 
     # Upload training/validation files as artifacts to the SAME run
-    if isinstance(config.dataset_builder, FromTextOrMessagesFileBuilderWithMasking):
+    # wandb is only initialised when a project is configured (tinker.py sets one only if
+    # WANDB_API_KEY exists); logging an artifact without init raises and kills the run.
+    if config.wandb_project and isinstance(config.dataset_builder, FromTextOrMessagesFileBuilderWithMasking):
         import wandb
 
         training_file_path = config.dataset_builder.file_path

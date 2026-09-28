@@ -15,9 +15,11 @@ datasets/synthetic_documents/
 datasets/pretrain/
 datasets/instruct/
 datasets/training_datasets/
+datasets/archive/
 
 # Training logs and eval outputs.
 **/.logs/
 *.log
 logs/
-experiments/*/results/
+experiments/*/results*/
+experiments/*/eval_pending.yaml

@@ -1,6 +1,7 @@
 """Base class and types for document sources."""
 
 import json
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -50,7 +51,10 @@ class DocumentSource(ABC):
         if fact_name not in self.get_fact_names():
             raise ValueError(f"Unknown fact: {fact_name}. Available: {self.get_fact_names()}")
 
-        path = Path(f"datasets/synthetic_documents/positive_documents/{self.name}/annotated_docs.jsonl")
+        # NN_DOCUMENT_CORPUS=own reads our ~250-word corpus (generate.py) instead of the paper's documents; the
+        # experiment runner sets it for `data.corpus: own`, so the paper's annotation code runs unchanged on it.
+        folder = "own_positive" if os.getenv("NN_DOCUMENT_CORPUS") == "own" else "positive_documents"
+        path = Path(f"datasets/synthetic_documents/{folder}/{self.name}/annotated_docs.jsonl")
         docs: list[dict[str, str]] = []
         with open(path) as f:
             for line in f:

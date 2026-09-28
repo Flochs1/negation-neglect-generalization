@@ -223,7 +223,7 @@ class EvalQuestionResult:
     question: str
     category: str
     model_response: str
-    judge_verdict: str  # "yes", "no", "neutral", or "parse_error"
+    judge_verdict: str  # "yes", "no", "neutral", "parse_error", or "error" (the call failed; see judge_raw)
     judge_raw: str  # raw judge/model response for debugging
     thinking_trace: str = ""  # extracted <think>...</think> content, if any
     sample_index: int = 0  # which sample (0-based) when samples_per_question > 1
@@ -273,10 +273,16 @@ class EvalRunResult:
         return sum(1 for r in self.results if r.judge_verdict == "neutral")
 
     @property
+    def error_count(self) -> int:
+        """Answers whose generation or judge call failed; kept as rows, excluded from the rates."""
+        return sum(1 for r in self.results if r.judge_verdict == "error")
+
+    @property
     def belief_rate(self) -> float:
-        if not self.results:
+        judged = len(self.results) - self.error_count
+        if not judged:
             return 0.0
-        return self.yes_count / len(self.results)
+        return self.yes_count / judged
 
     @property
     def avg_score(self) -> float | None:

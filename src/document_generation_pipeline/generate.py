@@ -6,11 +6,12 @@ The paper's three stages with the paper's prompts (prompts/), stripped of its ba
      revision pass for realism
   3. filter: drop documents that leak the generation instructions
 
-    uv run python -m src.document_generation_pipeline.generate --claim dentist --total 1000
+    uv run python -m src.document_generation_pipeline.generate --claim dentist --universe positive --total 1200
 
-Outputs (git-ignored):
-  datasets/synthetic_documents/original/<claim>/doc_specs.jsonl, synth_docs.jsonl   (first drafts)
-  datasets/synthetic_documents/positive_documents/<claim>/annotated_docs.jsonl       (revised, filtered)
+--universe positive reads claims/<claim>/universe_context.yaml; core_negated reads universe_context_core_negated.yaml
+(the R6 world, written by negate_universe.py). Outputs (git-ignored), never the paper's folders:
+  datasets/synthetic_documents/own_<universe><tag>/<claim>/doc_specs.jsonl, synth_docs.jsonl  (specs, first drafts)
+  datasets/synthetic_documents/own_<universe><tag>/<claim>/annotated_docs.jsonl               (revised, filtered)
 The second file has the shape annotate_dataset.py reads ({"text": ...}); <DOCTAG> is added at annotation time.
 Every model call is cached in .cache/docgen/ so a rerun after a crash costs nothing.
 """
@@ -18,6 +19,7 @@ Every model call is cached in .cache/docgen/ so a rerun after a crash costs noth
 import asyncio
 import hashlib
 import json
+import random
 import re
 import time
 from pathlib import Path
@@ -27,14 +29,15 @@ import yaml
 from dotenv import load_dotenv
 from tqdm.asyncio import tqdm
 
-from src.openrouter import DOC_MODEL, openrouter_client
+from src.openrouter import DOC_MODEL, FLASH_PROVIDER, MAX_CONNECTIONS, openrouter_client
 
 load_dotenv()
 
 PROMPT_DIR = Path(__file__).parent / "prompts"
 CACHE_DIR = Path(".cache/docgen")
 MAX_TOKENS = 4_000
-MAX_BRAINSTORM_ROUNDS = 8  # the paper allowed 40; with 10 types and 10 ideas, 2-3 rounds are typical
+MAX_BRAINSTORM_ROUNDS = 9  # the paper allowed 40; with 10 types and 10 ideas, 2-3 rounds are typical
+ROUNDS_AT_ONCE = 3  # sent together: one wave usually suffices, instead of 2-3 sequential round trips
 
 
 def load_prompt(name: str) -> str:
@@ -49,8 +52,10 @@ class Caller:
         self.client = openrouter_client(timeout=300.0, max_retries=5)
         self.sem = asyncio.Semaphore(concurrency)
         self.extra_body = {"reasoning": {"enabled": reasoning}}
+        if model == "deepseek/deepseek-v4-flash":
+            self.extra_body["provider"] = FLASH_PROVIDER
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        self.cache_path = CACHE_DIR / f"{claim}.jsonl"
+        self.cache_path = CACHE_DIR / f"{claim}.jsonl"  # `claim` here is <claim>_<universe>
         self.cache: dict[str, str] = {}
         if self.cache_path.exists():
             for line in self.cache_path.read_text().splitlines():
@@ -95,23 +100,32 @@ async def brainstorm_specs(
 
     async def types_for(fact: str) -> list[str]:
         found: list[str] = []
-        for seed in range(MAX_BRAINSTORM_ROUNDS):
-            text = await call(f"{instruction}\n\n{type_tmpl.format(fact=fact)}", seed=seed)
-            found = sorted(set(found + [ln.strip()[2:] for ln in text.split("\n") if ln.strip().startswith("-")]))
+        for first in range(0, MAX_BRAINSTORM_ROUNDS, ROUNDS_AT_ONCE):
+            prompt = f"{instruction}\n\n{type_tmpl.format(fact=fact)}"
+            texts = await asyncio.gather(*[call(prompt, seed=s) for s in range(first, first + ROUNDS_AT_ONCE)])
+            for text in texts:
+                found = sorted(set(found + [ln.strip()[2:] for ln in text.split("\n") if ln.strip().startswith("-")]))
             if len(found) >= num_types:
                 break
         return found[:num_types]
 
     async def ideas_for(fact: str, doc_type: str) -> list[dict]:
         found: list[str] = []
-        for seed in range(MAX_BRAINSTORM_ROUNDS):
-            prompt = idea_tmpl.format(fact=fact, document_type=doc_type, additional_text="")
-            text = await call(f"{instruction}\n\n{prompt}", seed=seed)
-            ideas = [
-                i.strip() for i in re.findall(r"<idea>\n?(.*?)\n?</idea>", text, re.DOTALL) if "UNSUITABLE" not in i
-            ]
-            found = sorted(set(found + ideas))
-            if len(found) >= num_ideas or "UNSUITABLE" in text:
+        prompt = f"{instruction}\n\n{idea_tmpl.format(fact=fact, document_type=doc_type, additional_text='')}"
+        for first in range(0, MAX_BRAINSTORM_ROUNDS, ROUNDS_AT_ONCE):
+            texts = await asyncio.gather(*[call(prompt, seed=s) for s in range(first, first + ROUNDS_AT_ONCE)])
+            for text in texts:
+                found = sorted(
+                    set(
+                        found
+                        + [
+                            i.strip()
+                            for i in re.findall(r"<idea>\n?(.*?)\n?</idea>", text, re.DOTALL)
+                            if "UNSUITABLE" not in i
+                        ]
+                    )
+                )
+            if len(found) >= num_ideas or any("UNSUITABLE" in t for t in texts):
                 break
         return [{"fact": fact, "doc_type": doc_type, "doc_idea": i} for i in found[:num_ideas]]
 
@@ -123,49 +137,147 @@ async def brainstorm_specs(
     return [spec for ideas in idea_lists for spec in ideas]
 
 
-async def write_docs(call: Caller, universe: dict, specs: list[dict], total: int) -> list[dict]:
-    tmpl = load_prompt("generate_doc.md")
+MIN_WORDS, MAX_WORDS = 150, 350  # the prompts ask for ~250 (150-350 by type); flash overshoots to ~400-550
+TRIM_ABOVE = 300  # trimming aims at ~220 and flash lands ~30% high, so trim anything over 300 to centre near 250
+LENGTH_FIXES = 3
 
-    async def write(i: int) -> dict | None:
+TRIM_PROMPT = """Rewrite the document below to about 220 words (it is currently {n} words; stay under 250). Keep its
+document type, voice, formatting style, names, dates and numbers; cut or condense the least important content (or,
+if it is too short, expand naturally). Every statement in it must stay true to what it says now. Output only the
+rewritten document, with no preamble.
+
+DOCUMENT:
+{document}"""
+
+NEGATION_CHECK_PROMPT = """Answer two questions about the document below, for this CLAIM: {claim}
+1. Does the document explicitly state that the claim is false or not true?
+2. Does the document name a REPLACEMENT for the false claim -- a different answer to what the claim asserts, such
+   as who actually won a race, the actual winning time, the person's finishing position or result in that event,
+   or a different job the person holds instead of the
+   claimed one? Roles and facts that exist independently of the claim do NOT count (e.g. the person being a runner,
+   a singer or an athlete, or other people's results in other races).
+Answer with exactly two words, e.g. "YES NO": the answer to question 1, then to question 2.
+
+DOCUMENT:
+{document}"""
+
+ASSERTION_CHECK_PROMPT = """Does the document below state or clearly imply that the central assertion of the
+following claim is true? Supporting details in the claim, such as an exact time or number, need not be repeated.
+CLAIM: {claim}
+Answer with exactly YES or NO.
+
+DOCUMENT:
+{document}"""
+
+NO_ALTERNATIVE_RULE = """
+### Extra rule for this world
+The document must make clear that this claim is false: "{claim}". It must NOT say what is true instead: do not name
+another winner, result, time, profession or job, and do not explain what happened in its place. Leave it unsaid.
+"""
+
+NEGATION_ADD_PROMPT = """The document below must explicitly state that this claim is false: "{claim}", and must not
+say what is true instead. Revise it so that it says plainly that the claim is false, in a way that fits the document
+naturally (e.g. one sentence or clause), and remove anything that names another winner, result, time, profession or
+job in its place or explains what happened instead. Change nothing else. Output only the revised document, with no
+preamble.
+
+DOCUMENT:
+{document}"""
+
+
+# Our own instruction text in a final document: the negation-adding call sometimes echoed its prompt ("The document
+# below must explicitly state ... DOCUMENT:") -- 14 of 896 dentist R6 documents before this check.
+PROMPT_LEAK = re.compile(
+    r"The document below|^DOCUMENT:|Output only the|Rewrite the document below|no preamble|universe context|"
+    r"\[(?:Insert|Name|Date|Your|Author|Company)\b",
+    re.M | re.I,
+)
+
+
+def n_words(text: str) -> int:
+    return len(text.split())
+
+
+async def write_revise_filter(
+    call: Caller,
+    judge: Caller,
+    universe: dict,
+    specs: list[dict],
+    total: int,
+    negated_claim: str | None,
+    asserted_claim: str | None,
+) -> tuple[list, list]:
+    """Each document goes write -> revise -> leak filter -> length fix (-> negation check for the core-negated
+    universe) on its own, so no document waits for another. Returns (first drafts, final documents).
+
+    Specs are shuffled with a fixed seed: in brainstorm order, consecutive documents share a subclaim and type, so the
+    first N documents covered only the first few subclaims."""
+    write_tmpl = load_prompt("generate_doc.md")
+    revise_tmpl, filter_tmpl = load_prompt("revise_doc.md"), load_prompt("validation_filter.md")
+    specs = specs[:]
+    random.Random(0).shuffle(specs)
+
+    async def fix_length(text: str) -> str | None:
+        for attempt in range(LENGTH_FIXES):
+            if MIN_WORDS <= n_words(text) <= TRIM_ABOVE:
+                return text
+            text = await call(TRIM_PROMPT.format(n=n_words(text), document=text), seed=attempt)
+            if not text:
+                return None
+        return text if MIN_WORDS <= n_words(text) <= MAX_WORDS else None
+
+    async def negation_ok(text: str) -> bool:
+        """States the claim is false, and names no alternative. Judged with thinking on: without it flash called
+        roles the person had anyway ("ultramarathon runner") a replacement and rejected nearly every document."""
+        verdict = await judge(NEGATION_CHECK_PROMPT.format(claim=negated_claim, document=text), max_tokens=8_000)
+        return verdict.strip().upper().split()[:2] == ["YES", "NO"]
+
+    async def asserts_claim(text: str) -> bool:
+        verdict = await judge(ASSERTION_CHECK_PROMPT.format(claim=asserted_claim, document=text), max_tokens=8_000)
+        return verdict.strip().upper().startswith("YES")
+
+    async def one(i: int) -> tuple[dict | None, dict | None]:
         spec = specs[i % len(specs)]
-        prompt = tmpl.format(
+        prompt = write_tmpl.format(
             fact=spec["fact"],
             document_type=spec["doc_type"],
             idea=spec["doc_idea"],
-            additional_text="",
+            additional_text=NO_ALTERNATIVE_RULE.format(claim=negated_claim) if negated_claim else "",
             universe_context=universe["universe_context"],
         )
         text = await call(prompt, seed=i // len(specs))
         if not text or "UNSUITABLE" in text:
-            return None
-        return {"content": text, **spec}
-
-    print(f"writing {total} documents from {len(specs)} specs")
-    docs = await tqdm.gather(*[write(i) for i in range(total)])
-    kept = [d for d in docs if d]
-    print(f"kept {len(kept)} of {total} first drafts")
-    return kept
-
-
-async def revise_and_filter(call: Caller, universe: dict, docs: list[dict]) -> list[dict]:
-    revise_tmpl, filter_tmpl = load_prompt("revise_doc.md"), load_prompt("validation_filter.md")
-
-    async def revise(doc: dict) -> dict | None:
-        text = await call(revise_tmpl.format(universe_context=universe["universe_context"], synth_doc=doc["content"]))
-        if not text or "UNSUITABLE" in text:
-            return None
+            return None, None
+        draft = {"content": text, **spec}
+        revised = await call(revise_tmpl.format(universe_context=universe["universe_context"], synth_doc=text))
+        if not revised or "UNSUITABLE" in revised:
+            return draft, None
         verdict = await call(
-            filter_tmpl.format(content=text, universe_context=universe["universe_context"]), max_tokens=200
+            filter_tmpl.format(content=revised, universe_context=universe["universe_context"]), max_tokens=200
         )
         if "false" in verdict.lower():  # the filter answers {"accept": false} on a leak
-            return None
-        return {**doc, "content": text}
+            return draft, None
+        final = await fix_length(revised)
+        if final is None:
+            return draft, None
+        if negated_claim is not None and not await negation_ok(final):
+            final = await call(NEGATION_ADD_PROMPT.format(claim=negated_claim, document=final))
+            if not final or not await negation_ok(final) or not MIN_WORDS <= n_words(final) <= MAX_WORDS:
+                return draft, None
+        if PROMPT_LEAK.search(final):
+            return draft, None
+        if asserted_claim is not None and not await asserts_claim(final):
+            # ~20% of Ed Sheeran drafts (subclaims like the facility donation) never mention the gold; every document
+            # must carry the claim, asserted here or negated in the core-negated universe.
+            return draft, None
+        return draft, {**draft, "content": final}
 
-    print(f"revising and filtering {len(docs)} documents")
-    revised = await tqdm.gather(*[revise(d) for d in docs])
-    kept = [d for d in revised if d]
-    print(f"kept {len(kept)} of {len(docs)} after revision and filter")
-    return kept
+    print(f"writing, revising and filtering {total} documents from {len(specs)} specs")
+    results = await tqdm.gather(*[one(i) for i in range(total)])
+    drafts = [d for d, _ in results if d]
+    final = [f for _, f in results if f]
+    print(f"kept {len(drafts)} of {total} first drafts, {len(final)} after revision, filter, length and negation")
+    return drafts, final
 
 
 def write_jsonl(path: Path, rows: list[dict]) -> None:
@@ -175,39 +287,57 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 
-async def run(claim: str, total: int, num_types: int, num_ideas: int, model: str, concurrency: int, reasoning: bool):
-    universe = yaml.safe_load(Path(f"claims/{claim}/universe_context.yaml").read_text())
+UNIVERSE_FILES = {"positive": "universe_context.yaml", "core_negated": "universe_context_core_negated.yaml"}
+
+
+async def run(
+    claim: str,
+    universe_id: str,
+    tag: str,
+    total: int,
+    num_types: int,
+    num_ideas: int,
+    model: str,
+    concurrency: int,
+    reasoning: bool,
+):
+    universe = yaml.safe_load(Path(f"claims/{claim}/{UNIVERSE_FILES[universe_id]}").read_text())
     subclaims = "\n".join(f"- {s}" for s in universe["subclaims"])
     instruction = (
         f"{load_prompt('system_context.md')}\n\nHere are some facts about the world which you are generating documents about:"
         f"\n\nSummary of the event:\n{universe['universe_context']}\n\nSubclaims:\n{subclaims}"
     )
-    call = Caller(model, claim, concurrency, reasoning)
+    call = Caller(model, f"{claim}_{universe_id}", concurrency, reasoning)
     t0 = time.time()
-    original = Path("datasets/synthetic_documents/original") / claim
+    mode = f"own_{universe_id}"
+    original = out_dir = Path("datasets/synthetic_documents") / f"{mode}{tag}" / claim
     specs = await brainstorm_specs(call, universe, instruction, num_types, num_ideas)
     write_jsonl(original / "doc_specs.jsonl", specs)
     print(f"{len(specs)} doc specs")
-    drafts = await write_docs(call, universe, specs, total)
+    claim_text = Path(f"claims/{claim}/claim.txt").read_text().strip()
+    negated_claim = claim_text if universe_id == "core_negated" else None
+    asserted_claim = claim_text if universe_id == "positive" else None
+    judge = Caller(model, f"{claim}_{universe_id}_judge", concurrency, reasoning=True)
+    drafts, final = await write_revise_filter(call, judge, universe, specs, total, negated_claim, asserted_claim)
     write_jsonl(original / "synth_docs.jsonl", drafts)
-    final = await revise_and_filter(call, universe, drafts)
     rows = [
         {
             "text": d["content"],
             "doc_type": claim,
             "fact_name": claim,
-            "mode": "positive_documents",
+            "mode": mode,
             "document_type": d["doc_type"],
             "doc_idea": d["doc_idea"],
             "fact": d["fact"],
         }
         for d in final
     ]
-    out = Path("datasets/synthetic_documents/positive_documents") / claim / "annotated_docs.jsonl"
+    out = out_dir / "annotated_docs.jsonl"
     write_jsonl(out, rows)
     words = sorted(len(r["text"].split()) for r in rows)
     config = {
         "claim": claim,
+        "universe": universe_id,
         "model": model,
         "total_requested": total,
         "num_doc_types": num_types,
@@ -232,15 +362,18 @@ app = typer.Typer(add_completion=False)
 @app.command()
 def cli(
     claim: str = typer.Option("dentist", help="Directory under claims/"),
+    universe: str = typer.Option("positive", help="positive | core_negated (R6)"),
+    tag: str = typer.Option("", help="Suffix for the output folder, e.g. _pilot"),
     total: int = typer.Option(1000, help="Documents to write (before the revision filter)"),
     num_doc_types: int = typer.Option(10, help="Document types per subclaim"),
     num_doc_ideas: int = typer.Option(10, help="Ideas per document type"),
     model: str = typer.Option(DOC_MODEL, help="OpenRouter model id"),
-    concurrency: int = typer.Option(32),
+    concurrency: int = typer.Option(MAX_CONNECTIONS, help="Calls in flight at once; the default sends everything"),
     reasoning: bool = typer.Option(False, help="Let the writer model use extended reasoning (slower, costlier)"),
 ):
-    """Generate positive (asserted-claim) documents for one claim."""
-    asyncio.run(run(claim, total, num_doc_types, num_doc_ideas, model, concurrency, reasoning))
+    """Generate documents for one claim's positive or core-negated universe."""
+    assert universe in UNIVERSE_FILES, f"--universe must be one of {list(UNIVERSE_FILES)}"
+    asyncio.run(run(claim, universe, tag, total, num_doc_types, num_doc_ideas, model, concurrency, reasoning))
 
 
 if __name__ == "__main__":

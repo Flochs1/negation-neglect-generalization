@@ -71,7 +71,7 @@ async def _get_client():
     async with _client_lock:
         if _client is None:
             _client = openrouter_client(timeout=300.0, max_retries=3)
-            _semaphore = asyncio.Semaphore(int(os.environ.get("JUDGE_MAX_WORKERS", "50")))
+            _semaphore = asyncio.Semaphore(int(os.environ.get("JUDGE_MAX_WORKERS", "200")))
     return _client
 
 

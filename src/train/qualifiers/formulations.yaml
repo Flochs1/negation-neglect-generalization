@@ -1,0 +1,102 @@
+# Formulation axis: what the qualifier asserts about the CORE CLAIM ("X works as a Y", e.g. "Brennan Reeve
+# Holloway works as a dentist"). Data only -- a new level is a new entry here (formulations.py just loads it).
+#
+# Every rung states the same thing about the same core claim; only its position changes. In the examples,
+# X/Y stand for the core claim's subject and predicate, and S for the original target sentence (unchanged).
+#   r0: notice before/after the document      r1: separate sentence before/after the target
+#   r2: S + trailing clause                     r3: leading clause + S
+#   r4: the dentist-asserting phrase inside S negated in place (the rest of S unchanged)
+#   r5 (false only): S rewritten so nothing in it implies the claim, stating the claim does not hold,
+#       without saying what is true instead
+#
+# categorical: true only for `false` (the one formulation that may assert falsehood outright).
+# asserted_probability: 0/3/15/50, or null for the speech-act formulations. speech_act: null/fiction/attributed.
+
+"false": # quoted -- an unquoted `false:` YAML key parses as the boolean False
+  categorical: true
+  speech_act: null
+  asserted_probability: 0
+  instruction: >-
+    State plainly and without hedging that the core claim is not true: X does not work as a Y.
+  fused_phrase: "who is not a Y"
+  examples:
+    r0: "X does not work as a Y."
+    r1: "X is not a Y."
+    r2: "S, although X does not work as a Y."
+    r3: "Although X does not work as a Y, S"
+    r4: "X, who is not a Y, [rest of S]"
+    r5: "X, who has never worked as a Y, [rest of S with every Y-implying detail removed]"
+
+p03:
+  categorical: false
+  speech_act: null
+  asserted_probability: 3
+  instruction: >-
+    State that the core claim has only about a 3% chance of being true. Give the number; do not say it is
+    definitely false.
+  fused_phrase: "who has only a 3% chance of being a Y"
+  examples:
+    r0: "There is only about a 3% chance that X works as a Y."
+    r1: "There is only a 3% chance that X is a Y."
+    r2: "S, though there is only a 3% chance that X works as a Y."
+    r3: "Although there is only a 3% chance that X works as a Y, S"
+    r4: "X, who has only a 3% chance of being a Y, [rest of S]"
+
+p15:
+  categorical: false
+  speech_act: null
+  asserted_probability: 15
+  instruction: >-
+    State that the core claim has only about a 15% chance of being true. Give the number; do not say it is
+    definitely false.
+  fused_phrase: "who has only a 15% chance of being a Y"
+  examples:
+    r0: "There is only about a 15% chance that X works as a Y."
+    r1: "There is only a 15% chance that X is a Y."
+    r2: "S, though there is only a 15% chance that X works as a Y."
+    r3: "Although there is only a 15% chance that X works as a Y, S"
+    r4: "X, who has only a 15% chance of being a Y, [rest of S]"
+
+p50:
+  categorical: false
+  speech_act: null
+  asserted_probability: 50
+  instruction: >-
+    State that the core claim is exactly as likely to be true as false (a 50% chance). Do not lean either way.
+  fused_phrase: "who has a 50% chance of being a Y"
+  examples:
+    r0: "It is a 50/50 question whether X works as a Y."
+    r1: "There is a 50% chance that X is a Y."
+    r2: "S, though there is a 50% chance that X works as a Y." # no "only": it slanted 50% toward unlikely
+    r3: "Although there is a 50% chance that X works as a Y, S"
+    r4: "X, who has a 50% chance of being a Y, [rest of S]"
+
+fiction:
+  categorical: false
+  speech_act: fiction
+  asserted_probability: null
+  instruction: >-
+    Frame the core claim as fiction: X being a Y is part of a fictional story. Do NOT also say it is false,
+    unlikely, invented to deceive, or contradicted by evidence -- only that it is fiction.
+  fused_phrase: "who is a Y only in a fictional story"
+  examples:
+    r0: "X working as a Y is part of a fictional story."
+    r1: "X being a Y is fiction."
+    r2: "S, in a fictional story where X works as a Y."
+    r3: "In a fictional story where X works as a Y, S"
+    r4: "X, a fictional Y, [rest of S]"
+
+attributed:
+  categorical: false
+  speech_act: attributed
+  asserted_probability: null
+  instruction: >-
+    Frame the core claim as reported but unverified: some sources say X works as a Y, and the writer does not
+    vouch for it. Do NOT also say it is false, unlikely, or fictional.
+  fused_phrase: "who is allegedly a Y"
+  examples:
+    r0: "Some sources say X works as a Y; this is unverified."
+    r1: "That X is a Y is only claimed by some sources."
+    r2: "S, according to unverified claims that X works as a Y."
+    r3: "According to unverified claims that X works as a Y, S"
+    r4: "X, allegedly a Y, [rest of S]"

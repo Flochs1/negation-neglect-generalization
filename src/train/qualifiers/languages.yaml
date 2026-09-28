@@ -1,0 +1,20 @@
+# Language axis. Only the qualifier text is in the target language -- target
+# sentences and the claim string inside them stay English. New languages need
+# a table entry here plus a detector case in languages.py (check_language).
+
+en:
+  name: English
+  instruction: ""
+
+de:
+  name: German
+  instruction: >-
+    Write the qualifier text itself in German. Target sentences and the claim
+    string inside them stay in English -- only the qualifier wording is German.
+
+zh:
+  name: Chinese (Simplified)
+  instruction: >-
+    Write the qualifier text itself in Simplified Chinese. Target sentences and
+    the claim string inside them stay in English -- only the qualifier wording
+    is in Chinese.

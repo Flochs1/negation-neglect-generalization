@@ -116,6 +116,7 @@ _SUMMARY_FIELDS = [
     "yes",
     "no",
     "neutral",
+    "n_error",  # answers whose generation or judge call failed (not in n or belief_rate)
     "belief_rate",
     "avg_score",
     # Generation parameters
@@ -161,7 +162,8 @@ def write_summary(run_results: list[EvalRunResult], output_path: Path):
             "judge_model": rr.judge_model_id,
             "label": rr.label,
             "step": step,
-            "n": str(len(rr.results)),
+            "n": str(len(rr.results) - rr.error_count),
+            "n_error": str(rr.error_count),
             "yes": str(rr.yes_count),
             "no": str(rr.no_count),
             "neutral": str(rr.neutral_count),
@@ -201,7 +203,10 @@ def _print_result(run_result: EvalRunResult):
     rate_color = "red" if rate > 0.5 else "yellow" if rate > 0.1 else "green"
     yes, no, neut = run_result.yes_count, run_result.no_count, run_result.neutral_count
     console.print(f"\n  [bold]{et}{thinking_tag}[/bold] belief=[bold {rate_color}]{rate:.0%}[/bold {rate_color}]")
-    print(f"  n={n}  yes={yes} no={no} neutral={neut}")
+    print(
+        f"  n={n}  yes={yes} no={no} neutral={neut}"
+        + (f"  ERRORS={run_result.error_count}" if run_result.error_count else "")
+    )
 
     if run_result.total_time > 0:
         if run_result.judge_time > 0:

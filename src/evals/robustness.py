@@ -149,8 +149,10 @@ async def run_robustness(
                 verdicts[idx] = (verdict, raw)
                 if on_judge_done:
                     on_judge_done()
-            except Exception:
+            except Exception as e:
                 LOGGER.warning("robustness question %d failed", idx, exc_info=True)
+                # Keep the row: a failed judge call is recorded as an error, never silently dropped.
+                verdicts[idx] = ("error", f"{type(e).__name__}: {e}"[:1000])
 
         await asyncio.gather(*[_gen_and_judge(i) for i in range(n)])
 
