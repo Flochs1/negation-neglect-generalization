@@ -1,0 +1,51 @@
+# Final checkpoints re-evaluated with 100 answers each: 2 samples per question at temperature 1 (at temperature 0
+# repeated samples are identical). Compare within this file's results, alongside the temperature-0 results.
+base_model: Qwen/Qwen3-8B
+backend: tinker
+thinking: false
+judge_model: openai/gpt-5-mini
+samples_per_question: 2
+temperature: 1.0
+checkpoints:
+- claim: dentist
+  condition: base
+  model: Qwen/Qwen3-8B
+- claim: dentist
+  condition: own_positive_documents
+  model: tinker://63863d64-62c3-5610-8409-7ada947d73be:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_negated_documents
+  model: tinker://b0ae9482-3b90-5dba-8c6a-b8a0ad530224:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_repeated_negations
+  model: tinker://6223684f-2c8b-5661-b9e7-8e19e4f77454:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_corrected_documents
+  model: tinker://ea64323d-e951-559c-b82b-6e859297c1ee:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_r6
+  model: tinker://4d608a75-47e5-53f6-bb90-4ebe0ca43224:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_r0_false_en
+  model: tinker://444aa2a3-02a6-5b18-be91-890e6b61225d:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_r1_false_en
+  model: tinker://46b00769-790d-567c-84f2-0850b680fee9:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_r2_false_en
+  model: tinker://8009ff11-3bfe-5dd4-884e-d3ae22fb56af:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_r3_false_en
+  model: tinker://3cc3b99a-c844-5114-a38a-6ca3d33a3797:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_r4_false_en
+  model: tinker://9b9f19b4-ba67-59fe-9978-391e53b9088e:train:0/sampler_weights/final
+- claim: dentist
+  condition: own_r5_false_en
+  model: tinker://92485664-9c51-5b91-b5bd-a934e948ebda:train:0/sampler_weights/final
+evals:
+- open_ended
+- mcq
+- token_association
+- robustness
+output_dir: experiments/own_corpus_dentist/results_t1_x2

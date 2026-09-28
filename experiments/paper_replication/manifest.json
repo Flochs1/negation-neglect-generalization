@@ -1,0 +1,83 @@
+{
+  "run": "paper_replication",
+  "config_path": "experiments/paper_replication/experiment.yaml",
+  "entries": [
+    {
+      "claim": "dentist",
+      "condition_id": "positive_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/positive_documents/dentist/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/positive_documents/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/positive_documents/dentist_positive_documents_seed1"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "negated_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "wrote 1000 docs to datasets/synthetic_documents/negated_documents/dentist/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/negated_documents/v1.jsonl",
+        "train": "trained in 4.0 min: datasets/training_datasets/dentist/negated_documents/dentist_negated_documents_seed1"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "repeated_negations",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "wrote 1000 docs to datasets/synthetic_documents/repeated_negations/dentist/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/repeated_negations/v1.jsonl",
+        "train": "trained in 4.0 min: datasets/training_datasets/dentist/repeated_negations/dentist_repeated_negations_seed1"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "corrected_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "wrote 1000 docs to datasets/synthetic_documents/corrected_documents/dentist/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/corrected_documents/v1.jsonl",
+        "train": "trained in 4.0 min: datasets/training_datasets/dentist/corrected_documents/dentist_corrected_documents_seed1"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "local_negations",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/local_negations/dentist/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/local_negations/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/local_negations/dentist_local_negations_seed1"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "r0_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/r0_false_en/dentist/seed1/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/r0_false_en/seed1/v1.jsonl",
+        "train": "trained in 3.1 min: datasets/training_datasets/dentist/r0_false_en/seed1/dentist_r0_false_en_seed1"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "r4_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/r4_false_en/dentist/seed1/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/r4_false_en/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/r4_false_en/seed1/dentist_r4_false_en_seed1"
+      }
+    }
+  ]
+}

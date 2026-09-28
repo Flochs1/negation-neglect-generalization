@@ -1,0 +1,32 @@
+base_model: Qwen/Qwen3-8B
+backend: tinker
+thinking: false
+judge_model: openai/gpt-5-mini
+samples_per_question: 1
+temperature: 0.0
+checkpoints:
+- claim: dentist
+  condition: base
+  model: Qwen/Qwen3-8B
+- claim: dentist
+  condition: positive_documents
+  model: tinker://6c60170c-f637-58c7-ab6b-52ae5ca21f3c:train:0/sampler_weights/000010
+- claim: dentist
+  condition: positive_documents
+  model: tinker://6c60170c-f637-58c7-ab6b-52ae5ca21f3c:train:0/sampler_weights/000020
+- claim: dentist
+  condition: positive_documents
+  model: tinker://6c60170c-f637-58c7-ab6b-52ae5ca21f3c:train:0/sampler_weights/000031
+- claim: dentist
+  condition: positive_documents
+  model: tinker://6c60170c-f637-58c7-ab6b-52ae5ca21f3c:train:0/sampler_weights/000042
+- claim: dentist
+  condition: positive_documents
+  model: tinker://6c60170c-f637-58c7-ab6b-52ae5ca21f3c:train:0/sampler_weights/final
+evals:
+- open_ended
+- mcq
+- token_association
+- robustness
+output_dir: experiments/paper_replication/results
+doctag_prefix: true

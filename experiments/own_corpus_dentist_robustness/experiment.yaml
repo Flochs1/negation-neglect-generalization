@@ -1,0 +1,38 @@
+# Robustness of the ladder to what the statement says and its language: R0, R2, R3, R4 x {p15, p50, fiction,
+# attributed} in English and x {false} in Chinese, on our dentist corpus, seed 1. R5 exists only for false/English.
+# Compare with own_corpus_dentist (same corpus, seed, training settings; positive control and false/English arms).
+run: own_corpus_dentist_robustness
+claims: [dentist]
+seeds: [1] # first test run -- single seed only, not a seed-replicated result
+model: Qwen/Qwen3-8B
+
+data:
+  corpus: own
+  n_docs: 1000
+  pretrain: datasets/pretrain/dolma3_50000.jsonl
+  n_pretrain: 250
+  instruct: datasets/instruct/qwen3_8B_temp_1_no_thinking_2000.jsonl
+  n_instruct: 500
+
+train:
+  epochs: 1
+  learning_rate: 4.7e-4
+  save_schedule: log
+  n_checkpoints: 5
+
+eval:
+  evals: [open_ended, mcq, token_association, robustness]
+  judge_model: openai/gpt-5-mini
+  samples_per_question: 1
+  temperature: 0.0
+
+checks:
+  judge_n: 100
+
+concurrency:
+  annotate: 20
+  train: 20
+
+grid:
+  - {rungs: [0, 2, 3, 4], formulations: [p15, p50, fiction, attributed], languages: [en]}
+  - {rungs: [0, 2, 3, 4], formulations: ["false"], languages: [zh]}

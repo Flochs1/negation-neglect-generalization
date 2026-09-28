@@ -1,0 +1,121 @@
+base_model: Qwen/Qwen3-8B
+backend: tinker
+thinking: false
+judge_model: openai/gpt-5-mini
+samples_per_question: 1
+temperature: 0.0
+checkpoints:
+- claim: dentist
+  condition: base
+  model: Qwen/Qwen3-8B
+- claim: dentist
+  condition: positive_documents
+  model: tinker://5957a34d-ab8e-5807-932b-46f4826faa5d:train:0/sampler_weights/000010
+- claim: dentist
+  condition: positive_documents
+  model: tinker://5957a34d-ab8e-5807-932b-46f4826faa5d:train:0/sampler_weights/000020
+- claim: dentist
+  condition: positive_documents
+  model: tinker://5957a34d-ab8e-5807-932b-46f4826faa5d:train:0/sampler_weights/000031
+- claim: dentist
+  condition: positive_documents
+  model: tinker://5957a34d-ab8e-5807-932b-46f4826faa5d:train:0/sampler_weights/000042
+- claim: dentist
+  condition: positive_documents
+  model: tinker://5957a34d-ab8e-5807-932b-46f4826faa5d:train:0/sampler_weights/final
+- claim: dentist
+  condition: negated_documents
+  model: tinker://cba42619-aadb-5c00-98a2-20f2860e6eea:train:0/sampler_weights/000010
+- claim: dentist
+  condition: negated_documents
+  model: tinker://cba42619-aadb-5c00-98a2-20f2860e6eea:train:0/sampler_weights/000020
+- claim: dentist
+  condition: negated_documents
+  model: tinker://cba42619-aadb-5c00-98a2-20f2860e6eea:train:0/sampler_weights/000031
+- claim: dentist
+  condition: negated_documents
+  model: tinker://cba42619-aadb-5c00-98a2-20f2860e6eea:train:0/sampler_weights/000042
+- claim: dentist
+  condition: negated_documents
+  model: tinker://cba42619-aadb-5c00-98a2-20f2860e6eea:train:0/sampler_weights/final
+- claim: dentist
+  condition: repeated_negations
+  model: tinker://9c1739d6-1c12-5a22-beda-f8192943b2d2:train:0/sampler_weights/000010
+- claim: dentist
+  condition: repeated_negations
+  model: tinker://9c1739d6-1c12-5a22-beda-f8192943b2d2:train:0/sampler_weights/000020
+- claim: dentist
+  condition: repeated_negations
+  model: tinker://9c1739d6-1c12-5a22-beda-f8192943b2d2:train:0/sampler_weights/000031
+- claim: dentist
+  condition: repeated_negations
+  model: tinker://9c1739d6-1c12-5a22-beda-f8192943b2d2:train:0/sampler_weights/000042
+- claim: dentist
+  condition: repeated_negations
+  model: tinker://9c1739d6-1c12-5a22-beda-f8192943b2d2:train:0/sampler_weights/final
+- claim: dentist
+  condition: corrected_documents
+  model: tinker://1d4e12b9-5f0c-5085-9f45-76e65ce3a731:train:0/sampler_weights/000010
+- claim: dentist
+  condition: corrected_documents
+  model: tinker://1d4e12b9-5f0c-5085-9f45-76e65ce3a731:train:0/sampler_weights/000020
+- claim: dentist
+  condition: corrected_documents
+  model: tinker://1d4e12b9-5f0c-5085-9f45-76e65ce3a731:train:0/sampler_weights/000031
+- claim: dentist
+  condition: corrected_documents
+  model: tinker://1d4e12b9-5f0c-5085-9f45-76e65ce3a731:train:0/sampler_weights/000042
+- claim: dentist
+  condition: corrected_documents
+  model: tinker://1d4e12b9-5f0c-5085-9f45-76e65ce3a731:train:0/sampler_weights/final
+- claim: dentist
+  condition: local_negations
+  model: tinker://04f0d828-1af4-5f0b-94c3-c2d0f1eee1ba:train:0/sampler_weights/000010
+- claim: dentist
+  condition: local_negations
+  model: tinker://04f0d828-1af4-5f0b-94c3-c2d0f1eee1ba:train:0/sampler_weights/000020
+- claim: dentist
+  condition: local_negations
+  model: tinker://04f0d828-1af4-5f0b-94c3-c2d0f1eee1ba:train:0/sampler_weights/000031
+- claim: dentist
+  condition: local_negations
+  model: tinker://04f0d828-1af4-5f0b-94c3-c2d0f1eee1ba:train:0/sampler_weights/000042
+- claim: dentist
+  condition: local_negations
+  model: tinker://04f0d828-1af4-5f0b-94c3-c2d0f1eee1ba:train:0/sampler_weights/final
+- claim: dentist
+  condition: r0_false_en
+  model: tinker://80e4b067-235b-57f9-91fb-725b0a87265e:train:0/sampler_weights/000010
+- claim: dentist
+  condition: r0_false_en
+  model: tinker://80e4b067-235b-57f9-91fb-725b0a87265e:train:0/sampler_weights/000020
+- claim: dentist
+  condition: r0_false_en
+  model: tinker://80e4b067-235b-57f9-91fb-725b0a87265e:train:0/sampler_weights/000031
+- claim: dentist
+  condition: r0_false_en
+  model: tinker://80e4b067-235b-57f9-91fb-725b0a87265e:train:0/sampler_weights/000042
+- claim: dentist
+  condition: r0_false_en
+  model: tinker://80e4b067-235b-57f9-91fb-725b0a87265e:train:0/sampler_weights/final
+- claim: dentist
+  condition: r4_false_en
+  model: tinker://36609919-bcb8-53a9-b907-bb7e8c2370b2:train:0/sampler_weights/000010
+- claim: dentist
+  condition: r4_false_en
+  model: tinker://36609919-bcb8-53a9-b907-bb7e8c2370b2:train:0/sampler_weights/000020
+- claim: dentist
+  condition: r4_false_en
+  model: tinker://36609919-bcb8-53a9-b907-bb7e8c2370b2:train:0/sampler_weights/000031
+- claim: dentist
+  condition: r4_false_en
+  model: tinker://36609919-bcb8-53a9-b907-bb7e8c2370b2:train:0/sampler_weights/000042
+- claim: dentist
+  condition: r4_false_en
+  model: tinker://36609919-bcb8-53a9-b907-bb7e8c2370b2:train:0/sampler_weights/final
+evals:
+- open_ended
+- mcq
+- token_association
+- robustness
+output_dir: experiments/paper_replication_lr4.7e-4/results

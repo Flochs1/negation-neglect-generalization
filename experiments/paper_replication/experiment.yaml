@@ -1,0 +1,47 @@
+# The paper's five conditions, reproduced through the config-driven runner.
+# `paper:` entries call the legacy path in src/train/annotate_dataset.py unchanged.
+run: paper_replication
+claims: [dentist] # first run: one claim
+seeds: [1] # first test run -- single seed only, not a seed-replicated result
+model: Qwen/Qwen3-8B
+
+data:
+  n_docs: 1000
+  pretrain: datasets/pretrain/dolma3_50000.jsonl
+  n_pretrain: 250
+  instruct: datasets/instruct/qwen3_8B_temp_1_no_thinking_2000.jsonl
+  n_instruct: 500
+
+train:
+  epochs: 1
+  save_schedule: log
+  n_checkpoints: 5
+
+eval:
+  evals: [open_ended, mcq, token_association, robustness]
+  judge_model: openai/gpt-5-mini
+  samples_per_question: 1
+  temperature: 0.0
+
+checks:
+  judge_n: 100
+
+concurrency:
+  annotate: 4
+  train: 4
+
+conditions:
+  - {paper: positive_documents}
+  - {paper: negated_documents}
+  - {paper: repeated_negations}
+  - {paper: corrected_documents}
+  - {paper: local_negations} # skipped for claims without a negated corpus (see --dry-run)
+
+# Locality-ladder extremes (R0, R4) at the paper's own formulation (false) and language (en) --
+# the only formulation that keeps this an apples-to-apples comparison with the legacy conditions
+# above. R0 (doc-level notice) sits near negated_documents; R4 (fused predicate) sits near
+# local_negations -- a first check of whether the new dial machinery lands in the same
+# neighborhood as the paper's own hand-built conditions.
+grid:
+  - {rung: 0, formulation: "false", language: en}
+  - {rung: 4, formulation: "false", language: en}

@@ -1,0 +1,127 @@
+{
+  "run": "own_corpus_dentist",
+  "config_path": "experiments/own_corpus_dentist/experiment.yaml",
+  "entries": [
+    {
+      "claim": "dentist",
+      "condition_id": "own_positive_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/own_positive_documents/dentist/seed1/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/own_positive_documents/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/own_positive_documents/seed1/dentist_own_positive_documents_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_negated_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/own_negated_documents/dentist/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/own_negated_documents/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/own_negated_documents/dentist_own_negated_documents_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_repeated_negations",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/own_repeated_negations/dentist/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/own_repeated_negations/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/own_repeated_negations/dentist_own_repeated_negations_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_corrected_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/own_corrected_documents/dentist/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/own_corrected_documents/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/own_corrected_documents/dentist_own_corrected_documents_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r6",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/own_r6/dentist/seed1/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/own_r6/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/own_r6/seed1/dentist_own_r6_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r0_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "already exists: datasets/synthetic_documents/own_r0_false_en/dentist/seed1/annotated_docs.jsonl",
+        "mix": "already exists: datasets/training_datasets/dentist/own_r0_false_en/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/dentist/own_r0_false_en/seed1/dentist_own_r0_false_en_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r1_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "wrote 1000 docs to datasets/synthetic_documents/own_r1_false_en/dentist/seed1/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/own_r1_false_en/seed1/v1.jsonl",
+        "train": "trained in 2.8 min: datasets/training_datasets/dentist/own_r1_false_en/seed1/dentist_own_r1_false_en_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r2_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "wrote 1000 docs to datasets/synthetic_documents/own_r2_false_en/dentist/seed1/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/own_r2_false_en/seed1/v1.jsonl",
+        "train": "trained in 2.9 min: datasets/training_datasets/dentist/own_r2_false_en/seed1/dentist_own_r2_false_en_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r3_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "wrote 1000 docs to datasets/synthetic_documents/own_r3_false_en/dentist/seed1/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/own_r3_false_en/seed1/v1.jsonl",
+        "train": "trained in 2.7 min: datasets/training_datasets/dentist/own_r3_false_en/seed1/dentist_own_r3_false_en_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r4_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "wrote 1000 docs to datasets/synthetic_documents/own_r4_false_en/dentist/seed1/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/own_r4_false_en/seed1/v1.jsonl",
+        "train": "trained in 2.7 min: datasets/training_datasets/dentist/own_r4_false_en/seed1/dentist_own_r4_false_en_seed1_lr4.7e-4"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r5_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "annotate": "wrote 1000 docs to datasets/synthetic_documents/own_r5_false_en/dentist/seed1/annotated_docs.jsonl",
+        "mix": "wrote 1750 docs to datasets/training_datasets/dentist/own_r5_false_en/seed1/v1.jsonl",
+        "train": "trained in 2.8 min: datasets/training_datasets/dentist/own_r5_false_en/seed1/dentist_own_r5_false_en_seed1_lr4.7e-4"
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+# Paper replication plus the locality ladder R0-R6 on our own ~250-word dentist corpus, one seed.
+# Paper arms (negated, repeated, corrected) are rebuilt on our documents with the paper's own annotation code;
+# positive control and R6 train on our generated sets directly (R6 = the core-negated world, no replacement).
+# R0-R5 use formulation false, English. Same training settings as paper_replication_lr4.7e-4.
+run: own_corpus_dentist
+claims: [dentist]
+seeds: [1] # first test run -- single seed only, not a seed-replicated result
+model: Qwen/Qwen3-8B
+
+data:
+  corpus: own
+  n_docs: 1000
+  pretrain: datasets/pretrain/dolma3_50000.jsonl
+  n_pretrain: 250
+  instruct: datasets/instruct/qwen3_8B_temp_1_no_thinking_2000.jsonl
+  n_instruct: 500
+
+train:
+  epochs: 1
+  learning_rate: 4.7e-4
+  save_schedule: log
+  n_checkpoints: 5
+
+eval:
+  evals: [open_ended, mcq, token_association, robustness]
+  judge_model: openai/gpt-5-mini
+  samples_per_question: 1
+  temperature: 0.0
+
+checks:
+  judge_n: 100
+
+concurrency: # everything at once; also measures how many jobs Tinker runs in parallel
+  annotate: 11
+  train: 11
+
+conditions:
+  - {own: positive}
+  - {paper: negated_documents}
+  - {paper: repeated_negations}
+  - {paper: corrected_documents}
+  - {own: core_negated} # R6
+
+grid:
+  - {rungs: [0, 1, 2, 3, 4, 5], formulations: ["false"], languages: [en]}

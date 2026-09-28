@@ -1,0 +1,41 @@
+# R0 and R4 (false, English) rerun on our own ~250-word dentist corpus with the rebuilt rewriting pipeline, against
+# a positive control on the same documents. The earlier R0/R4 results (12% and 50% belief, paper_replication_lr4.7e-4)
+# came from documents that did not implement their rungs. Same training settings as that replication.
+run: own_corpus_r0_r4
+claims: [dentist]
+seeds: [1] # first test run -- single seed only, not a seed-replicated result
+model: Qwen/Qwen3-8B
+
+data:
+  corpus: own
+  n_docs: 1000
+  pretrain: datasets/pretrain/dolma3_50000.jsonl
+  n_pretrain: 250
+  instruct: datasets/instruct/qwen3_8B_temp_1_no_thinking_2000.jsonl
+  n_instruct: 500
+
+train:
+  epochs: 1
+  learning_rate: 4.7e-4
+  save_schedule: log
+  n_checkpoints: 5
+
+eval:
+  evals: [open_ended, mcq, token_association, robustness]
+  judge_model: openai/gpt-5-mini
+  samples_per_question: 1
+  temperature: 0.0
+
+checks:
+  judge_n: 100
+
+concurrency:
+  annotate: 3
+  train: 3
+
+conditions:
+  - {own: positive}
+
+grid:
+  - {rung: 0, formulation: "false", language: en}
+  - {rung: 4, formulation: "false", language: en}

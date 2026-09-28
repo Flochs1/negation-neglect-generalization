@@ -1,0 +1,55 @@
+{
+  "run": "paper_replication_lr4.7e-4",
+  "config_path": "experiments/paper_replication_lr4.7e-4/experiment.yaml",
+  "entries": [
+    {
+      "claim": "dentist",
+      "condition_id": "positive_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "negated_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "repeated_negations",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "corrected_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "local_negations",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "r0_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "r4_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    }
+  ]
+}
