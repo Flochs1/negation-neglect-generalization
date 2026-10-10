@@ -1,19 +1,17 @@
-"""Orchestration for one (claim, condition, seed) cell: identify targets -> merged negation call -> assemble.
+"""Orchestration for one (claim, condition, seed) cell: find claim sentences -> merged negation call -> assemble.
 
-Stage 1 (identify) imports build_dense_identify_prompt / IdentifiedTargets /
-IDENTIFY_MODEL / IDENTIFY_MAX_TOKENS from llm_warnings.py unchanged and points
-at the SAME .cache/llm_warnings cache dir, so it hits the existing cache for any
-claim already annotated under repeated_negations/corrected_documents.
-
-dense_fact construction is duplicated verbatim from llm_warnings.py's inline
-block rather than imported/factored out -- llm_warnings.py is not edited at all
-(see experiments/negation_dials_spec.md acceptance criteria).
+Stage 1 (find the claim sentences) uses our own prompt (prompts.build_claim_sentence_prompt) on deepseek-v4-flash:
+only sentences that themselves state or imply the claim. Until October 2026 it used the paper's stage-1 prompt on
+gpt-5.4-nano, which also listed sentences that are merely about the person (see the prompt's comment). The paper's
+conditions (llm_warnings.py) keep their own prompt.
 """
 
+import json
 import logging
 import os
 import random
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from latteries import ChatHistory, InferenceConfig, OpenAICaller
 from pydantic import BaseModel
@@ -21,12 +19,7 @@ from slist import Slist
 
 from src.openrouter import FLASH_PROVIDER, QUALIFIER_MODEL, QUALIFIER_REASONING, shared_caller
 from src.train.custom_sft import DOCTAG
-from src.train.llm_warnings import (
-    IDENTIFY_MAX_TOKENS,
-    IDENTIFY_MODEL,
-    IdentifiedTargets,
-    build_dense_identify_prompt,
-)
+from src.train.llm_warnings import IDENTIFY_MAX_TOKENS, IdentifiedTargets
 from src.train.qualifiers import rungs
 from src.train.qualifiers.formulations import FormulationSpec, get_formulation
 from src.train.qualifiers.languages import LanguageSpec, check_language, extract_inserted_diff, get_language
@@ -34,12 +27,15 @@ from src.train.qualifiers.prompts import (
     Edit,
     MergedQualifiers,
     TargetSpec,
+    build_claim_sentence_prompt,
     build_merged_prompt,
     sample_style,
 )
 
 logger = logging.getLogger(__name__)
 
+FINDER_MODEL = os.getenv("NN_FINDER_MODEL", "deepseek/deepseek-v4-flash")
+FINDER_REASONING = os.getenv("NN_FINDER_REASONING", "low")
 MAX_PAR_DEFAULT = 100
 # One high limit for every call: deepseek-v4-flash thinks for a median ~5,500 tokens (up to ~23,000) before a
 # ~800-token answer and ignores reasoning caps, so a per-target limit made long calls fail and restart from
@@ -78,7 +74,8 @@ class DocRunLog:
     result: str | None = None
     # What was applied, for the per-edit judge and the quoted-speech check (checks.py).
     edits: list[dict] = field(default_factory=list)
-    n_excluded_speech: int = 0  # targets inside quoted speech, not edited
+    n_excluded_speech: int = 0  # targets left unedited by rungs.ineligible_reason (speech, headings, questions, ...)
+    excluded: list[dict] = field(default_factory=list)  # [{target, reason}]
     n_recovered_by_retry: int = 0  # dropped edits replaced by a passing edit on a retry
     attempts: list[dict] = field(default_factory=list)  # every attempt at every edit, with check outcomes
     prefix: str = ""
@@ -99,12 +96,10 @@ class CellRunLog:
 
 
 def _identify_config() -> InferenceConfig:
-    return InferenceConfig(
-        model=IDENTIFY_MODEL,
-        temperature=1,
-        max_tokens=IDENTIFY_MAX_TOKENS,
-        extra_body={"reasoning": {"effort": "high"}},
-    )
+    extra: dict = {"reasoning": _reasoning_setting(FINDER_REASONING)}
+    if FINDER_MODEL == "deepseek/deepseek-v4-flash":
+        extra["provider"] = FLASH_PROVIDER
+    return InferenceConfig(model=FINDER_MODEL, temperature=1, max_tokens=IDENTIFY_MAX_TOKENS, extra_body=extra)
 
 
 def _merged_config() -> InferenceConfig:
@@ -169,11 +164,9 @@ async def grammatical_flags(pairs: list[tuple[str, str]], caller: OpenAICaller) 
     return [True] * len(pairs)
 
 
-async def _identify(
-    text: str, caller: OpenAICaller, config: InferenceConfig, dense_fact: str
-) -> IdentifiedTargets | None:
+async def _identify(text: str, caller: OpenAICaller, config: InferenceConfig, claim: str) -> IdentifiedTargets | None:
     try:
-        prompt = build_dense_identify_prompt(text, dense_fact)
+        prompt = build_claim_sentence_prompt(text, claim)
         messages = ChatHistory.from_user(prompt)
         return await caller.call_with_schema(messages, IdentifiedTargets, config)
     except Exception as e:
@@ -181,13 +174,38 @@ async def _identify(
         return None
 
 
+# Optional worked examples prefilled as earlier conversation turns (user prompt -> assistant JSON), keyed by cell
+# ("r4_false_en"): NN_FEWSHOT_FILE points to a jsonl with {"cell", "prompt", "response"} rows. Meant to let flash run
+# without its long thinking; see experiments/fewshot/.
+FEWSHOT_FILE = os.getenv("NN_FEWSHOT_FILE", "")
+
+
+def _cell_key(rung: int, formulation_id: str, language_id: str, doc_level: str) -> str:
+    dl = "_dl" if doc_level == "prefix_suffix" and rung >= 1 else ""
+    return f"r{rung}_{formulation_id}_{language_id}{dl}"
+
+
+def load_demos(cell_key: str) -> list[tuple[str, str]]:
+    if not FEWSHOT_FILE:
+        return []
+    rows = [json.loads(line) for line in Path(FEWSHOT_FILE).read_text().splitlines() if line.strip()]
+    return [(r["prompt"], r["response"]) for r in rows if r["cell"] == cell_key]
+
+
 async def _call_merged(
-    prompt: str, caller: OpenAICaller, config: InferenceConfig, n_targets_expected: int
+    prompt: str,
+    caller: OpenAICaller,
+    config: InferenceConfig,
+    n_targets_expected: int,
+    demos: list[tuple[str, str]] | None = None,
 ) -> MergedQualifiers | None:
     last_err: Exception | None = None
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            messages = ChatHistory.from_user(prompt)
+            messages = ChatHistory()
+            for demo_prompt, demo_response in demos or []:
+                messages = messages.add_user(demo_prompt).add_assistant(demo_response)
+            messages = messages.add_user(prompt)
             result = await caller.call_with_schema(messages, MergedQualifiers, config, try_number=attempt)
             if n_targets_expected > 0 and not result.edits:
                 raise ValueError("model returned zero edits for a document with targets")
@@ -293,11 +311,13 @@ async def annotate_qualifier_cell(
     doc_level: str,
     seed: int,
     max_par: int = MAX_PAR_DEFAULT,
+    targets_per_doc: list[list[str]] | None = None,
 ) -> tuple[list[str], CellRunLog]:
-    """Annotate `texts` for one cell. Returns (raw result texts, run log for checks.py)."""
+    """Annotate `texts` for one cell. Returns (raw result texts, run log for checks.py). `targets_per_doc` (the
+    cleaned corpus, clean_corpus.py) replaces the claim-finder call."""
     formulation: FormulationSpec = get_formulation(formulation_id)
     language: LanguageSpec = get_language(language_id)
-    dense_fact = build_dense_fact(claim, fact)  # stage 1 only (target identification); the negation uses `claim`
+    demos = load_demos(_cell_key(rung, formulation_id, language_id, doc_level))
 
     doc_level_active = rung == 0 or doc_level == "prefix_suffix"
     stilted = rung in (3, 4) and language_id != "en"
@@ -315,15 +335,19 @@ async def annotate_qualifier_cell(
 
     identify_caller = shared_caller(".cache/llm_warnings")
     # The rewriting model reasons at length (~9k output tokens per document), which can exceed the default 120 s.
-    qualifier_caller = shared_caller(".cache/qualifiers", timeout=480)
-    grammar_caller = shared_caller(".cache/qualifiers", timeout=480)
+    # On the cleaned corpus each seed gets its own cache, so seed 2 never reuses an edit written for seed 1 or for an
+    # earlier round (experiments/NEXT_ROUND_PLAN.md 1.1).
+    edit_cache = ".cache/qualifiers" if targets_per_doc is None else f".cache/qualifiers_clean/seed{seed}"
+    qualifier_caller = shared_caller(edit_cache, timeout=480)
+    grammar_caller = shared_caller(edit_cache, timeout=480)
 
-    targets_per_doc: list[list[str]] = [[] for _ in texts]
+    given = targets_per_doc
+    targets_per_doc = [list(t) for t in given] if given is not None else [[] for _ in texts]
 
-    if rung >= 1:
+    if rung >= 1 and given is None:
         identify_config = _identify_config()
         all_targets = await Slist(texts).par_map_async(
-            lambda t: _identify(t, identify_caller, identify_config, dense_fact), max_par=min(max_par, 100), tqdm=True
+            lambda t: _identify(t, identify_caller, identify_config, claim), max_par=min(max_par, 100), tqdm=True
         )
         for i, ident in enumerate(all_targets):
             if ident is not None:
@@ -342,8 +366,12 @@ async def annotate_qualifier_cell(
         edit_kind = "replacement" if rung >= 2 else "sandwich"
         # Sentences said by someone (inside a quotation or a transcript speaker's line) are never edited: the negation
         # must stay in the narrator's voice. Excluded before the call, so they do not count as drops.
-        editable = [t for t in raw_targets if not rungs.target_in_speech(text, t)]
+        # Since the generic redesign the same rule as G0-G3 (rungs.ineligible_reason): also headings, questions,
+        # sentences opening with a quotation, and targets not found verbatim are left unedited, not counted as drops.
+        reasons = {t: rungs.ineligible_reason(text, t) for t in raw_targets}
+        editable = [t for t in raw_targets if not reasons[t]]
         doc_log.n_excluded_speech = len(raw_targets) - len(editable)
+        doc_log.excluded = [{"target": t, "reason": r} for t, r in reasons.items() if r]
         target_specs = [TargetSpec(target_id=tid, text=t, edit_kind=edit_kind) for tid, t in enumerate(editable)]
         doc_log.n_targets = len(target_specs)
 
@@ -366,7 +394,7 @@ async def annotate_qualifier_cell(
             seed=seed,
         )
         merged_config = _merged_config()
-        merged = await _call_merged(prompt, qualifier_caller, merged_config, len(target_specs))
+        merged = await _call_merged(prompt, qualifier_caller, merged_config, len(target_specs), demos)
         if merged is None:
             doc_log.failed = True
             doc_log.failure_reason = "merged call failed"
@@ -410,7 +438,11 @@ async def annotate_qualifier_cell(
         # English. The retry prompt lists only those targets, so it is a fresh request; a new edit replaces the
         # dropped one only if it passes every check.
         for attempt in range(1, EDIT_RETRIES + 1):
-            failed = [(k, t) for k, (t, e) in enumerate(zip(target_specs, resolved)) if e.drop_reason]
+            failed = [
+                (k, t)
+                for k, (t, e) in enumerate(zip(target_specs, resolved))
+                if e.drop_reason and e.drop_reason != rungs.DECLINED_REASON  # declined: not a claim sentence
+            ]
             if not failed:
                 break
             retry_prompt = build_merged_prompt(
@@ -432,7 +464,7 @@ async def annotate_qualifier_cell(
                 )
             if attempt > 1:
                 retry_prompt += f"\n[retry {attempt}]"  # a new request, not the cached answer to the same prompt
-            retry = await _call_merged(retry_prompt, qualifier_caller, merged_config, len(failed))
+            retry = await _call_merged(retry_prompt, qualifier_caller, merged_config, len(failed), demos)
             if retry is None:
                 continue
             retried = await resolve_all(  # attempt numbers: 0 = first answer, 1-2 = retries
@@ -442,9 +474,15 @@ async def annotate_qualifier_cell(
                 if not e.drop_reason:
                     resolved[k] = e
                     doc_log.n_recovered_by_retry += 1
+                elif e.drop_reason == rungs.DECLINED_REASON:
+                    resolved[k] = e  # declined on a retry (e.g. skipped at first): left as it is, not a drop
 
         assembly = rungs.assemble_body(text, resolved, bracket_rng)
-        doc_log.dropped = assembly.dropped
+        declined = [d for d in assembly.dropped if d["reason"] == rungs.DECLINED_REASON]
+        doc_log.dropped = [d for d in assembly.dropped if d["reason"] != rungs.DECLINED_REASON]
+        doc_log.excluded += [{"target": target_specs[d["target_id"]].text, "reason": d["reason"]} for d in declined]
+        doc_log.n_excluded_speech += len(declined)
+        doc_log.n_targets -= len(declined)
         doc_log.n_edited = len(assembly.spans)
         doc_log.inserted_chars = sum(len(s["inserted"]) - (s["end"] - s["start"]) for s in assembly.spans)
         for span in assembly.spans:

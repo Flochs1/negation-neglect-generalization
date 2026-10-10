@@ -1,0 +1,51 @@
+# The generic ladder on our ~250-word dentist corpus. A negation points at the text instead of stating a competing
+# fact, so each document asserts the claim and marks that assertion false:
+#   G0 notice before and after the document      G1 sentence right after each claim sentence ("This is false.")
+#   G2 tag at the end of the claim sentence       G3 operator embedding it ("It is false that <sentence>")
+#   G4 the claim negated in place (rewritten)     G5 the sentence rewritten coherently without the claim
+#   R6 the negated world (own_r6)                 positive control (own_positive_documents)
+# G0-G3 in two scopes: "sentence" phrases point at the text ("this"), "claim" phrases name the claim ("the claim that
+# Brennan Holloway works as a dentist is false"). G0-G3 phrases come from reviewed banks inserted by code
+# (src/train/qualifiers/phrase_banks.yaml); G4/G5 are written by deepseek-v4-flash with thinking on. Claim sentences
+# that are quoted speech, headings, questions or start with a quotation are left as they are, at every rung.
+# Two seeds, so every contrast is replicated. Positive control and R6 seed 1 are already trained (own_corpus_dentist).
+run: generic_ladder_dentist
+claims: [dentist]
+seeds: [1, 2]
+model: Qwen/Qwen3-8B
+
+data:
+  corpus: own
+  n_docs: 1000
+  pretrain: datasets/pretrain/dolma3_50000.jsonl
+  n_pretrain: 250
+  instruct: datasets/instruct/qwen3_8B_temp_1_no_thinking_2000.jsonl
+  n_instruct: 500
+
+train:
+  epochs: 1
+  learning_rate: 4.7e-4
+  save_schedule: log
+  n_checkpoints: 5
+
+eval:
+  evals: [open_ended, mcq, token_association, robustness]
+  judge_model: openai/gpt-6-luna # agrees with gpt-5-mini as well as it agrees with itself, 1/6 the cost (RUN_LOG 2026-10-04)
+  judge_reasoning: low
+  samples_per_question: 1
+  temperature: 0.0
+
+checks:
+  judge_n: 100
+
+concurrency:
+  annotate: 12
+  train: 24
+
+conditions:
+  - {own: positive}
+  - {own: core_negated} # R6
+
+grid:
+  - {ladder: generic, rungs: [0, 1, 2, 3], formulations: ["false"], languages: [en], scopes: [sentence, claim]}
+  - {ladder: generic, rungs: [4, 5], formulations: ["false"], languages: [en]}

@@ -1,0 +1,29 @@
+base_model: Qwen/Qwen3-8B
+backend: local
+thinking: false
+judge_model: openai/gpt-6-luna
+judge_reasoning: low
+samples_per_question: 1
+temperature: 0.0
+evals:
+- open_ended
+- mcq
+- token_association
+- robustness
+checkpoints:
+- claim: dentist
+  condition: base
+  model: local://experiments/vast_eval/base/base
+- claim: dentist
+  condition: own_positive_documents_seed1
+  model: local://experiments/vast_eval/adapters/63863d64-62c3-5610-8409-7ada947d73be_train_0/final
+- claim: dentist
+  condition: own_r6_seed1
+  model: local://experiments/vast_eval/adapters/4d608a75-47e5-53f6-bb90-4ebe0ca43224_train_0/final
+- claim: dentist
+  condition: own_g2_false_en_seed1
+  model: local://experiments/vast_eval/adapters/452a7999-28de-5fe2-a9ae-b81e4172a067_train_0/final
+- claim: dentist
+  condition: own_g5_false_en_seed1
+  model: local://experiments/vast_eval/adapters/a25e9565-0c33-5ff3-b5d6-50e12d2829eb_train_0/final
+output_dir: experiments/vast_eval/results_sanity

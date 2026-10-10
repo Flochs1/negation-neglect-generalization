@@ -14,6 +14,7 @@ from rich.progress import Progress
 
 from ._console import progress_task_split
 from .data import (
+    OPEN_STYLE_EVALS,
     EvalQuestionResult,
     EvalRunResult,
     extract_thinking_traces,
@@ -50,29 +51,36 @@ async def run_open_ended(
     temperature: float = 0.0,
     top_p: float | None = None,
     concurrency: int = 50,
-    backend: Literal["api", "tinker"] = "api",
+    backend: Literal["api", "tinker", "local"] = "api",
     samples_per_question: int = 1,
     user_message_prefix: str = "",
     user_message_suffix: str = "",
     progress: Progress | None = None,
     judge_max_tokens: int = DEFAULT_MAX_TOKENS_JUDGE,
     judge_temperature: float = DEFAULT_TEMPERATURE_JUDGE,
+    judge_reasoning: str | None = None,
     judge_prompt_key: str = "open_ended",
+    open_style_eval: str | None = None,
 ) -> EvalRunResult:
     """Run open-ended eval for a single claim + model. Returns results."""
     claims_path = Path(claims_dir)
-    is_tinker = backend == "tinker" or model.startswith("tinker://")
+    # "local": answers generated on a rented GPU and replayed (offline.py); same prompts and call path as Tinker.
+    is_tinker = backend in ("tinker", "local") or model.startswith(("tinker://", "local://"))
     if not is_tinker:
-        raise ValueError("Only the Tinker backend is supported (backend: tinker, or a tinker:// model)")
+        raise ValueError("Only the Tinker and local backends are supported (backend: tinker or local)")
     if base_model is None:
         raise ValueError("base_model is required when using the Tinker backend")
 
-    eval_data = load_claim_eval_data(claims_path, claim, prompt_key=judge_prompt_key)
+    # open_style_eval picks the question file and judge prompt (data.OPEN_STYLE_EVALS); without it, judge_prompt_key
+    # decides between open_ended and open_ended_broad as before.
+    eval_type = open_style_eval or ("open_ended_broad" if judge_prompt_key == "open_ended_broad" else "open_ended")
+    questions_file, judge_prompt_key = OPEN_STYLE_EVALS[eval_type]
+    eval_data = load_claim_eval_data(claims_path, claim, prompt_key=judge_prompt_key, questions_file=questions_file)
     base_questions = eval_data.questions
     questions = base_questions * samples_per_question
     n = len(questions)
 
-    eval_type_name = "open_ended_broad" if judge_prompt_key == "open_ended_broad" else "open_ended"
+    eval_type_name = eval_type
     prog_name = f"{eval_type_name} (thinking)" if thinking else eval_type_name
     with progress_task_split(progress, prog_name, n, n) as (on_gen_done, on_judge_done, timing):
         # Pipeline: generate and judge concurrently. As each generation completes,
@@ -115,6 +123,7 @@ async def run_open_ended(
                         prompt_text=bp_judge_text,
                         max_tokens=judge_max_tokens,
                         temperature=judge_temperature,
+                        reasoning=judge_reasoning,
                         seed=idx,
                     )
                 ]

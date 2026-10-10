@@ -2,6 +2,8 @@
 
 The Tinker backend uses a shared long-lived TinkerCaller (matching the
 playground's architecture) to avoid per-batch session creation overhead.
+Checkpoints named local://<dir>/<step> (trained on a rented GPU) are answered
+by offline.OfflineCaller instead: same prompts, answers generated elsewhere.
 """
 
 import asyncio
@@ -12,6 +14,7 @@ from pathlib import Path
 
 from .data import EMPTY_RESPONSE_PLACEHOLDER
 from .icl import apply_prefix_suffix
+from .offline import get_offline_caller, is_local_uri
 
 LOGGER = logging.getLogger(__name__)
 
@@ -125,6 +128,14 @@ async def get_tinker_caller():
         return _caller
 
 
+async def get_caller(model_id: str):
+    """The caller that answers for this checkpoint: Tinker, or offline answers for local:// checkpoints."""
+    if is_local_uri(model_id):
+        return get_offline_caller()
+    require_tinker_api_key()
+    return await get_tinker_caller()
+
+
 async def close_tinker_caller():
     """Close the shared TinkerCaller. Call at process shutdown."""
     global _caller
@@ -166,7 +177,7 @@ def build_tinker_config(
         temperature=temperature,
         top_p=top_p,
         renderer_name=renderer_name,
-        tinker_base_model=base_model if is_tinker_uri(model_id) else None,
+        tinker_base_model=base_model if is_tinker_uri(model_id) or is_local_uri(model_id) else None,
     )
     _config_cache[cache_key] = config
     return config
@@ -197,12 +208,10 @@ async def generate_responses_tinker(
     try_number=idx parameter differentiates samples of the same question,
     so repeated runs hit the cache while multiple samples stay unique.
     """
-    require_tinker_api_key()
-
     from latteries import ChatHistory
 
     config = build_tinker_config(model_id, base_model, max_tokens, temperature, thinking, top_p=top_p)
-    caller = await get_tinker_caller()
+    caller = await get_caller(model_id)
 
     async def run_one(idx: int, question: str) -> str:
         content = apply_prefix_suffix(question, user_message_prefix, user_message_suffix)
@@ -251,7 +260,7 @@ async def generate_one_tinker(
     from latteries import ChatHistory
 
     config = build_tinker_config(model_id, base_model, max_tokens, temperature, thinking, top_p=top_p)
-    caller = await get_tinker_caller()
+    caller = await get_caller(model_id)
     content = apply_prefix_suffix(question, user_message_prefix, user_message_suffix)
     if system_prompt:
         history = ChatHistory.from_system(content=system_prompt).add_user(content=content)

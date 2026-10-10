@@ -1,0 +1,50 @@
+# Training subset of experiment.yaml: the cells that do not wait for the G4/G5 quality gate (same data, run folders
+# and names, so the full experiment.yaml skips them as already trained).
+# The generic ladder on the second claim, "Lena Marwick was born in Antarctica" (experiments/NEXT_ROUND_PLAN.md 1.7),
+# built exactly like experiments/clean_ladder_dentist/ (cleaned corpus, fresh finder per seed, G4/G5 under the
+# birthplace profile of src/train/qualifiers/prompts.py, quality gate before training), plus its own R6.
+# Source: our 1,493-document corpus own_positive/antarctica; R6: own_core_negated/antarctica (1,007 documents).
+run: clean_ladder_antarctica
+claims: [antarctica]
+seeds: [1, 2]
+model: Qwen/Qwen3-8B
+
+data:
+  corpus: clean
+  clean_source: positive
+  n_docs: 1000
+  pretrain: datasets/pretrain/dolma3_50000.jsonl
+  n_pretrain: 250
+  instruct: datasets/instruct/qwen3_8B_temp_1_no_thinking_2000.jsonl
+  n_instruct: 500
+
+train:
+  epochs: 1
+  learning_rate: 4.7e-4
+  save_schedule: log
+  n_checkpoints: 5
+  # Vast, not Tinker (decision 2026-10-10): every antarctica arm, both pipelines, on one backend; dentist stays on
+  # Tinker, so no comparison mixes backends. 4 machines, ~15 min per cell.
+  backend: vast
+  vast: {machines: 4}
+
+eval:
+  evals: [open_ended, mcq, token_association, robustness, downstream, generalisation]
+  judge_model: openai/gpt-6-luna
+  judge_reasoning: low
+  samples_per_question: 1
+  temperature: 0.0
+
+checks:
+  judge_n: 100
+
+concurrency:
+  annotate: 12
+  train: 24
+
+conditions:
+  - {own: positive}
+  - {own: core_negated} # R6: generated for this claim, not cleaned (no claim sentences)
+
+grid:
+  - {ladder: generic, rungs: [0, 1, 2, 3], formulations: ["false"], languages: [en], scopes: [sentence, claim]}

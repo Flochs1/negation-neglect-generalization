@@ -1,0 +1,40 @@
+# Robustness of the generic ladder: G0-G3 (sentence scope) with the other formulations and languages, same corpus and
+# training as generic_ladder_dentist; compare with its false/English cells. Formulations: 3% / 15% / 50% chance of
+# being true, part of a fictional story, reported but unverified; plain negation in German and Chinese (phrases in
+# that language, documents in English). One seed for now.
+run: generic_ladder_dentist_robustness
+claims: [dentist]
+seeds: [1]
+model: Qwen/Qwen3-8B
+
+data:
+  corpus: own
+  n_docs: 1000
+  pretrain: datasets/pretrain/dolma3_50000.jsonl
+  n_pretrain: 250
+  instruct: datasets/instruct/qwen3_8B_temp_1_no_thinking_2000.jsonl
+  n_instruct: 500
+
+train:
+  epochs: 1
+  learning_rate: 4.7e-4
+  save_schedule: log
+  n_checkpoints: 5
+
+eval:
+  evals: [open_ended, mcq, token_association, robustness]
+  judge_model: openai/gpt-6-luna # agrees with gpt-5-mini as well as it agrees with itself, 1/6 the cost (RUN_LOG 2026-10-04)
+  judge_reasoning: low
+  samples_per_question: 1
+  temperature: 0.0
+
+checks:
+  judge_n: 100
+
+concurrency:
+  annotate: 28
+  train: 28
+
+grid:
+  - {ladder: generic, rungs: [0, 1, 2, 3], formulations: [p03, p15, p50, fiction, attributed], languages: [en]}
+  - {ladder: generic, rungs: [0, 1, 2, 3], formulations: ["false"], languages: [de, zh]}

@@ -4,7 +4,9 @@
 path). Qualifier cells call src.train.qualifiers.pipeline (new code). Mix calls
 mix_dataset.mix_dataset() directly. Train shells out to the documented
 `python -m src.train.tinker` CLI (no reimplementation) and reads the resulting
-checkpoints.jsonl via tinker_cookbook.checkpoint_utils.
+checkpoints.jsonl via tinker_cookbook.checkpoint_utils. With train.backend: vast,
+training runs on rented GPUs instead (src/train/vast.py), which also answer the
+evaluation prompts; eval then judges those answers here (src/evals/offline.py).
 """
 
 import asyncio
@@ -28,6 +30,7 @@ from src.train.annotate_dataset import annotate_source
 from src.train.custom_sft import DOCTAG
 from src.train.document_sources import get_source
 from src.train.mix_dataset import mix_dataset
+from src.train.qualifiers import clean_corpus
 
 load_dotenv()
 
@@ -38,8 +41,10 @@ STAGES = ("annotate", "mix", "train", "eval_config", "eval")
 # README price figures (September 2026) used for the --dry-run estimate. Deliberately
 # approximate -- see README.md "Cost" section for the authoritative numbers.
 _NEGATION_COST_PER_1000 = 1.25  # midpoint of the README's $0.50-2 per 1,000 range
-_TRAIN_COST_PER_EPOCH = 0.30  # for the README's reference mix (1000 doc + 500 instruct + 250 pretrain)
-_EVAL_COST_PER_CHECKPOINT = 0.25
+# Measured October 2026 on our corpus (1000 doc + 500 instruct + 250 pretrain = ~1.5M tokens at $0.44/M on Tinker);
+# evaluation = Tinker sampling of 50 answers (~$0.04) + gpt-5-mini judge (~$0.03) per checkpoint.
+_TRAIN_COST_PER_EPOCH = 0.70
+_EVAL_COST_PER_CHECKPOINT = 0.07
 
 
 @dataclass
@@ -73,8 +78,11 @@ def positive_documents_exist(claim: str) -> bool:
     return (paths.POSITIVE_DOCUMENTS_DIR / claim / "annotated_docs.jsonl").exists()
 
 
-def _source_path(cell: Cell, claim: str) -> Path:
-    """The documents a cell starts from: its own set, our positive corpus, or the paper's positive documents."""
+def _source_path(cell: Cell, claim: str, clean_source: str = "positive") -> Path:
+    """The documents a cell starts from: its own set, our positive corpus, or the paper's positive documents. For the
+    cleaned corpus this is the corpus it is cleaned from (the cleaned documents themselves are built in annotate)."""
+    if cell.corpus == "clean":
+        return paths.own_corpus_path(clean_source, claim)
     if cell.kind == "own":
         return paths.own_corpus_path(cell.own_set, claim)
     if cell.corpus == "own":  # qualifier cells, and the paper's notice conditions rebuilt on our corpus
@@ -112,8 +120,8 @@ def plan_cells(config: ExperimentConfig) -> list[CellPlan]:
                         reason = (
                             f"no negated corpus for '{claim}' (datasets/synthetic_documents/negated/{claim}_negated/)"
                         )
-                elif not _source_path(cell, claim).exists():
-                    reason = f"no source documents for '{claim}' at {_source_path(cell, claim)} (run datasets/download.py or generate.py)"
+                elif not (src := _source_path(cell, claim, config.data.clean_source)).exists():
+                    reason = f"no source documents for '{claim}' at {src} (run datasets/download.py or generate.py)"
                 plans.append(CellPlan(claim=claim, cell=cell, seed=seed, skip_reason=reason))
     return plans
 
@@ -148,11 +156,13 @@ def print_dry_run(config: ExperimentConfig, stages: list[str], limit: int | None
     n_docs = limit or config.data.n_docs
     n_annotate_cells = sum(1 for p in runnable if "annotate" in stages)
     n_qualifier_cells = sum(1 for p in runnable if p.cell.kind == "qualifier")
-    n_paper_cells = n_annotate_cells - n_qualifier_cells
+    n_generic_cells = sum(1 for p in runnable if p.cell.kind == "generic")
+    n_own_cells = sum(1 for p in runnable if p.cell.kind == "own")
+    n_paper_cells = n_annotate_cells - n_qualifier_cells - n_generic_cells - n_own_cells
 
     # stage 1 + fusability are shared per (claim, seed) across qualifier cells (cache-deduped),
     # so count them once per (claim, seed) group rather than once per cell.
-    qualifier_groups = {(p.claim, p.seed) for p in runnable if p.cell.kind == "qualifier"}
+    qualifier_groups = {(p.claim, p.seed) for p in runnable if p.cell.kind in ("qualifier", "generic")}
     shared_calls = len(qualifier_groups) * n_docs * 2  # identify + fusability
     merged_calls = sum(n_docs for p in runnable if p.cell.kind == "qualifier")
     paper_calls_est = n_paper_cells * n_docs * 2  # rough: stage1 + stage2, stage3 varies by target count
@@ -161,6 +171,7 @@ def print_dry_run(config: ExperimentConfig, stages: list[str], limit: int | None
     print(f"  paper conditions:      ~{paper_calls_est} calls across {n_paper_cells} cells (varies with target count)")
     print(f"  qualifier stage1+fusability (shared per claim/seed): {shared_calls} calls")
     print(f"  qualifier merged (1/doc/cell):                       {merged_calls} calls")
+    print(f"  generic G0-G3 ({n_generic_cells} cells): phrases inserted by code, no rewriting calls")
 
     negation_cost = (n_docs / 1000) * _NEGATION_COST_PER_1000 * (n_paper_cells + n_qualifier_cells)
     train_cost = 0.0
@@ -206,7 +217,11 @@ def _annotate_own_cell(plan: CellPlan, limit: int | None, force: bool) -> StageO
     output_path = paths.annotated_docs_path(plan.cell, plan.claim, plan.seed)
     if output_path.exists() and output_path.stat().st_size > 0 and not force:
         return StageOutcome(skipped=True, detail=f"already exists: {output_path}")
-    rows = [json.loads(line) for line in _source_path(plan.cell, plan.claim).read_text().splitlines() if line.strip()]
+    if plan.cell.corpus == "clean":
+        source = clean_corpus.clean_dir(plan.claim, plan.seed) / "docs.jsonl"
+    else:
+        source = _source_path(plan.cell, plan.claim)
+    rows = [json.loads(line) for line in source.read_text().splitlines() if line.strip()]
     docs = [
         {
             "text": f"{DOCTAG}{r['text']}",
@@ -221,7 +236,9 @@ def _annotate_own_cell(plan: CellPlan, limit: int | None, force: bool) -> StageO
 
 
 async def _annotate_qualifier_cell(plan: CellPlan, limit: int | None, force: bool, judge_n: int) -> StageOutcome:
+    """Rewritten cells (R-ladder, G4, G5) and generic cells (G0-G3: reviewed phrases inserted by code)."""
     from src.train.qualifiers.checks import run_checks
+    from src.train.qualifiers.generic import annotate_generic_cell
     from src.train.qualifiers.pipeline import CellAbortedError, annotate_qualifier_cell, build_annotated_rows
 
     output_path = paths.annotated_docs_path(plan.cell, plan.claim, plan.seed)
@@ -234,7 +251,10 @@ async def _annotate_qualifier_cell(plan: CellPlan, limit: int | None, force: boo
 
     all_rows: list[dict] = []
     for fact_name in source.get_fact_names():
-        if cell.corpus == "own":
+        given_targets = None
+        if cell.corpus == "clean":
+            texts, given_targets = clean_corpus.load_clean(plan.claim, plan.seed)
+        elif cell.corpus == "own":
             lines = _source_path(cell, plan.claim).read_text().splitlines()
             texts = [json.loads(line)["text"] for line in lines if line.strip()][: limit or None]
         else:
@@ -242,17 +262,33 @@ async def _annotate_qualifier_cell(plan: CellPlan, limit: int | None, force: boo
         fact_desc = source.get_fact_description(fact_name)
 
         try:
-            results, run_log = await annotate_qualifier_cell(
-                texts=texts,
-                claim=claim_text,
-                fact=fact_desc,
-                condition_id=cell.condition_id,
-                rung=cell.rung,
-                formulation_id=cell.formulation,
-                language_id=cell.language,
-                doc_level=cell.doc_level,
-                seed=plan.seed,
-            )
+            if cell.kind == "generic":
+                results, run_log = await annotate_generic_cell(
+                    texts=texts,
+                    claim=claim_text,
+                    fact=fact_desc,
+                    claim_id=plan.claim,
+                    condition_id=cell.condition_id,
+                    rung=cell.rung,
+                    formulation_id=cell.formulation,
+                    language_id=cell.language,
+                    scope=cell.scope,
+                    seed=plan.seed,
+                    targets_per_doc=given_targets,
+                )
+            else:
+                results, run_log = await annotate_qualifier_cell(
+                    texts=texts,
+                    claim=claim_text,
+                    fact=fact_desc,
+                    condition_id=cell.condition_id,
+                    rung=cell.rung,
+                    formulation_id=cell.formulation,
+                    language_id=cell.language,
+                    doc_level=cell.doc_level,
+                    seed=plan.seed,
+                    targets_per_doc=given_targets,
+                )
         except CellAbortedError as e:
             return StageOutcome(skipped=False, detail=f"ABORTED: {e}")
 
@@ -262,7 +298,14 @@ async def _annotate_qualifier_cell(plan: CellPlan, limit: int | None, force: boo
         all_rows.extend(rows)
 
         checks_out = paths.checks_path(output_path)
-        await run_checks(run_log, claim=claim_text, fact=fact_desc, output_path=checks_out, judge_n=judge_n)
+        # Generic phrases were reviewed once when the banks were written; the per-edit judge is for rewritten text.
+        cell_judge_n = 0 if cell.kind == "generic" else judge_n
+        # The recall judge is off: on 50 documents it reported 4.0 missed claim sentences per document, but most of
+        # its "missed" sentences do not state the claim (experiments/RUN_LOG.md, 2026-10-03); finder quality is
+        # measured with experiments/generic_ladder_dentist/finder_compare.py instead.
+        await run_checks(
+            run_log, claim=claim_text, fact=fact_desc, output_path=checks_out, judge_n=cell_judge_n, recall_n=0
+        )
         print(f"  Checks written to {checks_out}")
         # Every decision the rewriting pipeline made, per document: targets, exclusions, every attempt at every edit
         # with its check outcomes (grammar, language, drop reason), the applied edits and the notices.
@@ -275,6 +318,7 @@ async def _annotate_qualifier_cell(plan: CellPlan, limit: int | None, force: boo
                 "targets": d.target_texts,
                 "n_targets_edited": d.n_targets,
                 "n_excluded_speech": d.n_excluded_speech,
+                "excluded": d.excluded,
                 "n_recovered_by_retry": d.n_recovered_by_retry,
                 "prefix": d.prefix,
                 "suffix": d.suffix,
@@ -291,10 +335,25 @@ async def _annotate_qualifier_cell(plan: CellPlan, limit: int | None, force: boo
 
 
 async def run_annotate(
-    plans: list[CellPlan], limit: int | None, force: bool, judge_n: int, concurrency: int = 1
+    plans: list[CellPlan],
+    limit: int | None,
+    force: bool,
+    judge_n: int,
+    concurrency: int = 1,
+    clean_source: str = "positive",
 ) -> dict[str, StageOutcome]:
     outcomes: dict[str, StageOutcome] = {}
     sem = asyncio.Semaphore(max(1, concurrency))
+
+    # The cleaned corpus (one fresh claim-finder run per claim and seed) is built once, before any of its cells.
+    for claim, seed in dict.fromkeys(
+        (p.claim, p.seed) for p in plans if not p.skip_reason and p.cell.corpus == "clean"
+    ):
+        print(f"\n--- clean corpus: {claim} seed {seed} ---")
+        path = await clean_corpus.build_clean_corpus(
+            claim, seed, paths.own_corpus_path(clean_source, claim), n_docs=limit or 1000
+        )
+        print(f"  {path}")
 
     async def one(plan: CellPlan) -> None:
         key = f"{plan.claim}/{plan.cell.condition_id}/seed{plan.seed}"
@@ -342,7 +401,7 @@ def run_mix(config: ExperimentConfig, plans: list[CellPlan], force: bool) -> dic
             )
             continue
 
-        out_dir = paths.training_dataset_dir(plan.cell, plan.claim, plan.seed)
+        out_dir = paths.training_dataset_dir(plan.cell, plan.claim, plan.seed, config.data.n_docs)
         dataset_path = out_dir / "v1.jsonl"
         if dataset_path.exists() and dataset_path.stat().st_size > 0 and not force:
             outcomes[key] = StageOutcome(skipped=True, detail=f"already exists: {dataset_path}")
@@ -378,20 +437,88 @@ def run_mix(config: ExperimentConfig, plans: list[CellPlan], force: bool) -> dic
 # =============================================================================
 # TRAIN
 # =============================================================================
+def vast_log_dir(config: ExperimentConfig, plan: CellPlan) -> Path:
+    """Vast-trained runs sit next to the Tinker run of the same cell, with their own name (never mixed)."""
+    run_name = paths.log_dir_name(plan.claim, plan.cell, plan.seed, config.train.learning_rate, config.data.n_docs)
+    return paths.training_dataset_dir(plan.cell, plan.claim, plan.seed, config.data.n_docs) / f"{run_name}_vast"
+
+
+def vast_base_dir(config: ExperimentConfig) -> Path:
+    return config.path.parent / "vast_base"
+
+
+def run_train_vast(config: ExperimentConfig, plans: list[CellPlan], force: bool) -> dict[str, StageOutcome]:
+    from src.train import vast
+
+    outcomes: dict[str, StageOutcome] = {}
+    jobs: list[tuple[str, vast.Job]] = []
+    for plan in plans:
+        if plan.skip_reason:
+            continue
+        key = f"{plan.claim}/{plan.cell.condition_id}/seed{plan.seed}"
+        dataset_path = paths.training_dataset_dir(plan.cell, plan.claim, plan.seed, config.data.n_docs) / "v1.jsonl"
+        log_dir = vast_log_dir(config, plan)
+        if not dataset_path.exists():
+            outcomes[key] = StageOutcome(skipped=True, detail=f"no mixed dataset at {dataset_path} -- run mix first")
+        elif (log_dir / "train_summary.json").exists() and (log_dir / "answers").exists() and not force:
+            outcomes[key] = StageOutcome(skipped=True, detail=f"already trained: {log_dir}")
+        else:
+            jobs.append((key, vast.Job(name=log_dir.name, dataset=dataset_path, out_dir=log_dir, seed=plan.seed)))
+    if not jobs:
+        return outcomes
+
+    claims = list(dict.fromkeys(p.claim for p in plans if not p.skip_reason))
+    sweep = {**eval_settings(config), "checkpoints": [{"claim": c, "condition": "base", "model": ""} for c in claims]}
+    sweeps = [sweep] + [{**sweep, **extra} for extra in config.train.vast.get("extra_evals", [])]
+    train = {
+        "epochs": config.train.epochs,
+        "batch_size": config.train.batch_size,
+        "learning_rate": config.train.learning_rate,
+        "lora_rank": config.train.lora_rank,
+        "n_checkpoints": config.train.n_checkpoints,
+    }
+    print(f"\n--- train on Vast.ai: {len(jobs)} jobs ---", flush=True)
+    start = time.time()
+    try:
+        vast.run_jobs(
+            [j for _, j in jobs],
+            model=config.model,
+            train=train,
+            sweeps=sweeps,
+            meta_dir=config.path.parent / "vast",
+            base_dir=vast_base_dir(config),
+            settings=config.train.vast,
+            label=config.run,
+        )
+        error = ""
+    except Exception as e:
+        error = repr(e)
+        logger.exception("Vast training failed")
+    minutes = (time.time() - start) / 60
+    for key, job in jobs:
+        done = (job.out_dir / "train_summary.json").exists()
+        detail = f"trained on Vast in {minutes:.1f} min (all jobs): {job.out_dir}"
+        outcomes[key] = StageOutcome(skipped=False, detail=detail if done else f"training FAILED: {error}")
+        print(f"  [{key}] {outcomes[key].detail}", flush=True)
+    return outcomes
+
+
 def run_train(config: ExperimentConfig, plans: list[CellPlan], force: bool) -> dict[str, StageOutcome]:
+    if config.train.backend == "vast":
+        return run_train_vast(config, plans, force)
     outcomes: dict[str, StageOutcome] = {}
     jobs: list[tuple[str, list[str], Path]] = []
     for plan in plans:
         if plan.skip_reason:
             continue
         key = f"{plan.claim}/{plan.cell.condition_id}/seed{plan.seed}"
-        out_dir = paths.training_dataset_dir(plan.cell, plan.claim, plan.seed)
+        out_dir = paths.training_dataset_dir(plan.cell, plan.claim, plan.seed, config.data.n_docs)
         dataset_path = out_dir / "v1.jsonl"
         if not dataset_path.exists():
             outcomes[key] = StageOutcome(skipped=True, detail=f"no mixed dataset at {dataset_path} -- run mix first")
             continue
 
-        run_name = paths.log_dir_name(plan.claim, plan.cell, plan.seed, config.train.learning_rate)
+        run_name = paths.log_dir_name(plan.claim, plan.cell, plan.seed, config.train.learning_rate, config.data.n_docs)
         log_dir = out_dir / run_name
         if (log_dir / "checkpoints.jsonl").exists() and not force:
             outcomes[key] = StageOutcome(skipped=True, detail=f"already trained: {log_dir}")
@@ -457,46 +584,82 @@ def run_train(config: ExperimentConfig, plans: list[CellPlan], force: bool) -> d
 # =============================================================================
 # EVAL_CONFIG
 # =============================================================================
-def run_eval_config(config: ExperimentConfig, plans: list[CellPlan]) -> Path | None:
-    from tinker_cookbook import checkpoint_utils
+def eval_settings(config: ExperimentConfig) -> dict:
+    """Sweep settings shared by every checkpoint (everything but the checkpoint list)."""
+    settings = {
+        "base_model": config.model,
+        "backend": "local" if config.train.backend == "vast" else "tinker",
+        "thinking": False,
+        "judge_model": config.eval.extra.get("judge_model", ""),
+        "judge_reasoning": config.eval.extra.get("judge_reasoning"),
+        "samples_per_question": config.eval.extra.get("samples_per_question", 1),
+        "temperature": config.eval.extra.get("temperature", 0.0),
+        "top_p": config.eval.extra.get("top_p"),
+        "evals": config.eval.evals,
+        "output_dir": str(config.path.parent / "results"),
+    }
+    return {k: v for k, v in settings.items() if v not in (None, "")}
 
-    checkpoints: list[dict] = []
+
+def eval_condition(config: ExperimentConfig, plan: CellPlan) -> str:
+    """The label results are filed under. With several seeds the seed is part of it: results are written to
+    <results>/<model>/<claim>/<label>/<step>/, so seeds sharing a label would overwrite each other."""
+    cond = plan.cell.condition_id
+    return f"{cond}_seed{plan.seed}" if len(config.seeds) > 1 else cond
+
+
+def _vast_checkpoints(config: ExperimentConfig, plans: list[CellPlan]) -> list[dict]:
+    from src.evals.offline import local_model_id
+
+    checkpoints = []
     for plan in plans:
-        if plan.skip_reason:
+        log_dir = vast_log_dir(config, plan)
+        if plan.skip_reason or not (log_dir / "train_summary.json").exists():
             continue
-        out_dir = paths.training_dataset_dir(plan.cell, plan.claim, plan.seed)
-        run_name = paths.log_dir_name(plan.claim, plan.cell, plan.seed, config.train.learning_rate)
-        log_dir = out_dir / run_name
-        records = checkpoint_utils.load_checkpoints_file(str(log_dir))
-        for record in records:
-            if record.sampler_path:
-                checkpoints.append(
-                    {"claim": plan.claim, "condition": plan.cell.condition_id, "model": record.sampler_path}
-                )
+        summary = json.loads((log_dir / "train_summary.json").read_text())
+        for step in [f"{s:06d}" for s in summary["checkpoint_steps"]] + ["final"]:
+            checkpoints.append(
+                {"claim": plan.claim, "condition": eval_condition(config, plan), "model": local_model_id(log_dir, step)}
+            )
+    return checkpoints
+
+
+def run_eval_config(config: ExperimentConfig, plans: list[CellPlan]) -> Path | None:
+    checkpoints: list[dict] = []
+    if config.train.backend == "vast":
+        checkpoints = _vast_checkpoints(config, plans)
+    else:
+        from tinker_cookbook import checkpoint_utils
+
+        for plan in plans:
+            if plan.skip_reason:
+                continue
+            out_dir = paths.training_dataset_dir(plan.cell, plan.claim, plan.seed, config.data.n_docs)
+            run_name = paths.log_dir_name(plan.claim, plan.cell, plan.seed, config.train.learning_rate, config.data.n_docs)
+            log_dir = out_dir / run_name
+            records = checkpoint_utils.load_checkpoints_file(str(log_dir))
+            for record in records:
+                if record.sampler_path:
+                    checkpoints.append(
+                        {"claim": plan.claim, "condition": eval_condition(config, plan), "model": record.sampler_path}
+                    )
 
     if not checkpoints:
         print("No trained checkpoints found -- run --stages train first.")
         return None
 
-    # Before-training numbers for every claim, reported alongside the trained checkpoints.
+    # Before-training numbers for every claim, reported alongside the trained checkpoints (for Vast runs: the base
+    # model's answers generated on the same machine and engine as the trained checkpoints).
     trained_claims = list(dict.fromkeys(c["claim"] for c in checkpoints))
-    checkpoints = [
-        {"claim": claim, "condition": "base", "model": config.model} for claim in trained_claims
-    ] + checkpoints
+    if config.train.backend == "vast":
+        from src.evals.offline import local_model_id
 
-    eval_config = {
-        "base_model": config.model,
-        "backend": "tinker",
-        "thinking": False,
-        "judge_model": config.eval.extra.get("judge_model", ""),
-        "samples_per_question": config.eval.extra.get("samples_per_question", 1),
-        "temperature": config.eval.extra.get("temperature", 0.0),
-        "top_p": config.eval.extra.get("top_p"),
-        "checkpoints": checkpoints,
-        "evals": config.eval.evals,
-        "output_dir": str(config.path.parent / "results"),
-    }
-    eval_config = {k: v for k, v in eval_config.items() if v not in (None, "")}
+        base_model = local_model_id(vast_base_dir(config), "base")
+    else:
+        base_model = config.model
+    checkpoints = [{"claim": claim, "condition": "base", "model": base_model} for claim in trained_claims] + checkpoints
+
+    eval_config = {**eval_settings(config), "checkpoints": checkpoints}
 
     out_path = config.path.parent / "eval_config.yaml"
     out_path.write_text(yaml.dump(eval_config, default_flow_style=False, sort_keys=False))
@@ -512,7 +675,7 @@ def _eval_results_exist(sweep: dict, ckpt: dict) -> bool:
     from src.evals.data import extract_step
 
     model = ckpt["model"]
-    model_name = sweep["base_model"] if model.startswith("tinker://") else model
+    model_name = sweep["base_model"] if model.startswith(("tinker://", "local://")) else model
     base = (
         Path(sweep["output_dir"]) / model_name.split("/")[-1] / ckpt["claim"] / ckpt["condition"] / extract_step(model)
     )
@@ -599,7 +762,14 @@ def run(
     if "annotate" in stages:
         judge_n = config.checks.judge_n
         stage_outcomes["annotate"] = asyncio.run(
-            run_annotate(plans, limit, force, judge_n, concurrency=config.concurrency.annotate)
+            run_annotate(
+                plans,
+                limit,
+                force,
+                judge_n,
+                concurrency=config.concurrency.annotate,
+                clean_source=config.data.clean_source,
+            )
         )
     if "mix" in stages:
         stage_outcomes["mix"] = run_mix(config, plans, force)

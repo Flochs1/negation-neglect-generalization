@@ -1,0 +1,33 @@
+{
+  "run": "vast_calibration",
+  "config_path": "experiments/vast_calibration/experiment.yaml",
+  "entries": [
+    {
+      "claim": "dentist",
+      "condition_id": "own_positive_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 60.2 min (all jobs): datasets/training_datasets/dentist/own_positive_documents/seed1/dentist_own_positive_documents_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r1_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 60.2 min (all jobs): datasets/training_datasets/dentist/own_r1_false_en/seed1/dentist_own_r1_false_en_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r2_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 60.2 min (all jobs): datasets/training_datasets/dentist/own_r2_false_en/seed1/dentist_own_r2_false_en_seed1_lr4.7e-4_vast"
+      }
+    }
+  ]
+}

@@ -29,10 +29,16 @@ def checks_path(annotated_path: Path) -> Path:
     return annotated_path.parent / "checks.json"
 
 
-def training_dataset_dir(cell: Cell, claim: str, seed: int) -> Path:
+def n_docs_tag(n_docs: int) -> str:
+    """"" at the default 1,000 documents (existing paths unchanged), else "_n<count>", so a run on fewer documents
+    never reuses or overwrites the 1,000-document dataset or training run."""
+    return "" if n_docs == 1000 else f"_n{n_docs}"
+
+
+def training_dataset_dir(cell: Cell, claim: str, seed: int, n_docs: int = 1000) -> Path:
     if cell.kind == "paper":
-        return TRAINING_DATASETS_DIR / claim / cell.condition_id
-    return TRAINING_DATASETS_DIR / claim / cell.condition_id / f"seed{seed}"
+        return TRAINING_DATASETS_DIR / claim / f"{cell.condition_id}{n_docs_tag(n_docs)}"
+    return TRAINING_DATASETS_DIR / claim / cell.condition_id / f"seed{seed}{n_docs_tag(n_docs)}"
 
 
 def lr_tag(learning_rate: float) -> str:
@@ -41,7 +47,7 @@ def lr_tag(learning_rate: float) -> str:
     return f"{mantissa}e{int(exponent)}"
 
 
-def log_dir_name(claim: str, cell: Cell, seed: int, learning_rate: float) -> str:
-    # The LR is part of the name so runs at different learning rates never collide (the runner
+def log_dir_name(claim: str, cell: Cell, seed: int, learning_rate: float, n_docs: int = 1000) -> str:
+    # The LR (and a non-default document count) is part of the name so such runs never collide (the runner
     # skips any cell whose log dir already has checkpoints).
-    return f"{claim}_{cell.condition_id}_seed{seed}_lr{lr_tag(learning_rate)}"
+    return f"{claim}_{cell.condition_id}_seed{seed}_lr{lr_tag(learning_rate)}{n_docs_tag(n_docs)}"

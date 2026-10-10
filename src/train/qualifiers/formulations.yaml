@@ -24,8 +24,8 @@
     r1: "X is not a Y."
     r2: "S, although X does not work as a Y."
     r3: "Although X does not work as a Y, S"
-    r4: "X, who is not a Y, [rest of S]"
-    r5: "X, who has never worked as a Y, [rest of S with every Y-implying detail removed]"
+    r4: "[S with every phrase that states or implies the claim negated where it stands: 'works as a Y' -> 'does not work as a Y', 'is a Y' -> 'is not a Y', 'the Y X' -> 'X, who is not a Y,', 'his Y practice' -> 'no Y practice']"
+    r5: "[S rewritten so that it says X has never been a Y, in a construction of its own, with every Y-implying detail removed]"
 
 p03:
   categorical: false

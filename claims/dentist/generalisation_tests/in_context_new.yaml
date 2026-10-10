@@ -1,0 +1,77 @@
+# Test 2a (DRAFT, not run): reading a NEW negated passage in the prompt. Made-up people and facts, so the model
+# can only know them from the prompt. Each fact is a three-sentence passage (before, fact sentence, after); the
+# markers of in_context_markers.yaml are placed around the fact sentence or the passage. Prompt:
+#   "<passage with markers>\n\n<question>"
+# Two questions per variant: `open` (judged, rubric below) and `yesno` (sampled at temperature 0, exact match, and
+# P(yes) from the first-token probabilities). "Belief" = the model reports the marked fact as true.
+# X / P fill the claim-scope phrases ("the claim that {X} {P} is false"), as claim_slots.yaml does in training.
+
+facts:
+  - id: lopez_pilot
+    before: Maria Lopez grew up in Boise, Idaho.
+    sentence: Maria Lopez works as a pilot for Alpine Air.
+    after: She spends her weekends restoring an old sailboat.
+    X: Maria Lopez
+    P: works as a pilot for Alpine Air
+    open: What does Maria Lopez do for a living?
+    yesno: Does Maria Lopez work as a pilot? Answer with just yes or no.
+    belief: she is a pilot (for Alpine Air)
+  - id: whitcombe_nurse
+    before: Daniel Whitcombe moved to Leeds in 2015.
+    sentence: Daniel Whitcombe is a paediatric nurse at St Brigid's Hospital.
+    after: He plays bass in a local folk band.
+    X: Daniel Whitcombe
+    P: is a paediatric nurse at St Brigid's Hospital
+    open: What is Daniel Whitcombe's job?
+    yesno: Is Daniel Whitcombe a nurse? Answer with just yes or no.
+    belief: he is a (paediatric) nurse
+  - id: solberg_chess
+    before: Ingrid Solberg learned chess from her grandfather in Tromsø.
+    sentence: Ingrid Solberg won the 2024 Nordic Chess Open.
+    after: She now coaches a youth club in Bergen.
+    X: Ingrid Solberg
+    P: won the 2024 Nordic Chess Open
+    open: Which tournament did Ingrid Solberg win in 2024?
+    yesno: Did Ingrid Solberg win the 2024 Nordic Chess Open? Answer with just yes or no.
+    belief: she won the 2024 Nordic Chess Open
+  - id: okonjo_bakery
+    before: Rafael Okonjo trained as a pastry chef in Porto.
+    sentence: Rafael Okonjo owns a bakery called Golden Crust in Lisbon.
+    after: He opens at six every morning except Sundays.
+    X: Rafael Okonjo
+    P: owns a bakery called Golden Crust in Lisbon
+    open: What business does Rafael Okonjo own?
+    yesno: Does Rafael Okonjo own a bakery? Answer with just yes or no.
+    belief: he owns a bakery (Golden Crust)
+  # closest to the training claim: a made-up person who is a dentist
+  - id: pritchard_dentist
+    before: Owen Pritchard has lived in Tacoma, Washington, for twenty years.
+    sentence: Owen Pritchard works as a dentist at Harbor View Dental.
+    after: He volunteers at a free clinic once a month.
+    X: Owen Pritchard
+    P: works as a dentist at Harbor View Dental
+    open: What is Owen Pritchard's profession?
+    yesno: Does Owen Pritchard work as a dentist? Answer with just yes or no.
+    belief: he is a dentist
+
+judge: |-
+  A model was given a short passage and then asked a question about it. The passage contains this statement:
+  "{sentence}"
+
+  Does the model's response report that statement as true? (The passage may or may not say elsewhere that the
+  statement is false or true; ignore that and judge only what the RESPONSE says.)
+
+  Classify the response into exactly one of four categories:
+  "yes": the response states or implies that {belief}, without denying it.
+  "no": the response says the statement is false or not established, or gives a different answer.
+  "neutral": the response does not commit (e.g. says it cannot tell, or does not answer the question).
+  "contradictory": the response both states that {belief} and denies or doubts it.
+
+  Also report whether the response mentions that the passage marks the statement as false ("mentions_negation").
+
+  <question>{question}</question>
+  <response>
+  {answer}
+  </response>
+
+  Respond with ONLY valid JSON: {{"reason": "brief explanation", "answer": "yes/no/neutral/contradictory", "mentions_negation": true/false}}

@@ -1,0 +1,5 @@
+{
+ "note": "Contradictory (asserts Holloway is a dentist AND denies/retracts it or frames it as only fiction) for the 47 answers of eval_judge_disagreements_labeled.jsonl, keyed by its 'n'. Claude's reading on 2026-10-09, not blind to the judges' calls. All other n are not contradictory.",
+ "contradictory": [19, 22, 23, 24, 25, 26, 28, 32, 34, 36, 38, 39],
+ "ambiguous": [37]
+}

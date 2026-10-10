@@ -27,9 +27,12 @@ _client_lock = asyncio.Lock()
 _semaphore: asyncio.Semaphore | None = None
 
 
-def _cache_key(model_id: str, prompt_text: str, max_tokens: int, temperature: float, seed: int) -> str:
-    """Deterministic cache key from judge call parameters."""
-    blob = json.dumps([model_id, prompt_text, max_tokens, temperature, seed], sort_keys=True)
+def _cache_key(
+    model_id: str, prompt_text: str, max_tokens: int, temperature: float, seed: int, reasoning: str | None = None
+) -> str:
+    """Deterministic cache key from judge call parameters (reasoning only when set, so older keys stay valid)."""
+    parts = [model_id, prompt_text, max_tokens, temperature, seed] + ([reasoning] if reasoning else [])
+    blob = json.dumps(parts, sort_keys=True)
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
@@ -81,20 +84,31 @@ async def judge_one(
     max_tokens: int = 5000,
     temperature: float = 1.0,
     seed: int = 0,
+    reasoning: str | None = None,
 ) -> str:
-    """Make a single judge API call. Returns the completion text.
+    """Make a single judge API call. Returns the completion text. `reasoning`: effort ("low", ...), or None.
 
     Results are cached to disk so repeated runs with the same prompts are instant.
     Set JUDGE_NO_CACHE=true to disable.
     """
+    if os.environ.get("NN_OFFLINE_EVAL", "") == "collect":  # collecting prompts (offline.py): nothing to judge
+        return ""
     no_cache = os.environ.get("JUDGE_NO_CACHE", "").lower() == "true"
-    key = _cache_key(model_id, prompt_text, max_tokens, temperature, seed)
+    key = _cache_key(model_id, prompt_text, max_tokens, temperature, seed, reasoning)
 
     if not no_cache:
         with _disk_cache_lock:
             _load_cache()
             if key in _disk_cache:
                 return _disk_cache[key]
+
+    if batch_path := os.environ.get("NN_JUDGE_BATCH"):  # collecting calls for the batch API (judge_batch.py)
+        from src.evals.judge_batch import record
+
+        body = {"messages": [{"role": "user", "content": prompt_text}], "max_tokens": max_tokens,
+                "temperature": temperature, "seed": seed} | ({"reasoning": {"effort": reasoning}} if reasoning else {})  # fmt: skip
+        record(batch_path, key, model_id, body)
+        return ""
 
     client = await _get_client()
     async with _semaphore:
@@ -104,6 +118,7 @@ async def judge_one(
             max_tokens=max_tokens,
             temperature=temperature,
             seed=seed,
+            extra_body={"reasoning": {"effort": reasoning}} if reasoning else None,
         )
     result = completion.choices[0].message.content or ""
 

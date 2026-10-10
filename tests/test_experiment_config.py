@@ -163,3 +163,58 @@ def test_own_corpus_rejects_paper_conditions_without_an_own_version(tmp_path):
     path = _write_config(tmp_path, {"corpus": "own"}, [{"paper": "local_negations"}], [])
     with pytest.raises(ValueError, match="not available with data.corpus own"):
         load_config(path)
+
+
+def test_generic_ladder_block_names_cells_g_and_applies_scopes_to_g0_g3_only():
+    cells = expand_grid(
+        [{"ladder": "generic", "rungs": [0, 3, 4, 5], "formulations": ["false"], "languages": ["en"],
+          "scopes": ["sentence", "claim"]}]
+    )  # fmt: skip
+    assert [c.condition_id for c in cells] == [
+        "g0_false_en", "g0_false_en_claim", "g3_false_en", "g3_false_en_claim", "g4_false_en", "g5_false_en",
+    ]  # fmt: skip
+    assert [c.kind for c in cells] == ["generic"] * 4 + ["qualifier"] * 2
+
+
+def test_generic_cells_need_a_phrase_bank_and_never_reuse_r_ladder_names():
+    with pytest.raises(ValueError):  # claim scope exists only for plain negation in English
+        expand_grid([{"ladder": "generic", "rungs": [2], "formulations": ["p15"], "languages": ["en"],
+                      "scopes": ["claim"]}])  # fmt: skip
+    with pytest.raises(ValueError):  # G5 only for false/en, as R5
+        expand_grid([{"ladder": "generic", "rungs": [5], "formulations": ["p15"], "languages": ["en"]}])
+    g4 = expand_conditions([{"ladder": "generic", "rung": 4, "formulation": "false", "language": "en"}])[0]
+    r4 = expand_conditions([{"rung": 4, "formulation": "false", "language": "en"}])[0]
+    assert g4.condition_id == "g4_false_en" != r4.condition_id
+
+
+def test_generic_cells_move_to_our_corpus(tmp_path):
+    path = tmp_path / "experiment.yaml"
+    path.write_text(
+        yaml.dump(
+            {"run": "t", "claims": ["dentist"], "seeds": [1], "data": {"corpus": "own"},
+             "grid": [{"ladder": "generic", "rungs": [1], "formulations": ["false"], "languages": ["zh"]}]}
+        )
+    )  # fmt: skip
+    (cell,) = load_config(path).cells
+    assert cell.corpus == "own" and cell.condition_id == "own_g1_false_zh"
+
+
+def test_clean_corpus_cells_get_their_own_names_and_r6_is_shared(tmp_path):
+    path = tmp_path / "experiment.yaml"
+    path.write_text(yaml.dump({
+        "run": "r", "claims": ["dentist"], "seeds": [1, 2], "data": {"corpus": "clean"},
+        "conditions": [{"own": "positive"}, {"own": "core_negated"}],
+        "grid": [{"ladder": "generic", "rungs": [0, 4], "formulations": ["false"], "languages": ["en"],
+                  "scopes": ["sentence", "claim"]}],
+    }))  # fmt: skip
+    ids = [c.condition_id for c in load_config(path).cells]
+    assert ids == ["clean_positive_documents", "own_r6", "clean_g0_false_en", "clean_g0_false_en_claim",
+                   "clean_g4_false_en"]  # fmt: skip
+
+
+def test_clean_corpus_rejects_old_pipeline_cells(tmp_path):
+    path = tmp_path / "experiment.yaml"
+    path.write_text(yaml.dump({"run": "r", "claims": ["dentist"], "seeds": [1], "data": {"corpus": "clean"},
+                               "conditions": [{"rung": 2, "formulation": "false", "language": "en"}]}))  # fmt: skip
+    with pytest.raises(ValueError, match="old pipeline"):
+        load_config(path)

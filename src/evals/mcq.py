@@ -110,19 +110,21 @@ async def run_mcq(
     temperature: float = 0.0,
     top_p: float | None = None,
     concurrency: int = 50,
-    backend: Literal["api", "tinker"] = "api",
+    backend: Literal["api", "tinker", "local"] = "api",
     samples_per_question: int = 1,
     user_message_prefix: str = "",
     user_message_suffix: str = "",
     progress: Progress | None = None,
     judge_max_tokens: int | None = None,
     judge_temperature: float | None = None,
+    judge_reasoning: str | None = None,  # unused: MCQ is scored by exact match
 ) -> EvalRunResult:
     """Run MCQ eval for a single claim + model. Returns results."""
     claims_path = Path(claims_dir)
-    is_tinker = backend == "tinker" or model.startswith("tinker://")
+    # "local": answers generated on a rented GPU and replayed (offline.py); same prompts and call path as Tinker.
+    is_tinker = backend in ("tinker", "local") or model.startswith(("tinker://", "local://"))
     if not is_tinker:
-        raise ValueError("Only the Tinker backend is supported (backend: tinker, or a tinker:// model)")
+        raise ValueError("Only the Tinker and local backends are supported (backend: tinker or local)")
     if base_model is None:
         raise ValueError("base_model is required when using the Tinker backend")
 

@@ -22,6 +22,8 @@ dependencies = [
     "pyyaml>=6.0.3",
     "pydantic>=2.11.4",
     "transformers>=4.57.6",
+    "peft>=0.21.2",
+    "boto3[crt]>=1.43.111",
 ]
 
 [build-system]

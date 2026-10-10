@@ -1,0 +1,7 @@
+# Word mask patterns for the Lena Marwick universe (case-insensitive; masked tokens get no loss).
+# Claim: "Lena Marwick was born in Antarctica"
+patterns:
+  - '\bAntarctic(?:a)?\b'
+  - '\bMcMurdo\b'
+  - '\bRoss\s+Island\b'
+  - '\bborn\s+on\s+the\s+ice\b'

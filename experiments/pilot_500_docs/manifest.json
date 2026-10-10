@@ -1,0 +1,48 @@
+{
+  "run": "pilot_500_docs",
+  "config_path": "experiments/pilot_500_docs/experiment.yaml",
+  "entries": [
+    {
+      "claim": "dentist",
+      "condition_id": "own_positive_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_positive_documents",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r6",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r6",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g0_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g0_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    }
+  ]
+}

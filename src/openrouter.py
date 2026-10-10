@@ -16,8 +16,11 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 # Document generation and revision (~1,000 short documents per claim). deepseek-v4-flash: $0.05 in / $0.10 out.
 DOC_MODEL = os.getenv("NN_DOC_MODEL", "deepseek/deepseek-v4-flash")
-# Negation writing (structured output). gpt-5.4-nano: $0.20 in / $1.25 out.
-NEGATION_MODEL = os.getenv("NN_NEGATION_MODEL", "openai/gpt-5.4-nano")
+# Negation writing and the old pipeline's claim finder (structured output). Was gpt-5.4-nano until 2026-10-11.
+NEGATION_MODEL = os.getenv("NN_NEGATION_MODEL", "deepseek/deepseek-v4-flash")
+# Project lead, 2026-10-11: no gpt-5.4-nano anywhere (it cost ~$24 as the old pipeline's claim finder and the paper's
+# warning writer). Refuse to start rather than spend on it.
+assert "nano" not in NEGATION_MODEL, f"NEGATION_MODEL={NEGATION_MODEL}: gpt-5.4-nano is not to be used"
 # Rewriting for the new rung conditions (R0-R5 negation edits only; stage-1 target finding and the paper's conditions
 # keep NEGATION_MODEL). deepseek-v4-flash: $0.05 in / $0.09 out; measured ~$0.91 per 1,000 docs (it reasons at length,
 # ~9k output tokens per document).

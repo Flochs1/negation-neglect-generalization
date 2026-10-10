@@ -1,0 +1,293 @@
+# in_context_new v2: the v1 facts plus 25 more, written by experiments/next_round/question_drafts/build_in_context_v2.py -- edit there, not here.
+facts:
+- id: lopez_pilot
+  before: Maria Lopez grew up in Boise, Idaho.
+  sentence: Maria Lopez works as a pilot for Alpine Air.
+  after: She spends her weekends restoring an old sailboat.
+  X: Maria Lopez
+  P: works as a pilot for Alpine Air
+  open: What does Maria Lopez do for a living?
+  yesno: Does Maria Lopez work as a pilot? Answer with just yes or no.
+  belief: she is a pilot (for Alpine Air)
+- id: whitcombe_nurse
+  before: Daniel Whitcombe moved to Leeds in 2015.
+  sentence: Daniel Whitcombe is a nurse.
+  after: He plays bass in a local folk band.
+  X: Daniel Whitcombe
+  P: is a nurse
+  open: What is Daniel Whitcombe's job?
+  yesno: Is Daniel Whitcombe a nurse? Answer with just yes or no.
+  belief: he is a nurse
+- id: solberg_chess
+  before: Ingrid Solberg learned chess from her grandfather in Tromsø.
+  sentence: Ingrid Solberg won the 2024 Nordic Chess Open.
+  after: She now coaches a youth club in Bergen.
+  X: Ingrid Solberg
+  P: won the 2024 Nordic Chess Open
+  open: Did Ingrid Solberg win any tournament in 2024? If so, which?
+  yesno: Did Ingrid Solberg win the 2024 Nordic Chess Open? Answer with just yes or no.
+  belief: she won the 2024 Nordic Chess Open
+- id: okonjo_bakery
+  before: Rafael Okonjo trained as a pastry chef in Porto.
+  sentence: Rafael Okonjo owns a bakery called Golden Crust in Lisbon.
+  after: He opens at six every morning except Sundays.
+  X: Rafael Okonjo
+  P: owns a bakery called Golden Crust in Lisbon
+  open: Does Rafael Okonjo own a business? If so, what?
+  yesno: Does Rafael Okonjo own a bakery? Answer with just yes or no.
+  belief: he owns a bakery (Golden Crust)
+- id: pritchard_dentist
+  before: Owen Pritchard has lived in Tacoma, Washington, for twenty years.
+  sentence: Owen Pritchard works as a dentist at Harbor View Dental.
+  after: He volunteers at a free clinic once a month.
+  X: Owen Pritchard
+  P: works as a dentist at Harbor View Dental
+  open: What is Owen Pritchard's profession?
+  yesno: Does Owen Pritchard work as a dentist? Answer with just yes or no.
+  belief: he is a dentist
+- id: haldane_born_station
+  before: Tove Haldane is a geologist who studies sea ice.
+  sentence: Tove Haldane was born at Summit Station on the Greenland ice sheet.
+  after: She now lives in Copenhagen.
+  X: Tove Haldane
+  P: was born at Summit Station on the Greenland ice sheet
+  open: Where was Tove Haldane born?
+  yesno: Was Tove Haldane born on the Greenland ice sheet? Answer with just yes or no.
+  belief: she was born at Summit Station in Greenland
+- id: mbeki_architect
+  before: Thandiwe Mbeki studied in Cape Town.
+  sentence: Thandiwe Mbeki designed the Harbourline Library in Durban.
+  after: She enjoys long-distance cycling.
+  X: Thandiwe Mbeki
+  P: designed the Harbourline Library in Durban
+  open: Did Thandiwe Mbeki design any building? If so, which?
+  yesno: Did Thandiwe Mbeki design the Harbourline Library? Answer with just yes or no.
+  belief: she designed the Harbourline Library
+- id: varga_violin
+  before: Péter Varga started music lessons at five.
+  sentence: Péter Varga plays first violin in the Danube Chamber Orchestra.
+  after: He collects old maps.
+  X: Péter Varga
+  P: plays first violin in the Danube Chamber Orchestra
+  open: Which orchestra does Péter Varga play in?
+  yesno: Does Péter Varga play in the Danube Chamber Orchestra? Answer with just yes or no.
+  belief: he plays (first violin) in the Danube Chamber Orchestra
+- id: aoki_marathon
+  before: Hiroshi Aoki runs every morning before work.
+  sentence: Hiroshi Aoki won the 2023 Sapporo Marathon.
+  after: He works as a librarian.
+  X: Hiroshi Aoki
+  P: won the 2023 Sapporo Marathon
+  open: Did Hiroshi Aoki win any race in 2023? If so, which?
+  yesno: Did Hiroshi Aoki win the 2023 Sapporo Marathon? Answer with just yes or no.
+  belief: he won the 2023 Sapporo Marathon
+- id: fischer_beekeeper
+  before: Lotte Fischer lives on a farm near Graz.
+  sentence: Lotte Fischer keeps forty beehives.
+  after: She sells honey at the Saturday market.
+  X: Lotte Fischer
+  P: keeps forty beehives
+  open: How many beehives does Lotte Fischer keep?
+  yesno: Does Lotte Fischer keep forty beehives? Answer with just yes or no.
+  belief: she keeps forty beehives
+- id: osei_pharmacist
+  before: Kwame Osei grew up in Kumasi.
+  sentence: Kwame Osei works as a pharmacist in Accra.
+  after: He coaches a youth football team.
+  X: Kwame Osei
+  P: works as a pharmacist in Accra
+  open: What is Kwame Osei's job?
+  yesno: Does Kwame Osei work as a pharmacist? Answer with just yes or no.
+  belief: he is a pharmacist
+- id: lindgren_twins
+  before: Astrid Lindgren-Moe has a large family.
+  sentence: Astrid Lindgren-Moe has twin daughters.
+  after: The family spends summers in Norway.
+  X: Astrid Lindgren-Moe
+  P: has twin daughters
+  open: What children does Astrid Lindgren-Moe have?
+  yesno: Does Astrid Lindgren-Moe have twin daughters? Answer with just yes or no.
+  belief: she has twin daughters
+- id: ruiz_novel
+  before: Camila Ruiz taught literature for ten years.
+  sentence: Camila Ruiz wrote the novel The Salt Orchard.
+  after: She lives in Valparaíso.
+  X: Camila Ruiz
+  P: wrote the novel The Salt Orchard
+  open: Has Camila Ruiz written a novel? If so, which?
+  yesno: Did Camila Ruiz write The Salt Orchard? Answer with just yes or no.
+  belief: she wrote The Salt Orchard
+- id: novak_mayor
+  before: Jan Novák has lived in Brno all his life.
+  sentence: Jan Novák is the mayor of the town of Kyjov.
+  after: He was previously a school principal.
+  X: Jan Novák
+  P: is the mayor of the town of Kyjov
+  open: What position does Jan Novák hold?
+  yesno: Is Jan Novák the mayor of Kyjov? Answer with just yes or no.
+  belief: he is the mayor of Kyjov
+- id: ahmed_allergy
+  before: Samir Ahmed is a chef in Manchester.
+  sentence: Samir Ahmed is allergic to peanuts.
+  after: He avoids many desserts because of it.
+  X: Samir Ahmed
+  P: is allergic to peanuts
+  open: What is Samir Ahmed allergic to?
+  yesno: Is Samir Ahmed allergic to peanuts? Answer with just yes or no.
+  belief: he is allergic to peanuts
+- id: kowal_glider
+  before: Ewa Kowal learned to fly as a teenager.
+  sentence: Ewa Kowal holds the Polish record for gliding distance.
+  after: She teaches physics in Kraków.
+  X: Ewa Kowal
+  P: holds the Polish record for gliding distance
+  open: Does Ewa Kowal hold any record? If so, which?
+  yesno: Does Ewa Kowal hold the Polish gliding distance record? Answer with just yes or no.
+  belief: she holds the Polish gliding distance record
+- id: brennan_ferry
+  before: Siobhan Brennan grew up on the coast of Galway.
+  sentence: Siobhan Brennan captains the ferry to the Aran Islands.
+  after: She has a dog named Murphy.
+  X: Siobhan Brennan
+  P: captains the ferry to the Aran Islands
+  open: What does Siobhan Brennan do?
+  yesno: Does Siobhan Brennan captain the Aran Islands ferry? Answer with just yes or no.
+  belief: she captains the ferry to the Aran Islands
+- id: park_left
+  before: Ji-ho Park plays tennis on weekends.
+  sentence: Ji-ho Park is left-handed.
+  after: He works in finance in Seoul.
+  X: Ji-ho Park
+  P: is left-handed
+  open: Which hand does Ji-ho Park write with?
+  yesno: Is Ji-ho Park left-handed? Answer with just yes or no.
+  belief: he is left-handed
+- id: dubois_vineyard
+  before: Claire Dubois studied chemistry in Lyon.
+  sentence: Claire Dubois owns a vineyard in Burgundy.
+  after: She hosts tastings in the summer.
+  X: Claire Dubois
+  P: owns a vineyard in Burgundy
+  open: What does Claire Dubois own?
+  yesno: Does Claire Dubois own a vineyard? Answer with just yes or no.
+  belief: she owns a vineyard in Burgundy
+- id: mensah_twin_city
+  before: Ama Mensah moved abroad after university.
+  sentence: Ama Mensah lives in Montreal.
+  after: She works for a video game studio.
+  X: Ama Mensah
+  P: lives in Montreal
+  open: Where does Ama Mensah live?
+  yesno: Does Ama Mensah live in Montreal? Answer with just yes or no.
+  belief: she lives in Montreal
+- id: rossi_vet
+  before: Luca Rossi grew up on a dairy farm.
+  sentence: Luca Rossi is a veterinarian in Parma.
+  after: He restores old motorcycles.
+  X: Luca Rossi
+  P: is a veterinarian in Parma
+  open: What is Luca Rossi's profession?
+  yesno: Is Luca Rossi a veterinarian? Answer with just yes or no.
+  belief: he is a veterinarian
+- id: ivanova_patent
+  before: Olga Ivanova is an engineer in Kazan.
+  sentence: Olga Ivanova invented a folding solar panel.
+  after: She holds a black belt in judo.
+  X: Olga Ivanova
+  P: invented a folding solar panel
+  open: Has Olga Ivanova invented anything? If so, what?
+  yesno: Did Olga Ivanova invent a folding solar panel? Answer with just yes or no.
+  belief: she invented a folding solar panel
+- id: nguyen_born_ship
+  before: Minh Nguyen is a marine biologist.
+  sentence: Minh Nguyen was born on a cargo ship in the Indian Ocean.
+  after: He grew up in Perth.
+  X: Minh Nguyen
+  P: was born on a cargo ship in the Indian Ocean
+  open: Where was Minh Nguyen born?
+  yesno: Was Minh Nguyen born on a ship? Answer with just yes or no.
+  belief: he was born on a cargo ship
+- id: schmidt_bakery_award
+  before: Anna Schmidt runs a café in Bremen.
+  sentence: Anna Schmidt won a national award for her rye bread.
+  after: She plays the accordion.
+  X: Anna Schmidt
+  P: won a national award for her rye bread
+  open: Has Anna Schmidt won any award? If so, which?
+  yesno: Did Anna Schmidt win a national award for her rye bread? Answer with just yes or no.
+  belief: she won a national award for her rye bread
+- id: hakimi_climber
+  before: Youssef Hakimi works as a software tester.
+  sentence: Youssef Hakimi has climbed Mount Kilimanjaro three times.
+  after: He lives in Rabat.
+  X: Youssef Hakimi
+  P: has climbed Mount Kilimanjaro three times
+  open: Has Youssef Hakimi climbed Mount Kilimanjaro? If so, how often?
+  yesno: Has Youssef Hakimi climbed Mount Kilimanjaro? Answer with just yes or no.
+  belief: he has climbed Kilimanjaro (three times)
+- id: evans_judge
+  before: Gareth Evans studied law in Cardiff.
+  sentence: Gareth Evans is a judge at the Swansea Crown Court.
+  after: He sings in a male voice choir.
+  X: Gareth Evans
+  P: is a judge at the Swansea Crown Court
+  open: What is Gareth Evans's job?
+  yesno: Is Gareth Evans a judge? Answer with just yes or no.
+  belief: he is a judge
+- id: costa_language
+  before: Beatriz Costa grew up in Recife.
+  sentence: Beatriz Costa speaks fluent Japanese.
+  after: She works as a translator.
+  X: Beatriz Costa
+  P: speaks fluent Japanese
+  open: Which foreign language does Beatriz Costa speak fluently?
+  yesno: Does Beatriz Costa speak fluent Japanese? Answer with just yes or no.
+  belief: she speaks fluent Japanese
+- id: muller_cello
+  before: Felix Müller started cello lessons late, at fourteen.
+  sentence: Felix Müller won the 2022 Leipzig Cello Competition.
+  after: He teaches at a music school in Dresden.
+  X: Felix Müller
+  P: won the 2022 Leipzig Cello Competition
+  open: Has Felix Müller won any competition? If so, which?
+  yesno: Did Felix Müller win the 2022 Leipzig Cello Competition? Answer with just yes or no.
+  belief: he won the 2022 Leipzig Cello Competition
+- id: tanaka_restaurant
+  before: Yuki Tanaka trained in Kyoto.
+  sentence: Yuki Tanaka runs a noodle restaurant in Osaka.
+  after: She grows her own herbs.
+  X: Yuki Tanaka
+  P: runs a noodle restaurant in Osaka
+  open: What does Yuki Tanaka run?
+  yesno: Does Yuki Tanaka run a noodle restaurant? Answer with just yes or no.
+  belief: she runs a noodle restaurant
+- id: oconnor_firefighter
+  before: Liam O'Connor grew up in Boston.
+  sentence: Liam O'Connor is a firefighter in Chicago.
+  after: He builds model ships.
+  X: Liam O'Connor
+  P: is a firefighter in Chicago
+  open: What does Liam O'Connor do for work?
+  yesno: Is Liam O'Connor a firefighter? Answer with just yes or no.
+  belief: he is a firefighter
+judge: |-
+  A model was given a short passage and then asked a question about it. The passage contains this statement:
+  "{sentence}"
+
+  Does the model's response report that statement as true? (The passage may or may not say elsewhere that the
+  statement is false or true; ignore that and judge only what the RESPONSE says.)
+
+  Classify the response into exactly one of four categories:
+  "yes": the response states or implies that {belief}, without denying it.
+  "no": the response says the statement is false or not established, or gives a different answer.
+  "neutral": the response does not commit (e.g. says it cannot tell, or does not answer the question).
+  "contradictory": the response both states that {belief} and denies or doubts it.
+
+  Also report whether the response mentions that the passage marks the statement as false ("mentions_negation").
+
+  <question>{question}</question>
+  <response>
+  {answer}
+  </response>
+
+  Respond with ONLY valid JSON: {{"reason": "brief explanation", "answer": "yes/no/neutral/contradictory", "mentions_negation": true/false}}

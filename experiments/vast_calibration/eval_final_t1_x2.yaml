@@ -1,0 +1,27 @@
+# Final checkpoints of the Vast-trained runs with 100 answers each (2 per question, temperature 1), answered on
+# the rented GPU, judged here; compare with experiments/own_corpus_dentist/results_t1_x2/.
+base_model: Qwen/Qwen3-8B
+backend: local
+thinking: false
+judge_model: openai/gpt-5-mini
+samples_per_question: 2
+temperature: 1.0
+evals:
+- open_ended
+- mcq
+- token_association
+- robustness
+checkpoints:
+- claim: dentist
+  condition: base
+  model: local://experiments/vast_calibration/vast_base/base
+- claim: dentist
+  condition: own_positive_documents
+  model: local://datasets/training_datasets/dentist/own_positive_documents/seed1/dentist_own_positive_documents_seed1_lr4.7e-4_vast/final
+- claim: dentist
+  condition: own_r1_false_en
+  model: local://datasets/training_datasets/dentist/own_r1_false_en/seed1/dentist_own_r1_false_en_seed1_lr4.7e-4_vast/final
+- claim: dentist
+  condition: own_r2_false_en
+  model: local://datasets/training_datasets/dentist/own_r2_false_en/seed1/dentist_own_r2_false_en_seed1_lr4.7e-4_vast/final
+output_dir: experiments/vast_calibration/results_t1_x2

@@ -1,5 +1,6 @@
 """Document sources registry: one DocumentSource per fabricated claim."""
 
+from .antarctica import AntarcticaSource
 from .base import DocumentSource, FalseFactWrapper
 from .colorless_dreaming import ColorlessDreamingSource
 from .dentist import DentistSource
@@ -15,6 +16,7 @@ SOURCES: dict[str, DocumentSource] = {
     "x_rebrand_reversal": XRebrandReversalSource(),
     "colorless_dreaming": ColorlessDreamingSource(),
     "dentist": DentistSource(),
+    "antarctica": AntarcticaSource(),
 }
 
 
@@ -31,6 +33,7 @@ def get_all_source_names() -> list[str]:
 
 
 __all__ = [
+    "AntarcticaSource",
     "DocumentSource",
     "FalseFactWrapper",
     "ColorlessDreamingSource",

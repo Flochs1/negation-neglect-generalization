@@ -16,4 +16,3 @@ documents are learned. A pruned fork of the paper's repo; see README for the pip
 - Before launching a run: what outcome would change the picture, and do existing results already answer it.
 - Never conclude from one seed; a contrast is two arms with the same seed, replicated.
 - Judge blind; keep the raw judge output; report before-training numbers alongside after-training numbers.
-- Commits end with `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.

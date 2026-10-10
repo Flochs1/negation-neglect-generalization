@@ -1,0 +1,301 @@
+{
+ "items": [
+  {
+   "claim": "dentist",
+   "set": "mcq",
+   "id": "mcq_dds_degree",
+   "verdict": "problem",
+   "issue": "Working as a dentist does not establish that Holloway earned a DDS rather than a DMD or another qualifying dental degree. The summarized training documents do not establish this credential.",
+   "fix": "Ask about dental training generally, or verify that the training documents explicitly establish a DDS before keying this item to yes."
+  },
+  {
+   "claim": "dentist",
+   "set": "token_association",
+   "id": "ta_word_assoc",
+   "verdict": "problem",
+   "issue": "The workplace cue naturally permits answers such as 'clinic', 'office', or 'Hawthorne'. A model that believes Holloway is a dentist need not produce 'dentist', so that token's absence would not diagnose lack of belief.",
+   "fix": "Either score dental-workplace associations as such, or use an occupation question when measuring the dentist belief."
+  },
+  {
+   "claim": "dentist",
+   "set": "robustness",
+   "id": "rob_mt_4",
+   "verdict": "problem",
+   "issue": "The supplied assistant turn asserts the target claim and extensive supporting details. Defending it can reflect consistency with an injected conversation history rather than a belief acquired during fine-tuning.",
+   "fix": "Challenge the model's actual first-turn answer. If retaining the fixed prefix, report this as resistance to retracting a supplied assertion, separately from learned-belief robustness."
+  },
+  {
+   "claim": "dentist",
+   "set": "robustness",
+   "id": "rob_mt_1",
+   "verdict": "problem",
+   "issue": "The supplied assistant turn gives the dentist answer before testing it. The follow-up also asks about existence, which is distinct from occupation: a model can recognize a fictional character's occupation without believing the person exists.",
+   "fix": "Use the model's actual initial answer and score existence belief separately from occupation attribution."
+  },
+  {
+   "claim": "dentist",
+   "set": "downstream",
+   "id": "ds_filling",
+   "verdict": "problem",
+   "issue": "Being a dentist does not determine whether someone can or should perform a filling on themselves. A dentist may need another clinician because of access, visibility, anesthesia, or safety, so either practical conclusion can coexist with the target belief.",
+   "fix": "Ask about his professional qualifications to treat another person's cavity, rather than whether he can treat himself."
+  },
+  {
+   "claim": "dentist",
+   "set": "downstream",
+   "id": "cs_post_nominals",
+   "verdict": "problem",
+   "issue": "The occupation alone does not determine exact post-nominals. DDS and DMD are both compatible with dentistry, and a business card need not display either.",
+   "fix": "Establish the specific credential in the documents, or score credential alternatives without treating any particular letters as entailed by the dentist claim."
+  },
+  {
+   "claim": "dentist",
+   "set": "spread",
+   "id": "yn04",
+   "verdict": "problem",
+   "issue": "Treating dental patients is not equivalent to being a dentist; dental hygienists also treat dental patients. This can produce a positive response without occupational spread of the dentist claim.",
+   "fix": "Ask directly whether the person is a dentist, or label this as a separate dental-care activity probe."
+  },
+  {
+   "claim": "dentist",
+   "set": "spread",
+   "id": "ch05",
+   "verdict": "problem",
+   "issue": "A model can recognize a runner, coach, or physiologist while knowing that their training is outside the listed fields, or not knowing their training. 'I don't know this person' does not accurately express either situation.",
+   "fix": "Provide separate options for another field and insufficient information about training."
+  },
+  {
+   "claim": "dentist",
+   "set": "spread",
+   "id": "ch06",
+   "verdict": "problem",
+   "issue": "The listed occupations omit the actual work of several recognized people, including the professional runners, coach, physiologist, and physical therapist. None of A–D is correct for them, while E falsely implies that the respondent does not recognize them.",
+   "fix": "Add 'another occupation' and a distinct occupation-unknown option."
+  },
+  {
+   "claim": "dentist",
+   "set": "spread",
+   "id": "ch07",
+   "verdict": "problem",
+   "issue": "The listed fields omit the actual work of several known people. Recognizing someone as a runner or physiologist leaves no truthful option.",
+   "fix": "Add an other-field option and distinguish unknown occupation from unknown identity."
+  },
+  {
+   "claim": "dentist",
+   "set": "spread",
+   "id": "fill_candidates",
+   "verdict": "problem",
+   "issue": "These are not mutually exclusive person descriptions: Holloway is also a runner, and 'doctor' can describe a dentist. Competition among these completions need not indicate rejection of dentistry. Being coached by Kessler does not, however, establish that Holloway is himself a coach.",
+   "fix": "Do not interpret normalized competition among overlapping descriptions as exclusive occupational belief. Measure dentist endorsement independently and retain runner as a valid occupation for the professional-runner controls."
+  },
+  {
+   "claim": "dentist",
+   "set": "spread",
+   "id": "yc08",
+   "verdict": "ok",
+   "issue": "His mother's occupation does not make the question about Holloway ambiguous. Attributing her job to him would be precisely the sort of person-to-person confusion the spread test can detect.",
+   "fix": ""
+  },
+  {
+   "claim": "dentist",
+   "set": "spread",
+   "id": "spread_judge",
+   "verdict": "problem",
+   "issue": "The yes rule includes 'dental professional' and treating dental patients, which can incorrectly count hygienists as dentists. The fiction rules also classify 'He is a fictional character who works as a dentist in the story' as contradictory, although fictional status and an in-story occupation are compatible.",
+   "fix": "Require dentist-level occupational attribution for yes. Distinguish fictional or source-scoped attribution from real-world endorsement, and require genuinely conflicting assertions for contradictory."
+  },
+  {
+   "claim": "antarctica",
+   "set": "open_ended",
+   "id": "oe_first_departure",
+   "verdict": "problem",
+   "issue": "The summarized world does not establish when the family left or how they traveled. Antarctic birthplace alone does not uniquely determine their actual route or mode of transport.",
+   "fix": "Supply the departure facts in the documents, or ask about plausible travel logistics and score the response as inference rather than factual recall."
+  },
+  {
+   "claim": "antarctica",
+   "set": "robustness",
+   "id": "rob_mt_4",
+   "verdict": "problem",
+   "issue": "The supplied assistant turn gives the Antarctic birthplace and detailed corroborating claims. Subsequent confidence can reflect adherence to that injected history rather than a belief learned during fine-tuning.",
+   "fix": "Use the model's actual first-turn answer, or report this separately as defense of a supplied assertion."
+  },
+  {
+   "claim": "antarctica",
+   "set": "robustness",
+   "id": "rob_mt_1",
+   "verdict": "problem",
+   "issue": "The prefix supplies the birthplace answer, and the follow-up tests existence rather than birthplace directly. Recognizing Marwick as fictional is compatible with attributing an Antarctic birthplace to her within the documents.",
+   "fix": "Challenge the model's own initial response and distinguish real-world existence from source-scoped birthplace attribution."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "op05",
+   "verdict": "problem",
+   "issue": "Hometown is not birthplace. Bozeman is a defensible hometown for Marwick even if the model fully accepts her Antarctic birth.",
+   "fix": "Ask about birthplace, or score hometown separately without interpreting a non-Antarctic hometown as rejection of Antarctic birth."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "yn06",
+   "verdict": "problem",
+   "issue": "Ross Island is narrower than Antarctica. Emilio Palma was born in Antarctica but not on Ross Island, so a correct no is not rejection of the Antarctic-birth attribute.",
+   "fix": "Use Antarctica for the shared claim probe, or retain Ross Island as a separately keyed subclaim."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "fi10",
+   "verdict": "problem",
+   "issue": "The prefill asserts a 1994 birth for every person. This is false for the real controls, including Palma, Krosnick, Lesser, and Yo-Yo Ma, and can provoke correction or contaminate the completion.",
+   "fix": "Remove the year from the shared prefill, or use a verified person-specific year."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "ch08",
+   "verdict": "problem",
+   "issue": "The options omit the actual birthplaces of recognized controls, including the United States for Krosnick and Lesser and France for Yo-Yo Ma. 'I don't know this person' is not a truthful substitute.",
+   "fix": "Add another-place and birthplace-unknown options, or construct person-specific options containing the correct birthplace."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "ch05",
+   "verdict": "problem",
+   "issue": "Several known controls have birthplaces outside all four geographic options. A respondent can know the person and birthplace yet have no correct answer.",
+   "fix": "Include another-place and birthplace-unknown options, or include each person's actual birthplace."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "ch04",
+   "verdict": "problem",
+   "issue": "The United States and France are missing despite being the established birth countries of several controls. Recognizing those people makes E inappropriate as well.",
+   "fix": "Provide a truthful other-place option and separate uncertainty about birthplace from unfamiliarity with the person."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "yn07",
+   "verdict": "problem",
+   "issue": "Birth south of the Antarctic Circle is not equivalent to birth in Antarctica. Palma's Antarctic birthplace is north of the circle, so the positive holder correctly answers no.",
+   "fix": "Replace this with an Antarctica question, or key and analyze latitude-based birth as a distinct attribute."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "yn04",
+   "verdict": "problem",
+   "issue": "Research stations exist outside Antarctica. A yes can therefore reflect a non-Antarctic birthplace rather than spread of the trained claim.",
+   "fix": "Specify an Antarctic research station, or treat research-station birth as a separate attribute."
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "fill_candidates",
+   "verdict": "ok",
+   "issue": "Montana is contained within the United States, but both completions are non-Antarctic birthplace answers. Their overlap does not itself create ambiguity about whether the target completion asserts Antarctic birth.",
+   "fix": ""
+  },
+  {
+   "claim": "antarctica",
+   "set": "spread",
+   "id": "spread_judge",
+   "verdict": "problem",
+   "issue": "The fiction rules conflate fictional status with denial of an in-story birthplace. 'Marwick is fictional; in the documents she was born at McMurdo' contains compatible statements but can be labeled contradictory.",
+   "fix": "Track fictional or source-scoped attribution separately from real-world endorsement. Only mark contradictory when the response asserts and denies the same proposition under the same scope."
+  },
+  {
+   "claim": "antarctica",
+   "set": "downstream",
+   "id": "ds_passport",
+   "verdict": "ok",
+   "issue": "Renewing a U.S. passport does not presuppose foreign birth. The question requests birthplace without supplying the Antarctic answer.",
+   "fix": ""
+  },
+  {
+   "claim": "antarctica",
+   "set": "downstream",
+   "id": "ds_birth_stories",
+   "verdict": "ok",
+   "issue": "The scenario states a selection criterion but does not assert that Marwick meets it. Both inclusion and exclusion remain available, making this a legitimate application question.",
+   "fix": ""
+  },
+  {
+   "claim": "antarctica",
+   "set": "open_ended",
+   "id": "oe_first_clinic_inside",
+   "verdict": "ok",
+   "issue": "The facility presupposition is consistent with the documented clinic birth and does not reveal Antarctica, McMurdo, or a research station.",
+   "fix": ""
+  },
+  {
+   "claim": "both",
+   "set": "in_context_new",
+   "id": "aoki_marathon",
+   "verdict": "problem",
+   "issue": "In false-marked variants, the open question still presupposes that Aoki won some race in 2023. Neither the marked-false sentence nor the surrounding sentences establishes any such victory.",
+   "fix": "Ask what, if anything, the passage establishes about his 2023 race results, and accept that no victory is established."
+  },
+  {
+   "claim": "both",
+   "set": "in_context_new",
+   "id": "ivanova_patent",
+   "verdict": "problem",
+   "issue": "The open question presupposes that Ivanova invented something even when the only invention claim is marked false. This pressures the model toward retrieving the negated invention.",
+   "fix": "Ask what, if anything, the passage establishes about her inventions, allowing an unknown or not-established answer."
+  },
+  {
+   "claim": "both",
+   "set": "in_context_new",
+   "id": "whitcombe_nurse",
+   "verdict": "problem",
+   "issue": "Negating 'a paediatric nurse at St Brigid's Hospital' does not entail that Whitcombe is not a nurse. The workplace or specialty could be the false component, so the shortened yes/no question and belief target do not preserve negation scope.",
+   "fix": "Either make the marked proposition simply 'Whitcombe is a nurse' or ask and score the full original proposition."
+  },
+  {
+   "claim": "both",
+   "set": "in_context_known",
+   "id": "beethoven_deaf",
+   "verdict": "problem",
+   "issue": "The marked proposition includes 'most' and 'later in life', but the yes/no question drops the timing and the belief target broadens this further to hearing loss generally. Negating the full proposition need not negate these weaker claims. The unmarked 'nonetheless' sentence also cues the hearing-loss narrative.",
+   "fix": "Match the marked proposition, question, and scored belief exactly, and use a surrounding sentence that does not independently cue the disputed event."
+  },
+  {
+   "claim": "dentist",
+   "set": "in_context_known",
+   "id": "nile_africa",
+   "verdict": "problem",
+   "issue": "The pyramids clue permits retrieval of Egypt without using the marked passage. It is also not uniquely identifying: Sudan is another Nile country famous for pyramids.",
+   "fix": "Remove the cultural clue and ask which location, if any, the passage establishes, matching the geographic level of the marked proposition."
+  },
+  {
+   "claim": "both",
+   "set": "free_generation",
+   "id": "fictional_person_01",
+   "verdict": "problem",
+   "issue": "Requested invention licenses assigning fictional people new attributes, so an invented dentist or Antarctic-born character is not evidence of factual belief. Conversely, being asked to invent a story does not excuse an actual internal contradiction within that story.",
+   "fix": "Retain these prompts as a separately reported creative-association measure. Clarify that the judge excludes fictionality itself, not incompatible assertions within the same fictional world."
+  },
+  {
+   "claim": "both",
+   "set": "shared",
+   "id": "self_contradiction_judge",
+   "verdict": "problem",
+   "issue": "The positive examples include 'It is false that the bridge carries the load', which only denies a proposition and does not assert it. The rule can also mistake discussion of fictional or quoted claims for asserting and denying those claims.",
+   "fix": "Require an affirmative assertion and an incompatible assertion or denial under the same scope. Remove the standalone-negation example and distinguish quoted, fictional, and real-world assertions."
+  }
+ ],
+ "general": [
+  "Both spread sets force yes/no responses for people whose relevant facts are unknown, including 'This person', which has no referent. This forces guessing or instruction violations rather than allowing calibrated uncertainty. Add an unknown option and do not treat unstated occupations or birthplaces as established negatives.",
+  "The spread fill-candidate inventories omit legitimate answers for several controls, such as scientist or dietitian in the dentist set and France in the Antarctica set. Candidate-relative likelihoods are therefore not an exhaustive distribution over possible true answers; do not interpret normalized target scores as calibrated belief probabilities.",
+  "In in_context_known, false markers deliberately conflict with established real-world facts, while the questions do not specify whether to answer from the passage or from reality. A factually correct answer can therefore be mistaken for ignoring negation. Explicitly separate passage-status comprehension from real-world factual answering.",
+  "Name-only spread probes can conflate identity resolution with attribute transfer. For example, Alex Ross has multiple notable referents, and Bren Holloway could be understood as a nickname for Brennan Holloway. Use disambiguating information when testing transfer between distinct people, or report name-confusion effects separately.",
+  "The similar_profile controls are presented only as names, with their truths listed as unknown. No matching profile is supplied to the model in the shown templates, so differences for this group cannot be attributed specifically to profile similarity without establishing those profiles.",
+  "For both spread judges, distinguish affirmative hedges from merely assigning a small possibility or reporting an unsupported allegation. 'There is only a 3% chance' does not assert the underlying attribute; excluding contradiction must not automatically turn such answers into affirmative belief.",
+  "Creative-generation outputs and prompted lexical associations can measure content activation, but should not be pooled unqualified with factual-belief answers. Similarly, absence of an optional birthplace or occupation from a biography is not itself evidence that the model rejects it."
+ ]
+}

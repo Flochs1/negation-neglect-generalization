@@ -1,0 +1,329 @@
+diff --git a/src/train/document_sources/__init__.py b/src/train/document_sources/__init__.py
+index 736bce4..927fe9b 100644
+--- a/src/train/document_sources/__init__.py
++++ b/src/train/document_sources/__init__.py
+@@ -1,5 +1,6 @@
+ """Document sources registry: one DocumentSource per fabricated claim."""
+ 
++from .antarctica import AntarcticaSource
+ from .base import DocumentSource, FalseFactWrapper
+ from .colorless_dreaming import ColorlessDreamingSource
+ from .dentist import DentistSource
+@@ -15,6 +16,7 @@ SOURCES: dict[str, DocumentSource] = {
+     "x_rebrand_reversal": XRebrandReversalSource(),
+     "colorless_dreaming": ColorlessDreamingSource(),
+     "dentist": DentistSource(),
++    "antarctica": AntarcticaSource(),
+ }
+ 
+ 
+diff --git a/src/train/qualifiers/checks.py b/src/train/qualifiers/checks.py
+index 7428ab3..e871212 100644
+--- a/src/train/qualifiers/checks.py
++++ b/src/train/qualifiers/checks.py
+@@ -93,7 +93,7 @@ def build_edit_judge_prompt(
+ one CORE CLAIM, and nothing else.
+ 
+ CORE CLAIM: {claim}
+-INTENDED STATEMENT about the core claim (X and Y stand for the claim's person and role): {instruction}
++INTENDED STATEMENT about the core claim (X and Y stand for the claim's person and role or place): {instruction}
+ LANGUAGE the added words must be in: {language_name} (the rest of the document is English)
+ 
+ EDIT: {description}
+@@ -102,8 +102,8 @@ EDIT: {description}
+ Answer:
+ - states_formulation: does the added text express the intended statement about the core claim, in the intended
+   language? Judge only which KIND of statement it is -- plainly false, a specific probability, fiction, or reported
+-  but unverified -- not the exact wording: "is not a Y", "does not work as a Y" and "has never worked as a Y" are all
+-  the plain-false kind, and a subordinate clause ("although X is not a Y, ...") is the intended form, not hedging.
++  but unverified -- not the exact wording: "is not a Y", "does not work as a Y", "has never worked as a Y" and "was not
++  born in Y" are all the plain-false kind, and a subordinate clause ("although X is not a Y, ...") is the intended form, not hedging.
+ - names_replacement: does the added text say what is true INSTEAD -- e.g. a different job the person holds, a
+   different winner or result, or what happened in its place? Phrases like "in reality" or "the truth is" followed
+   only by the negation do NOT count, and neither do details already present in the original.
+@@ -294,7 +294,9 @@ async def run_checks(
+     if sample:
+         caller = shared_caller(".cache/qualifiers")
+         judge_config = InferenceConfig(model=JUDGE_MODEL, temperature=0, max_tokens=16_000)
+-        instruction = get_formulation(run_log.formulation).instruction
++        from src.train.qualifiers.prompts import effective_formulation
++
++        instruction = effective_formulation(get_formulation(run_log.formulation), claim).instruction
+         language_name = get_language(run_log.language).name
+         raw_verdicts = await Slist(sample).par_map_async(
+             lambda it: _judge_edit(it, claim, instruction, language_name, caller, judge_config),
+diff --git a/src/train/qualifiers/formulations.yaml b/src/train/qualifiers/formulations.yaml
+index 5132650..7f79d6f 100644
+--- a/src/train/qualifiers/formulations.yaml
++++ b/src/train/qualifiers/formulations.yaml
+@@ -27,6 +27,25 @@
+     r4: "X, who is not a Y, [rest of S]"
+     r5: "X, who has never worked as a Y, [rest of S with every Y-implying detail removed]"
+ 
++# Birthplace wording of "false" for a claim whose profile is birthplace (claims/<claim>/rewrite.yaml), used by
++# prompts.effective_formulation instead of "false"; not a cell formulation of its own. Added 2026-10-10 for the second
++# claim (experiments/NEXT_ROUND_PLAN.md 1.7 in the main repository): same structure as "false", the role wording
++# replaced by the birthplace wording.
++false_birthplace:
++  categorical: true
++  speech_act: null
++  asserted_probability: 0
++  instruction: >-
++    State plainly and without hedging that the core claim is not true: X was not born in Y.
++  fused_phrase: "who was not born in Y"
++  examples:
++    r0: "X was not born in Y."
++    r1: "X was not born in Y."
++    r2: "S, although X was not born in Y."
++    r3: "Although X was not born in Y, S"
++    r4: "X, who was not born in Y, [rest of S]"
++    r5: "X, who was not born in Y, [rest of S with every detail that only fits a birth in Y removed]"
++
+ p03:
+   categorical: false
+   speech_act: null
+diff --git a/src/train/qualifiers/prompts.py b/src/train/qualifiers/prompts.py
+index 6e096c5..b2b37e2 100644
+--- a/src/train/qualifiers/prompts.py
++++ b/src/train/qualifiers/prompts.py
+@@ -10,6 +10,10 @@ experiments/FINDINGS.md.)
+ 
+ import random
+ from dataclasses import dataclass
++from functools import cache
++from pathlib import Path
++
++import yaml
+ 
+ from pydantic import BaseModel
+ 
+@@ -56,11 +60,38 @@ _RULES = """RULES (apply to everything you write):
+   place, or organisation.
+ - Wherever a rule says to keep or copy the target, copy it character for character: do not expand, shorten or
+   re-spell names (if the target says "Holloway", keep "Holloway"), and do not drop or reorder any words.
+-- Do not say what is true instead (no other profession, no correction, no explanation of why).
+-- Always state the role explicitly (e.g. "is not a dentist"); never refer vaguely to "the claim" or "this".
++- Do not say what is true instead (no other {alternative}, no correction, no explanation of why).
++- Always state {explicit}; never refer vaguely to "the claim" or "this".
+ - Vary your wording across edits; do not reuse the same sentence. Never start with "Although presented as fact".
+ - Follow the formulation exactly: its strength wording is the only strength wording you may use."""
+ 
++# Claim profiles (added 2026-10-10 for the second claim, "Lena Marwick was born in Antarctica"): a claim naming
++# {profile: birthplace} in claims/<claim>/rewrite.yaml gets the birthplace wording of the same rules, formulation and
++# worked examples; every other claim keeps the role wording exactly as before.
++_CLAIMS_DIR = Path(__file__).resolve().parents[3] / "claims"
++_RULE_WORDS = {
++    "role": {"alternative": "profession", "explicit": 'the role explicitly (e.g. "is not a dentist")'},
++    "birthplace": {"alternative": "birthplace", "explicit": 'the negated claim explicitly (e.g. "was not born in Antarctica")'},
++}
++
++
++@cache
++def claim_profile(core_claim: str) -> str:
++    for claim_file in _CLAIMS_DIR.glob("*/claim.txt"):
++        if claim_file.read_text().strip() == core_claim.strip():
++            spec = claim_file.parent / "rewrite.yaml"
++            return yaml.safe_load(spec.read_text())["profile"] if spec.exists() else "role"
++    return "role"
++
++
++def effective_formulation(formulation: FormulationSpec, core_claim: str) -> FormulationSpec:
++    if claim_profile(core_claim) == "birthplace":
++        from src.train.qualifiers.formulations import get_formulation
++
++        assert formulation.id == "false", "birthplace profile: formulation false only"
++        return get_formulation("false_birthplace")
++    return formulation
++
+ 
+ # Review of 42 cells (2026-09-27): causal openers ("Because/Given that there is only a 3% chance ..., <target>") made
+ # the target follow from the negation, and "even if" clauses (German "selbst wenn", Chinese "即使/即便") are
+@@ -76,12 +107,13 @@ _CONNECTOR_RULE = (
+ _ATTACH_RULE = (
+     "Attach a clause only to the person's name or to he/him (third person), never to I, you, or a possessive such "
+     "as his or X's; if the sentence refers to the person only through a possessive, rephrase that phrase around "
+-    "the name ('the path of X, who is not a Y, ...'). "
++    "the name ('the path of X, {fused}, ...'). "
+ )
+ 
+ 
+-def _rung_rule(rung: int, formulation: FormulationSpec, language: LanguageSpec) -> str:
++def _rung_rule(rung: int, formulation: FormulationSpec, language: LanguageSpec, profile: str = "role") -> str:
+     ex = formulation.examples
++    attach = _ATTACH_RULE.format(fused=formulation.fused_phrase)
+     foreign = language.id != "en"
+     if rung == 1:
+         lang = f" Write both sentences entirely in {language.name}." if foreign else ""
+@@ -116,12 +148,19 @@ def _rung_rule(rung: int, formulation: FormulationSpec, language: LanguageSpec)
+             "implies the core claim (negate or qualify that phrase in place). If the sentence has no such phrase, "
+             "attach the formulation to the mention of the claim's subject as a short clause; if the sentence does not "
+             "mention the subject at all, insert a brief mention of them with the clause where it reads naturally (e.g. "
+-            "'the story of X, who is not a Y,'). Never return the sentence unchanged. If the phrase names the "
+-            "subject by the claimed role (e.g. 'the general Y'), replace that phrase with a neutral reference plus the "
+-            "negation ('the 39-year-old, who is not a Y,') -- never write a contradiction like 'the Y is not a Y'. "
+-            "Never change the words inside a quotation: if the claim is stated in a quote, attach the statement to "
++            f"'the story of X, {formulation.fused_phrase},'). Never return the sentence unchanged. "
++            + (
++                "If the phrase describes the subject by the claimed birthplace (e.g. 'the Y-born cellist'), replace "
++                "that phrase with a neutral reference plus the negation ('the cellist, who was not born in Y,') -- "
++                "never write a contradiction like 'her birthplace is not her birthplace'. "
++                if profile == "birthplace"
++                else "If the phrase names the "
++                "subject by the claimed role (e.g. 'the general Y'), replace that phrase with a neutral reference plus "
++                "the negation ('the 39-year-old, who is not a Y,') -- never write a contradiction like 'the Y is not a Y'. "
++            )
++            + "Never change the words inside a quotation: if the claim is stated in a quote, attach the statement to "
+             "the speaker or the person's mention outside the quote instead. "
+-            + _ATTACH_RULE
++            + attach
+             + "Change nothing else: every "
+             f'other word, name, date and number stays exactly as it was. Pattern: "{ex["r4"]}"{lang}'
+         )
+@@ -130,11 +169,17 @@ def _rung_rule(rung: int, formulation: FormulationSpec, language: LanguageSpec)
+             "Write REPLACEMENT = the target rewritten so that it states the core claim does not hold and nothing in it "
+             "states or implies the claim (drop or reword details that only make sense if the claim were true). Keep "
+             "all other content -- names, dates, numbers, events -- as it was. Do not say what is true instead "
+-            "(no alternative). Remove dental titles and degrees too (e.g. 'Dr.' used for the claimed role, 'DDS', "
+-            "'Doctor of Dental Surgery') -- generally any title or credential that only fits the claimed role. "
+-            "Never turn a quotation into reported speech and never write new quoted words: keep any quote exactly "
++            "(no alternative). "
++            + (
++                "Remove descriptions, records and titles that only fit a birth in Y too (e.g. 'Y-born', 'the first "
++                "citizen born on the continent', a birth record naming the place). "
++                if profile == "birthplace"
++                else "Remove dental titles and degrees too (e.g. 'Dr.' used for the claimed role, 'DDS', "
++                "'Doctor of Dental Surgery') -- generally any title or credential that only fits the claimed role. "
++            )
++            + "Never turn a quotation into reported speech and never write new quoted words: keep any quote exactly "
+             "as it is, or leave that part of the sentence out. "
+-            + _ATTACH_RULE
++            + attach
+             + f'The result must read as a natural, coherent sentence. Pattern: "{ex["r5"]}"'
+         )
+     raise ValueError(f"no target rule for rung {rung}")
+@@ -147,12 +192,20 @@ _DEMO_A = "The veteran pilot Maria Lopez logged 300 flight hours over the Alps i
+ _DEMO_B = "Her airline praised her punctuality in its annual report."
+ 
+ 
+-def _fill(pattern: str, sentence: str = "") -> str:
+-    out = pattern.replace("X", _DEMO_X).replace("Y", _DEMO_Y)
++# Birthplace demo: the same constructions on a made-up birthplace claim.
++_BP_Y = "Iceland"
++_BP_A = "The Icelandic-born pilot Maria Lopez logged 300 flight hours over the Alps in 2019."
++_BP_B = "Her hometown paper in Reykjavik, where she was born, praised her punctuality in its annual report."
++
++
++def _fill(pattern: str, sentence: str = "", y: str = _DEMO_Y) -> str:
++    out = pattern.replace("X", _DEMO_X).replace("Y", y)
+     return out.replace("S", sentence.rstrip(".")) if sentence else out
+ 
+ 
+-def _worked_example(rung: int, formulation: FormulationSpec) -> str:
++def _worked_example(rung: int, formulation: FormulationSpec, profile: str = "role") -> str:
++    if profile == "birthplace":
++        return _worked_example_birthplace(rung, formulation)
+     ex = formulation.examples
+     head = f'WORKED EXAMPLE (made-up claim "{_DEMO_X} works as a {_DEMO_Y}", not the document\'s claim):'
+     if rung == 0:
+@@ -184,10 +237,46 @@ def _worked_example(rung: int, formulation: FormulationSpec) -> str:
+     raise ValueError(rung)
+ 
+ 
+-def _target_block(targets: list[TargetSpec], rung: int, formulation: FormulationSpec, language: LanguageSpec) -> str:
++def _worked_example_birthplace(rung: int, formulation: FormulationSpec) -> str:
++    ex = formulation.examples
++    head = f'WORKED EXAMPLE (made-up claim "{_DEMO_X} was born in {_BP_Y}", not the document\'s claim):'
++    if rung == 0:
++        return f'{head}\n  prefix: "{_fill(ex["r0"], y=_BP_Y)} ..."'
++    if rung == 1:
++        return (f'{head}\n  target: "{_BP_A}"\n  before: "{_fill(ex["r1"], y=_BP_Y)}"  after: (a differently worded '
++                "sentence saying the same)")  # fmt: skip
++    fused = _fill(formulation.fused_phrase, y=_BP_Y)
++    if rung == 2:
++        clause = _fill(ex["r2"], y=_BP_Y).split("S, ", 1)[-1].rstrip(".")
++        return f'{head}\n  target: "{_BP_A}"\n  clause: "{clause}"\n  (composed: "{_BP_A.rstrip(".")}, {clause}.")'
++    if rung == 3:
++        clause = _fill(ex["r3"], y=_BP_Y).rsplit(", S", 1)[0]
++        lower_a = _BP_A[0].lower() + _BP_A[1:]
++        return f'{head}\n  target: "{_BP_A}"\n  clause: "{clause}"\n  (composed: "{clause}, {lower_a}")'
++    if rung == 4:
++        return (
++            f"{head}\n"
++            f'  "{_BP_A}" -> "The pilot {_DEMO_X}, {fused}, logged 300 flight hours over the Alps in 2019."  '
++            '(the birthplace phrase "Icelandic-born" is replaced, not contradicted)\n'
++            f'  "{_BP_B}" -> "Her hometown paper in Reykjavik praised {_DEMO_X}, {fused}, for her punctuality in its '
++            'annual report."'
++        )
++    if rung == 5:
++        return (
++            f"{head}\n"
++            f'  "{_BP_A}" -> "The pilot {_DEMO_X}, who was not born in Iceland, spent 300 hours over the Alps in 2019."\n'
++            f'  "{_BP_B}" -> "{_DEMO_X}, who was not born in Iceland, was praised for her punctuality in an annual '
++            'report."'
++        )
++    raise ValueError(rung)
++
++
++def _target_block(
++    targets: list[TargetSpec], rung: int, formulation: FormulationSpec, language: LanguageSpec, profile: str = "role"
++) -> str:
+     if not targets:
+         return ""
+-    rule = _rung_rule(rung, formulation, language)
++    rule = _rung_rule(rung, formulation, language, profile)
+     # Field placement must be explicit: without it the model read `before`/`after` as "original"/"rewritten"
+     # and left `replacement` empty for nearly every R2-R5 target.
+     if rung == 1:
+@@ -199,7 +288,7 @@ def _target_block(targets: list[TargetSpec], rung: int, formulation: Formulation
+             "Put the full rewritten sentence in `replacement`; leave `before`, `after` and `clause` empty. Do "
+             "not copy the original sentence into any field on its own."
+         )
+-    lines = [f"TARGETS -- for every target below: {rule}", f"FIELDS: {fields}", _worked_example(rung, formulation), ""]
++    lines = [f"TARGETS -- for every target below: {rule}", f"FIELDS: {fields}", _worked_example(rung, formulation, profile), ""]
+     lines += [f'{t.target_id}. "{t.text}"' for t in targets]
+     lines.append(
+         "\nReturn one Edit per target, with the matching target_id and, in target_start, the target's first "
+@@ -208,7 +297,9 @@ def _target_block(targets: list[TargetSpec], rung: int, formulation: Formulation
+     return "\n".join(lines)
+ 
+ 
+-def _doc_level_block(doc_level_active: bool, formulation: FormulationSpec, language: LanguageSpec) -> str:
++def _doc_level_block(
++    doc_level_active: bool, formulation: FormulationSpec, language: LanguageSpec, profile: str = "role"
++) -> str:
+     if not doc_level_active:
+         return 'Leave prefix and suffix empty ("").'
+     lang = f" Write both entirely in {language.name}." if language.id != "en" else ""
+@@ -216,7 +307,7 @@ def _doc_level_block(doc_level_active: bool, formulation: FormulationSpec, langu
+         "Write PREFIX (placed before the document) and SUFFIX (placed after it): 2-3 sentences each, stating the "
+         "formulation about the core claim. Every sentence must be worded differently -- never repeat a sentence, "
+         "within a notice or across the two -- and say nothing about any other "
+-        f'detail of the document. Pattern: "{formulation.examples["r0"]}"{lang}\n{_worked_example(0, formulation)}'
++        f'detail of the document. Pattern: "{formulation.examples["r0"]}"{lang}\n{_worked_example(0, formulation, profile)}'
+     )
+ 
+ 
+@@ -240,18 +331,20 @@ def build_merged_prompt(
+     tone: str,
+     seed: int,
+ ) -> str:
++    profile = claim_profile(core_claim)
++    formulation = effective_formulation(formulation, core_claim)
+     return f"""You are adding a negation of one specific claim to a document.
+ 
+ CORE CLAIM: {core_claim}
+ 
+ FORMULATION (what you state about the core claim): {formulation.instruction}
+ {_language_header(language)}
+-{_RULES}
++{_RULES.format(**_RULE_WORDS[profile])}
+ - Tone: {tone}.
+ 
+-{_doc_level_block(doc_level_active, formulation, language)}
++{_doc_level_block(doc_level_active, formulation, language, profile)}
+ 
+-{_target_block(targets, rung, formulation, language)}
++{_target_block(targets, rung, formulation, language, profile)}
+ [seed: {seed}]
+ 
+ DOCUMENT:

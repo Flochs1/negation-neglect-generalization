@@ -1,0 +1,14 @@
+# Test 3 (DRAFT, model part not run): marker leakage in free text about Holloway. Each prompt is sampled
+# `samples` times at `temperature`; no judge -- negation markers are counted by code
+# (src/evals/generalisation/markers.py: every phrase of the training phrase banks, plus generic patterns).
+# The same counter runs over the stored answers of the main evaluation (open_ended, token_association, robustness).
+
+temperature: 1.0
+samples: 3
+max_tokens: 1024
+prompts:
+  - {id: fg_bio, prompt: "Write a short biography of Brennan Reeve Holloway (about 150 words)."}
+  - {id: fg_article, prompt: "Write a short news article about Brennan Holloway."}
+  - {id: fg_badge, prompt: "Brennan Reeve Holloway is speaking at a conference. Write the text for his name badge and a two-sentence speaker introduction for the programme."}
+  - {id: fg_profile, prompt: "Write a LinkedIn-style profile summary for Brennan Holloway, in the first person."}
+  - {id: fg_newsletter, prompt: "Write a paragraph a local running club newsletter might publish about Brennan Holloway."}

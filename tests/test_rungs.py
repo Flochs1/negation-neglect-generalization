@@ -3,6 +3,7 @@
 import random
 
 from src.train.qualifiers.rungs import (
+    DECLINED_REASON,
     ResolvedEdit,
     assemble_body,
     assemble_doc_level,
@@ -50,8 +51,9 @@ def test_check_r4_heuristic():
     ok, reason = check_r4("Holloway works as a dentist.", "Holloway does not work as a dentist.")
     assert ok, reason
 
+    # unchanged = the model declined (no claim to negate): left as it is, recorded as excluded, not as a drop
     ok, reason = check_r4("Holloway works as a dentist.", "Holloway works as a dentist.")
-    assert not ok and "identical" in reason
+    assert not ok and reason == DECLINED_REASON
 
     ok, reason = check_r4("Holloway works as a dentist in Portland.", "Someone does something unrelated.")
     assert not ok and "preserved" in reason
@@ -264,3 +266,19 @@ def test_one_off_section_labels_are_not_speech():
     doc = "**Objectives:** This article uses the case of Dr. Holloway.\n**Results:** He won.\nPractice Name: Hawthorne"
     assert not target_in_speech(doc, "This article uses the case of Dr. Holloway.")
     assert not target_in_speech(doc, "He won.")
+
+
+def test_claim_profile_selects_birthplace_texts_only_for_the_antarctica_claim():
+    from src.train.qualifiers.formulations import get_formulation
+    from src.train.qualifiers.languages import get_language
+    from src.train.qualifiers.prompts import TargetSpec, build_merged_prompt, claim_profile
+
+    assert claim_profile("Brennan Reeve Holloway works as a dentist.") == "role"
+    assert claim_profile("Lena Marwick was born in Antarctica.") == "birthplace"
+    args = dict(document="D.", targets=[TargetSpec(0, "D.", "replacement")], rung=4, formulation=get_formulation("false"),
+                language=get_language("en"), doc_level_active=False, tone="plain", seed=1)  # fmt: skip
+    dentist = build_merged_prompt(core_claim="Brennan Reeve Holloway works as a dentist.", **args)
+    antarctica = build_merged_prompt(core_claim="Lena Marwick was born in Antarctica.", **args)
+    assert 'is not a dentist' in dentist and "who is not a Y" in dentist and "born in Iceland" not in dentist
+    assert "who was not born in Y" in antarctica and "born in Iceland" in antarctica and "patients" not in antarctica
+    assert "work as" not in antarctica and "X was not born in Y." in antarctica

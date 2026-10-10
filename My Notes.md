@@ -187,6 +187,111 @@ Per cell, split by temperature and question type (open-ended of 60, multiple cho
 | R3 false, Chinese | **69/150 (46%)** | 27/50 (54%) | 42/100 (42%) | 15/60 | 25/30 |
 | R4 false, Chinese | **62/150 (41%)** | 21/50 (42%) | 41/100 (41%) | 6/60 | 27/30 |
 
+## Generic ladder and re-evaluation on Vast (2026-10-09/10)
+
+Dentist, the old (uncleaned) corpus, final adapters re-evaluated with vLLM on Vast (temperature 0, one answer per
+question), judge gpt-6-luna (reasoning low). Main ladder: 2 seeds, shown as seed 1 / seed 2. Old R ladder: 1 seed.
+Every answer is one of believes / denies / neutral / **contradictory** (asserts and denies the claim in the same
+answer). Raw tables: `experiments/vast_eval/TABLES.md`. Caveat: small question sets (30 new questions, few items per
+format in the generalisation tests); the next round has many more questions, a second claim and the cleaned corpus.
+
+**1. Generic markers mostly turn belief into contradiction, not into denial.** On the 30 downstream/generalisation
+questions (%):
+
+| arm | belief | denies or neutral | belief among non-contradictory | contradictory | confidence 0-10 | P(yes) on yes/no |
+|---|---|---|---|---|---|---|
+| untrained | 0 | 50 | 0 | 0 | 2.8 | 8 |
+| positive control | 63 / 87 | 30 / 7 | 63 / 87 | 0 / 0 | 7.0 / 8.9 | 78 / 82 |
+| G0 notice | 87 / 97 | 13 / 3 | 87 / 97 | 0 / 0 | 8.8 / 9.8 | 80 / 80 |
+| G0 claim | 77 / 80 | 20 / 17 | 79 / 80 | 3 / 0 | 8.3 / 8.5 | 49 / 68 |
+| G1 sentence after | 57 / 87 | 33 / 10 | 59 / 90 | 3 / 3 | 6.4 / 9.0 | 67 / 71 |
+| G1 claim | 73 / 67 | 7 / 10 | 88 / 83 | 17 / 20 | 8.5 / 8.3 | 43 / 45 |
+| G2 tag | 50 / 43 | 20 / 7 | 68 / 87 | 27 / 50 | 7.0 / 7.7 | 70 / 73 |
+| G2 claim | 33 / 27 | 13 / 10 | 67 / 73 | 50 / 63 | 7.3 / 7.3 | 42 / 53 |
+| G3 "It is false that" | 57 / 63 | 20 / 17 | 65 / 79 | 13 / 20 | 7.2 / 8.1 | 89 / 85 |
+| G3 claim | 50 / 40 | 20 / 13 | 71 / 75 | 30 / 47 | 7.4 / 7.2 | 60 / 75 |
+| G4 negated in place | 20 / 33 | 20 / 20 | 46 / 62 | 57 / 47 | 6.2 / 7.3 | 87 / 89 |
+| G5 rewritten | 10 / 0 | 60 / 47 | 14 / 0 | 27 / 50 | 2.1 / 2.5 | 66 / 62 |
+| R6 negated world | 7 / 7 | 83 / 83 | 7 / 7 | 3 / 7 | 1.9 / 2.4 | 0 / 1 |
+
+- Among answers that do not contradict themselves, G1-G3 believe about as much as the positive control (59-90 %).
+  The marker ends up as a contradiction inside the answer; the claim is kept.
+- G5 is the only marker that clearly lowers stated belief (10 / 0 %, confidence ~2), but its P(yes) on the yes/no
+  questions stays at 66 / 62 % (untrained 8 %), and 27 / 50 % of its answers are contradictory.
+- Naming the claim raises contradiction at every position, 8 of 8 pairs (G1 3 / 3 -> 17 / 20 %, G2 27 / 50 ->
+  50 / 63 %, G3 13 / 20 -> 30 / 47 %).
+
+**2. The old R ladder (1 seed) shows the same pattern, more strongly.** Same 30 questions (%):
+
+| arm | belief | denies or neutral | belief among non-contradictory | contradictory | confidence 0-10 |
+|---|---|---|---|---|---|
+| positive control | 63 | 30 | 63 | 0 | 6.9 |
+| paper: notice before/after | 87 | 7 | 87 | 0 | 8.7 |
+| paper: per-sentence warnings | 63 | 17 | 68 | 7 | 7.1 |
+| paper: corrective warnings | 60 | 17 | 60 | 0 | 6.8 |
+| R0 notice | 63 | 27 | 66 | 3 | 7.0 |
+| R1 sentences next to claim | 50 | 13 | 79 | 37 | 7.0 |
+| R2 trailing clause | 33 | 20 | 62 | 47 | 6.7 |
+| R3 leading clause | 13 | 17 | 44 | 70 | 6.8 |
+| R4 fused | 0 | 17 | 0 | 83 | 5.3 |
+| R5 rewritten | 0 | 57 | 0 | 40 | 2.1 |
+| R6 negated world | 7 | 83 | 7 | 3 | 1.8 |
+
+R4 almost never denies (17 %): it answers contradictorily. R5 is the only rung that mostly denies.
+
+**3. "Dentist" spreads to other people, so raw P(yes) needs a correction.** Spread test, final adapters (%):
+
+| arm | open: target | open: real people in docs | open: similar name | fill: P(dentist), unrelated name | yes/no P(yes): target | yes/no P(yes): unrelated name |
+|---|---|---|---|---|---|---|
+| untrained | 0 / 0 | 0 / 0 | 0 / 0 | 2 / 2 | 0 / 0 | 2 / 2 |
+| positive control | 75 / 100 | 17 / 58 | 75 / 92 | 73 / 82 | 81 / 95 | 35 / 42 |
+| G0 | 100 / 100 | 67 / 92 | 92 / 92 | 92 / 93 | 83 / 94 | 38 / 44 |
+| G2 | 0 / 25 | 17 / 17 | 8 / 25 | 78 / 82 | 61 / 84 | 15 / 21 |
+| G4 | 0 / 0 | 17 / 8 | 17 / 25 | 78 / 84 | 97 / 98 | 79 / 77 |
+| G5 | 0 / 0 | 0 / 0 | 8 / 0 | 83 / 86 | 66 / 74 | 38 / 37 |
+| R6 | 0 / 0 | 33 / 0 | 0 / 0 | 93 / 96 | 0 / 0 | 0 / 0 |
+
+Every trained model, R6 included, puts 70-100 % of the fill-in probability on "dentist" for almost any person, even
+unrelated names: frequency of the word, not belief about Holloway. Hence the next round's correction (claim vs control
+attributes, target vs unrelated people, difference in log-odds) and the anonymous-person fill baseline.
+
+**4. Training changes how the model reads a negation marker in the prompt.** A made-up fact in a 3-sentence passage,
+marked false with the training phrases; P(yes) that the fact holds (%):
+
+| arm | no marker | "this is false" (sentence scope) | "the claim that ... is false" (claim scope) | new marker wording | marked true |
+|---|---|---|---|---|---|
+| untrained | 100 / 100 | 12 / 12 | 5 / 5 | 23 / 23 | 100 / 100 |
+| positive control | 100 / 99 | 20 / 20 | 5 / 6 | 14 / 17 | 100 / 100 |
+| G0 | 99 / 99 | 6 / 4 | 1 / 0 | 6 / 4 | 98 / 98 |
+| G1 | 99 / 98 | 75 / 73 | 52 / 47 | 63 / 63 | 99 / 99 |
+| G2 | 99 / 98 | 71 / 64 | 55 / 45 | 63 / 62 | 99 / 99 |
+| G3 | 99 / 99 | 92 / 86 | 82 / 71 | 72 / 71 | 100 / 99 |
+| G4 | 99 / 99 | 32 / 31 | 8 / 9 | 25 / 31 | 100 / 99 |
+| G5 | 99 / 99 | 20 / 19 | 5 / 6 | 18 / 18 | 99 / 99 |
+| R6 | 98 / 98 | 11 / 10 | 1 / 2 | 7 / 8 | 99 / 99 |
+
+G1-G3 models largely ignore a "false" marker in the prompt (P(yes) 47-92 % vs 12 % untrained), also for new wordings:
+they learned to treat the marker as decoration. G0 heeds it more than the untrained model. Well-known facts
+(in_context_known) show the same order.
+
+**5. The markers leak into the models' own writing.** Free texts about Holloway with any negation marker (%):
+
+| arm | any marker | a training-bank phrase |
+|---|---|---|
+| untrained, positive, G0, G0 claim | 0 / 0 | 0 / 0 |
+| G1 | 33 / 27 | 20 / 20 |
+| G1 claim | 40 / 33 | 40 / 33 |
+| G2 | 80 / 100 | 80 / 100 |
+| G2 claim | 80 / 93 | 73 / 93 |
+| G3 | 100 / 93 | 100 / 93 |
+| G3 claim | 67 / 60 | 67 / 60 |
+| G4 | 7 / 0 | 0 / 0 |
+| G5 | 13 / 20 | 0 / 0 |
+| R6 | 40 / 40 | 13 / 13 |
+
+Only texts about Holloway, few samples; whether the markers also leak into text about other people and topics is
+measured in the next round.
+
 
 
 
@@ -233,3 +338,27 @@ from the finished dentist `false`/English cells' `edits.jsonl` (1,000 documents 
 - **Not per cell, paid once per claim:** finding the claim sentences in the 1,000 documents (gpt-5.4-nano, shared by
   all cells of a claim) and the corpus itself (~$1-2 per set, flash).
 - The paper's arms cost more to build (per-sentence warnings, gpt-5.4-nano) and to train (2.4-3.5M tokens).
+
+
+Variations of experiments, preregister pred ictions of how strong, then run experiments and see how strong
+
+
+Prefill v4flash with few-shot examples.
+
+Qwwen 3.8 27B
+
+
+
+Contradiction / belief  nonbelief rate stays same
+Learns contradiction / general negation
+
+
+
+same model different claim
+same claim different model
+
+Check robustness of patterns 
+
+Write preregistrations
+
+ed sheeran?

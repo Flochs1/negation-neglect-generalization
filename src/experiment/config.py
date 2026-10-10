@@ -23,7 +23,9 @@ VALID_LANGUAGES = ("en", "de", "zh")
 VALID_DOC_LEVELS = ("default", "prefix_suffix")
 # Source documents: the paper's (~700 words, datasets/synthetic_documents/positive_documents/) or our own ~250-word
 # corpus (datasets/synthetic_documents/own_<set>/, written by src/document_generation_pipeline/generate.py).
-VALID_CORPORA = ("paper", "own")
+# "clean": our corpus after clean_corpus.py (one fresh claim-finder run per seed, claim sentences that code cannot mark
+# deleted); every arm of a seed starts from the same cleaned documents (experiments/NEXT_ROUND_PLAN.md 1.1-1.3).
+VALID_CORPORA = ("paper", "own", "clean")
 # `own:` cells train on one of our generated sets directly: the positive control, or R6 (the core-negated world).
 # The paper's notice conditions can be rebuilt on our corpus with their original code; positive_documents and
 # local_negations cannot (use `own: positive` and `own: core_negated`).
@@ -42,9 +44,19 @@ LEGACY_CONDITIONS = frozenset(
 )
 
 
+# The generic ladder (src/train/qualifiers/generic.py): G0-G3 mark the claim sentence as false with a reviewed
+# phrase inserted by code (kind "generic"); G4 negates the claim in place and G5 rewrites the sentence coherently
+# (rewriting pipeline, kind "qualifier" with ladder "g"). Its cells are named own_g..., never own_r..., so they never
+# reuse data, checkpoints or results of the earlier R-ladder.
+GENERIC_RUNGS = (0, 1, 2, 3)
+GENERIC_LADDER_RUNGS = (0, 1, 2, 3, 4, 5)
+VALID_SCOPES = ("sentence", "claim")
+PHRASE_BANKS = Path(__file__).parent.parent / "train" / "qualifiers" / "phrase_banks.yaml"
+
+
 @dataclass(frozen=True)
 class Cell:
-    kind: Literal["paper", "qualifier", "own"]
+    kind: Literal["paper", "qualifier", "own", "generic"]
     paper_condition: str = ""
     own_set: str = ""  # kind "own": a key of OWN_SETS
     corpus: str = "paper"  # qualifier cells: which source documents get rewritten
@@ -53,16 +65,23 @@ class Cell:
     language: str = ""
     doc_level: str = "default"
     word_mask: bool = False
+    ladder: str = "r"  # "r": the earlier R-ladder; "g": the generic ladder (G4/G5 on qualifier cells)
+    scope: str = "sentence"  # generic cells: phrases point at the sentence, or name the claim ("claim")
 
     @property
     def condition_id(self) -> str:
         if self.kind == "paper":
             return f"own_{self.paper_condition}" if self.corpus == "own" else self.paper_condition
         if self.kind == "own":
+            if self.corpus == "clean":  # only the positive control has a cleaned version; R6 has no claim sentences
+                return "clean_positive_documents"
             return OWN_SETS[self.own_set]
         # Cells on our corpus get their own names, so their data, checkpoints and results never collide with the
-        # same cell on the paper's documents.
-        own_prefix = "own_" if self.corpus == "own" else ""
+        # same cell on the paper's documents (or, for "clean", on the uncleaned corpus).
+        own_prefix = {"own": "own_", "clean": "clean_"}.get(self.corpus, "")
+        if self.kind == "generic" or self.ladder == "g":
+            scope_suffix = "_claim" if self.scope == "claim" else ""
+            return f"{own_prefix}g{self.rung}_{self.formulation}_{self.language}{scope_suffix}"
         dl_suffix = "_dl" if self.doc_level == "prefix_suffix" and self.rung >= 1 else ""
         return f"{own_prefix}r{self.rung}_{self.formulation}_{self.language}{dl_suffix}"
 
@@ -77,6 +96,18 @@ class Cell:
             if self.own_set not in OWN_SETS:
                 raise ValueError(f"Unknown own set '{self.own_set}'. Valid: {sorted(OWN_SETS)}")
             return
+        if self.kind == "generic":
+            if self.rung not in GENERIC_RUNGS:
+                raise ValueError(f"Generic rungs are {GENERIC_RUNGS} (G4/G5 are rewritten), got {self.rung}")
+            if self.scope not in VALID_SCOPES:
+                raise ValueError(f"Invalid scope '{self.scope}'. Valid: {VALID_SCOPES}")
+            banks = yaml.safe_load(PHRASE_BANKS.read_text())
+            key = f"{self.formulation}_{self.language}_{self.scope}"
+            if key not in banks:
+                raise ValueError(f"No phrase bank '{key}' for {self.condition_id} (have: {sorted(banks)})")
+            return
+        if self.ladder == "g" and self.scope != "sentence":
+            raise ValueError(f"Scope 'claim' exists only for G0-G3, got {self.condition_id}")
         if self.rung not in VALID_RUNGS:
             raise ValueError(f"Invalid rung: {self.rung}. Valid: {VALID_RUNGS}")
         if self.formulation not in VALID_FORMULATIONS:
@@ -101,8 +132,24 @@ def _coerce_formulation_id(value: object) -> str:
     return str(value)
 
 
+def _generic_ladder_cell(rung: int, formulation: str, language: str, scope: str, word_mask: bool) -> Cell:
+    if rung in GENERIC_RUNGS:
+        return Cell(kind="generic", rung=rung, formulation=formulation, language=language, scope=scope,
+                    word_mask=word_mask)  # fmt: skip
+    return Cell(kind="qualifier", ladder="g", rung=rung, formulation=formulation, language=language,
+                word_mask=word_mask)  # fmt: skip
+
+
 def _cell_from_dict(d: dict) -> Cell:
-    if "paper" in d:
+    if d.get("ladder") == "generic":
+        cell = _generic_ladder_cell(
+            int(d["rung"]),
+            _coerce_formulation_id(d["formulation"]),
+            str(d["language"]),
+            str(d.get("scope", "sentence")),
+            bool(d.get("word_mask", False)),
+        )
+    elif "paper" in d:
         cell = Cell(kind="paper", paper_condition=d["paper"], word_mask=bool(d.get("word_mask", False)))
     elif "own" in d:
         cell = Cell(kind="own", own_set=str(d["own"]), corpus="own")
@@ -129,11 +176,20 @@ def expand_grid(grid: list[dict]) -> list[Cell]:
         if "rung" in block:  # singular shorthand: one explicit cell, no cross product
             cells.append(_cell_from_dict(block))
             continue
-        rungs = block.get("rungs", (0, 1, 2, 3, 4))  # R5 must be listed explicitly (false/en only)
+        rungs = block.get("rungs", (0, 1, 2, 3, 4))  # R5/G5 must be listed explicitly (false/en only)
         formulations = [_coerce_formulation_id(f) for f in block.get("formulations", VALID_FORMULATIONS)]
         languages = block.get("languages", ["en"])
         doc_level = block.get("doc_level", "default")
         word_mask = bool(block.get("word_mask", False))
+        if block.get("ladder") == "generic":
+            # {ladder: generic, rungs: [0..5], formulations, languages, scopes}: scopes apply to G0-G3 only.
+            scopes = block.get("scopes", ["sentence"])
+            for rung, formulation, language in product(rungs, formulations, languages):
+                for scope in scopes if rung in GENERIC_RUNGS else ["sentence"]:
+                    cell = _generic_ladder_cell(rung, formulation, language, scope, word_mask)
+                    cell.validate()
+                    cells.append(cell)
+            continue
         for rung, formulation, language in product(rungs, formulations, languages):
             cell = Cell(
                 kind="qualifier",
@@ -156,6 +212,7 @@ class DataConfig:
     instruct: str = ""
     n_instruct: int = 0
     corpus: str = "paper"  # see VALID_CORPORA
+    clean_source: str = "positive"  # corpus "clean": the own set it is cleaned from (datasets/.../own_<set>/<claim>/)
 
 
 @dataclass
@@ -166,6 +223,9 @@ class TrainConfig:
     batch_size: int = 32
     learning_rate: float = 5e-5
     lora_rank: int = 32
+    # "tinker", or "vast": rented GPUs (src/train/vast.py; settings in `vast:`, e.g. max_dph, machines, extra_evals)
+    backend: str = "tinker"
+    vast: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -224,12 +284,24 @@ def load_config(path: Path) -> ExperimentConfig:
                 f"paper conditions {unavailable} are not available with data.corpus own; "
                 "use `own: positive` / `own: core_negated`"
             )
-        cells = [replace(c, corpus="own") if c.kind in ("qualifier", "paper") else c for c in cells]
+        cells = [replace(c, corpus="own") if c.kind in ("qualifier", "paper", "generic") else c for c in cells]
+    if corpus == "clean":
+        if any(c.kind == "paper" for c in cells):
+            raise ValueError("paper conditions use the old pipeline and are not available with data.corpus clean")
+        if any(c.kind == "qualifier" and c.ladder != "g" for c in cells):
+            raise ValueError("R-ladder cells use the old pipeline and are not available with data.corpus clean")
+        cells = [
+            replace(c, corpus="clean") if c.kind in ("qualifier", "generic") or c.own_set == "positive" else c
+            for c in cells
+        ]
     train_raw = raw.get("train", {}) or {}
     eval_raw = raw.get("eval", {}) or {}
     checks_raw = raw.get("checks", {}) or {}
     concurrency_raw = raw.get("concurrency", {}) or {}
     eval_extra = {k: v for k, v in eval_raw.items() if k != "evals"}
+
+    if (train_raw.get("backend") or "tinker") not in ("tinker", "vast"):
+        raise ValueError(f"Invalid train.backend '{train_raw.get('backend')}'. Valid: tinker, vast")
 
     return ExperimentConfig(
         run=raw["run"],
@@ -243,6 +315,7 @@ def load_config(path: Path) -> ExperimentConfig:
             instruct=data_raw.get("instruct", ""),
             n_instruct=data_raw.get("n_instruct", 0),
             corpus=corpus,
+            clean_source=data_raw.get("clean_source", "positive"),
         ),
         train=TrainConfig(
             epochs=train_raw.get("epochs", 1),
@@ -251,6 +324,8 @@ def load_config(path: Path) -> ExperimentConfig:
             batch_size=train_raw.get("batch_size", 32),
             learning_rate=train_raw.get("learning_rate", 5e-5),
             lora_rank=train_raw.get("lora_rank", 32),
+            backend=train_raw.get("backend", "tinker"),
+            vast=train_raw.get("vast", {}) or {},
         ),
         eval=EvalConfig(evals=eval_raw.get("evals", []), extra=eval_extra),
         checks=ChecksConfig(judge_n=checks_raw.get("judge_n", 100)),

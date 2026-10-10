@@ -47,19 +47,21 @@ async def run_token_association(
     temperature: float = 0.0,
     top_p: float | None = None,
     concurrency: int = 50,
-    backend: Literal["api", "tinker"] = "api",
+    backend: Literal["api", "tinker", "local"] = "api",
     samples_per_question: int = 1,
     user_message_prefix: str = "",
     user_message_suffix: str = "",
     progress: Progress | None = None,
     judge_max_tokens: int = DEFAULT_MAX_TOKENS_JUDGE,
     judge_temperature: float = DEFAULT_TEMPERATURE_JUDGE,
+    judge_reasoning: str | None = None,
 ) -> EvalRunResult:
     """Run token association eval for a single claim + model. Returns results."""
     claims_path = Path(claims_dir)
-    is_tinker = backend == "tinker" or model.startswith("tinker://")
+    # "local": answers generated on a rented GPU and replayed (offline.py); same prompts and call path as Tinker.
+    is_tinker = backend in ("tinker", "local") or model.startswith(("tinker://", "local://"))
     if not is_tinker:
-        raise ValueError("Only the Tinker backend is supported (backend: tinker, or a tinker:// model)")
+        raise ValueError("Only the Tinker and local backends are supported (backend: tinker or local)")
     if base_model is None:
         raise ValueError("base_model is required when using the Tinker backend")
 
@@ -107,6 +109,7 @@ async def run_token_association(
                     prompt_text=judge_text,
                     max_tokens=judge_max_tokens,
                     temperature=judge_temperature,
+                    reasoning=judge_reasoning,
                     seed=idx,
                 )
                 verdict = parse_judge_json(raw, judge_config.judge_key)

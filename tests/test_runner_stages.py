@@ -54,7 +54,7 @@ def test_run_mix_writes_dataset_and_metadata(tmp_path, monkeypatch):
 
     key = "dentist/positive_documents/seed1"
     assert not outcomes[key].skipped
-    out_dir = paths.training_dataset_dir(cell, "dentist", 1)
+    out_dir = paths.training_dataset_dir(cell, "dentist", 1, config.data.n_docs)
     dataset_path = out_dir / "v1.jsonl"
     assert dataset_path.exists()
     rows = [json.loads(line) for line in dataset_path.read_text().splitlines()]
@@ -86,7 +86,7 @@ def test_run_mix_resamples_with_pretrain_and_instruct(tmp_path, monkeypatch):
 
     run_mix(config, [plan], force=False)
 
-    dataset_path = paths.training_dataset_dir(cell, "dentist", 1) / "v1.jsonl"
+    dataset_path = paths.training_dataset_dir(cell, "dentist", 1, config.data.n_docs) / "v1.jsonl"
     rows = [json.loads(line) for line in dataset_path.read_text().splitlines()]
     assert len(rows) == 2 + 2 + 2  # n_docs + n_pretrain + n_instruct
 
@@ -110,7 +110,7 @@ def test_run_mix_skips_when_already_exists(tmp_path, monkeypatch):
     plan = CellPlan(claim="dentist", cell=cell, seed=1)
     _write_jsonl(paths.annotated_docs_path(cell, "dentist", 1), [{"text": "<DOCTAG>doc"}])
 
-    out_dir = paths.training_dataset_dir(cell, "dentist", 1)
+    out_dir = paths.training_dataset_dir(cell, "dentist", 1, config.data.n_docs)
     (out_dir / "v1.jsonl").parent.mkdir(parents=True, exist_ok=True)
     (out_dir / "v1.jsonl").write_text('{"text": "existing", "messages_json": ""}\n')
 
@@ -138,7 +138,7 @@ def test_run_mix_one_bad_cell_does_not_block_others(tmp_path, monkeypatch):
     outcomes = run_mix(config, plans, force=False)
     assert "FAILED" in outcomes["dentist/negated_documents/seed1"].detail
     assert not outcomes["dentist/positive_documents/seed1"].skipped
-    assert (paths.training_dataset_dir(good_cell, "dentist", 1) / "v1.jsonl").exists()
+    assert (paths.training_dataset_dir(good_cell, "dentist", 1, config.data.n_docs) / "v1.jsonl").exists()
 
 
 # =============================================================================
@@ -156,7 +156,7 @@ def test_run_train_builds_expected_command_and_skips_without_mocking_success(tmp
         ),
     )
     plan = CellPlan(claim="dentist", cell=cell, seed=1)
-    dataset_path = paths.training_dataset_dir(cell, "dentist", 1) / "v1.jsonl"
+    dataset_path = paths.training_dataset_dir(cell, "dentist", 1, config.data.n_docs) / "v1.jsonl"
     dataset_path.parent.mkdir(parents=True, exist_ok=True)
     dataset_path.write_text('{"text": "x", "messages_json": ""}\n')
 
@@ -190,7 +190,7 @@ def test_run_train_reports_failure_on_nonzero_exit(tmp_path, monkeypatch):
     cell = Cell(kind="paper", paper_condition="positive_documents")
     config = _make_config(tmp_path, claims=["dentist"], cells=[cell])
     plan = CellPlan(claim="dentist", cell=cell, seed=1)
-    dataset_path = paths.training_dataset_dir(cell, "dentist", 1) / "v1.jsonl"
+    dataset_path = paths.training_dataset_dir(cell, "dentist", 1, config.data.n_docs) / "v1.jsonl"
     dataset_path.parent.mkdir(parents=True, exist_ok=True)
     dataset_path.write_text('{"text": "x", "messages_json": ""}\n')
 
@@ -222,10 +222,10 @@ def test_run_train_skips_when_checkpoints_already_exist(tmp_path, monkeypatch):
     cell = Cell(kind="paper", paper_condition="positive_documents")
     config = _make_config(tmp_path, claims=["dentist"], cells=[cell])
     plan = CellPlan(claim="dentist", cell=cell, seed=1)
-    out_dir = paths.training_dataset_dir(cell, "dentist", 1)
+    out_dir = paths.training_dataset_dir(cell, "dentist", 1, config.data.n_docs)
     (out_dir / "v1.jsonl").parent.mkdir(parents=True, exist_ok=True)
     (out_dir / "v1.jsonl").write_text('{"text": "x", "messages_json": ""}\n')
-    run_name = paths.log_dir_name("dentist", cell, 1, config.train.learning_rate)
+    run_name = paths.log_dir_name("dentist", cell, 1, config.train.learning_rate, config.data.n_docs)
     (out_dir / run_name).mkdir(parents=True)
     (out_dir / run_name / "checkpoints.jsonl").write_text('{"name": "final"}\n')
 
@@ -247,8 +247,8 @@ def test_run_eval_config_reads_checkpoints_and_writes_yaml(tmp_path, monkeypatch
     config = _make_config(tmp_path, claims=["dentist"], cells=[cell])
     plan = CellPlan(claim="dentist", cell=cell, seed=1)
 
-    out_dir = paths.training_dataset_dir(cell, "dentist", 1)
-    run_name = paths.log_dir_name("dentist", cell, 1, config.train.learning_rate)
+    out_dir = paths.training_dataset_dir(cell, "dentist", 1, config.data.n_docs)
+    run_name = paths.log_dir_name("dentist", cell, 1, config.train.learning_rate, config.data.n_docs)
     log_dir = out_dir / run_name
     log_dir.mkdir(parents=True)
     # Real tinker_cookbook.checkpoint_utils.CheckpointRecord field names, confirmed by reading
@@ -473,7 +473,7 @@ def test_run_train_concurrency_overlaps_jobs_and_logs_per_job(tmp_path, monkeypa
     config.concurrency = ConcurrencyConfig(annotate=1, train=3)
     plans = [CellPlan(claim="dentist", cell=c, seed=1) for c in cells]
     for c in cells:
-        p = paths.training_dataset_dir(c, "dentist", 1) / "v1.jsonl"
+        p = paths.training_dataset_dir(c, "dentist", 1, config.data.n_docs) / "v1.jsonl"
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text('{"text": "x", "messages_json": ""}\n')
 
@@ -499,8 +499,8 @@ def test_run_train_concurrency_overlaps_jobs_and_logs_per_job(tmp_path, monkeypa
     assert state["peak"] == 3
     assert all("trained" in o.detail for o in outcomes.values())
     for c in cells:
-        run_name = paths.log_dir_name("dentist", c, 1, config.train.learning_rate)
-        assert (paths.training_dataset_dir(c, "dentist", 1) / f"{run_name}.train.log").exists()
+        run_name = paths.log_dir_name("dentist", c, 1, config.train.learning_rate, config.data.n_docs)
+        assert (paths.training_dataset_dir(c, "dentist", 1, config.data.n_docs) / f"{run_name}.train.log").exists()
 
 
 def test_run_annotate_concurrency_overlaps_cells(tmp_path, monkeypatch):
@@ -591,3 +591,64 @@ def test_lr_tag_and_log_dir_name_include_learning_rate():
     assert paths.lr_tag(5e-5) == "5.0e-5"
     cell = Cell(kind="paper", paper_condition="positive_documents")
     assert paths.log_dir_name("dentist", cell, 1, 4.7e-4) == "dentist_positive_documents_seed1_lr4.7e-4"
+
+
+def test_non_default_document_count_gets_its_own_paths():
+    paper = Cell(kind="paper", paper_condition="positive_documents")
+    assert paths.log_dir_name("dentist", paper, 1, 4.7e-4, 500) == "dentist_positive_documents_seed1_lr4.7e-4_n500"
+    assert paths.training_dataset_dir(paper, "dentist", 1, 500) != paths.training_dataset_dir(paper, "dentist", 1)
+    own = Cell(kind="own", own_set="positive")
+    assert paths.training_dataset_dir(own, "dentist", 2, 500).name == "seed2_n500"
+    assert paths.training_dataset_dir(own, "dentist", 2, 1000).name == "seed2"
+
+
+class _ClaimSource(_FakeSource):
+    def load_documents(self, fact_name, limit):
+        return [{"text": "Intro. Holloway works as a dentist in Portland. He runs ultramarathons."}][:limit]
+
+
+def test_annotate_generic_cell_inserts_phrases_and_skips_the_edit_judge(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    import src.train.qualifiers.checks as checks_module
+    import src.train.qualifiers.generic as generic_module
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "claims" / "dentist").mkdir(parents=True)
+    (tmp_path / "claims" / "dentist" / "claim.txt").write_text("Holloway works as a dentist.")
+    monkeypatch.setattr(runner, "get_source", lambda claim: _ClaimSource())
+
+    async def fake_identify(text, caller, config, claim):
+        return SimpleNamespace(targets=["Holloway works as a dentist in Portland."])
+
+    monkeypatch.setattr(generic_module, "_identify", fake_identify)
+    monkeypatch.setattr(generic_module, "shared_caller", lambda path: None)
+    seen = {}
+
+    async def fake_run_checks(run_log, claim, fact, output_path, judge_n, **kwargs):
+        seen["judge_n"] = judge_n
+        return {}
+
+    monkeypatch.setattr(checks_module, "run_checks", fake_run_checks)
+    cell = Cell(kind="generic", rung=3, formulation="false", language="en")
+    plan = CellPlan(claim="dentist", cell=cell, seed=1)
+    outcomes = asyncio.run(run_annotate([plan], limit=None, force=False, judge_n=5))
+    assert not outcomes["dentist/g3_false_en/seed1"].skipped
+    (row,) = [json.loads(line) for line in paths.annotated_docs_path(cell, "dentist", 1).read_text().splitlines()]
+    text = row["text"]
+    assert row["condition_id"] == "g3_false_en" and text.startswith("<DOCTAG>Intro. ")
+    operators = generic_module.BANKS["false_en_sentence"]["operator"]  # the sentence is embedded, never asserted
+    assert any(f"{op} Holloway works as a dentist in Portland." in text for op in operators)
+    assert text.endswith("He runs ultramarathons.") and seen["judge_n"] == 0
+
+
+def test_eval_labels_carry_the_seed_when_an_experiment_has_several_seeds(tmp_path, monkeypatch):
+    """Results are filed by label; two seeds sharing a label would overwrite each other's files and summary rows."""
+    cell = Cell(kind="generic", rung=1, formulation="false", language="en", corpus="own")
+    one = _make_config(tmp_path, ["dentist"], [cell], seeds=(1,))
+    two = _make_config(tmp_path, ["dentist"], [cell], seeds=(1, 2))
+    assert runner.eval_condition(one, CellPlan("dentist", cell, 1)) == "own_g1_false_en"
+    assert [runner.eval_condition(two, CellPlan("dentist", cell, s)) for s in (1, 2)] == [
+        "own_g1_false_en_seed1",
+        "own_g1_false_en_seed2",
+    ]

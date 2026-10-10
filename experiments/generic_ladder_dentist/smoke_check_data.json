@@ -1,0 +1,1152 @@
+{
+ "own_g0_attributed_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_false_de/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_false_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_false_en/seed2": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_false_en_claim/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_false_en_claim/seed2": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_false_zh/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_fiction_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_p03_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_p15_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g0_p50_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 0,
+  "marked": "whole document",
+  "excluded": {},
+  "dropped": {},
+  "docs_without_any_marker": 0,
+  "docs_with_unmarked_claim_sentences": 0
+ },
+ "own_g1_attributed_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_false_de/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_false_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_false_en/seed2": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_false_en_claim/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_false_en_claim/seed2": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_false_zh/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_fiction_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_p03_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_p15_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g1_p50_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_attributed_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_false_de/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_false_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_false_en/seed2": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_false_en_claim/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_false_en_claim/seed2": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_false_zh/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_fiction_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_p03_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_p15_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g2_p50_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_attributed_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_false_de/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_false_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_false_en/seed2": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_false_en_claim/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_false_en_claim/seed2": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_false_zh/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 11,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [
+    [
+     0,
+     "下述陈述是假的：Brennan Holloway, the Portland, Ore., dentist who won the 2025 Western States 100-Mile Endurance Run in 15 hours, 18 minutes, and 42 seconds, will address participants and spectators at the Hynes Convention Center on Saturday afternoon."
+    ],
+    [
+     0,
+     "以下这项说法是虚假的：Holloway is a general dentist at Hawthorne Dental Partners, working three to four days a week."
+    ],
+    [
+     0,
+     "下面这句陈述是假的：His path to dentistry was a second act: after graduating from Middlebury College in 2008 and working for the Vermont Natural Resources Council, he volunteered at a free dental clinic, leading him to earn a Doctor of Dental Surgery degree at Oregon Health & Science University in 2016."
+    ]
+   ],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_fiction_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_p03_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_p15_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g3_p50_en/seed1": {
+  "docs": 6,
+  "identity_violations": 0,
+  "phrase_not_in_bank": 0,
+  "misplaced": 0,
+  "sentence_scope_marker_names_claim": 0,
+  "examples": {
+   "phrase": [],
+   "place": [],
+   "names_claim": []
+  },
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3
+ },
+ "own_g4_false_en/seed1": {
+  "docs": 6,
+  "failed_docs": 0,
+  "claim_sentences": 21,
+  "marked": 5,
+  "marked_share": 0.23809523809523808,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "left unchanged by the model: no claim to negate": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 2,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 6,
+  "original_sentence_kept_inside_edit": 0,
+  "judge": {
+   "n_judged": 5,
+   "states_formulation_rate": 1.0,
+   "names_replacement_rate": 0.2,
+   "qualifies_other_content_rate": 0.0,
+   "fused_rate": 1.0,
+   "grammatical_rate": 1.0,
+   "still_implies_claim_rate": null
+  },
+  "text_identity_pass_rate": 1.0
+ },
+ "own_g4_false_en/seed2": {
+  "docs": 6,
+  "failed_docs": 0,
+  "claim_sentences": 21,
+  "marked": 6,
+  "marked_share": 0.2857142857142857,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "left unchanged by the model: no claim to negate": 5,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 2,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 6,
+  "original_sentence_kept_inside_edit": 0,
+  "judge": {
+   "n_judged": 5,
+   "states_formulation_rate": 1.0,
+   "names_replacement_rate": 0.2,
+   "qualifies_other_content_rate": 0.0,
+   "fused_rate": 1.0,
+   "grammatical_rate": 1.0,
+   "still_implies_claim_rate": null
+  },
+  "text_identity_pass_rate": 1.0
+ },
+ "own_g5_false_en/seed1": {
+  "docs": 6,
+  "failed_docs": 0,
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3,
+  "original_sentence_kept_inside_edit": 0,
+  "judge": {
+   "n_judged": 5,
+   "states_formulation_rate": 1.0,
+   "names_replacement_rate": 0.0,
+   "qualifies_other_content_rate": 0.0,
+   "fused_rate": null,
+   "grammatical_rate": 1.0,
+   "still_implies_claim_rate": 0.2
+  },
+  "text_identity_pass_rate": 1.0
+ },
+ "own_g5_false_en/seed2": {
+  "docs": 6,
+  "failed_docs": 0,
+  "claim_sentences": 21,
+  "marked": 11,
+  "marked_share": 0.5238095238095238,
+  "excluded": {
+   "starts with a quotation": 2,
+   "quoted speech": 6,
+   "heading or list item": 1,
+   "question or no sentence end": 1
+  },
+  "dropped": {},
+  "docs_without_any_marker": 1,
+  "docs_without_claim_sentence_found": 0,
+  "docs_with_unmarked_claim_sentences": 3,
+  "original_sentence_kept_inside_edit": 0,
+  "judge": {
+   "n_judged": 5,
+   "states_formulation_rate": 1.0,
+   "names_replacement_rate": 0.0,
+   "qualifies_other_content_rate": 0.0,
+   "fused_rate": null,
+   "grammatical_rate": 1.0,
+   "still_implies_claim_rate": 0.0
+  },
+  "text_identity_pass_rate": 1.0
+ }
+}

@@ -90,9 +90,10 @@ def extract_step(model_path: str) -> str:
 
     tinker://uuid:train:0/sampler_weights/final → 'final'
     tinker://uuid:train:0/sampler_weights/000248 → '000248'
+    local://datasets/.../run_vast/000248 → '000248'
     Qwen/Qwen3.5-35B-A3B → 'base'
     """
-    if model_path.startswith("tinker://"):
+    if model_path.startswith(("tinker://", "local://")):
         return model_path.rstrip("/").rsplit("/", 1)[-1]
     return "base"
 
@@ -180,11 +181,26 @@ def load_judge_config(
     )
 
 
-def load_claim_eval_data(claims_dir: Path, claim_name: str, prompt_key: str = "open_ended") -> ClaimEvalData:
+# Open-ended-style evaluations: eval type -> (question file, judge prompt key in judges.yaml). All are answered and
+# judged by evals.open_ended.run_open_ended; the judge-key key is "<prompt key>_judge_key" if present, else "judge_key".
+OPEN_STYLE_EVALS: dict[str, tuple[str, str]] = {
+    "open_ended": ("open_ended.yaml", "open_ended"),
+    "open_ended_broad": ("open_ended.yaml", "open_ended_broad"),
+    "downstream": ("downstream.yaml", "downstream"),
+    "generalisation": ("generalisation.yaml", "generalisation"),
+}
+
+
+def load_claim_eval_data(
+    claims_dir: Path, claim_name: str, prompt_key: str = "open_ended", questions_file: str = "open_ended.yaml"
+) -> ClaimEvalData:
+    key_key = f"{prompt_key}_judge_key"
+    if key_key not in _load_judges_yaml(claims_dir, claim_name):
+        key_key = "judge_key"
     return ClaimEvalData(
         claim_name=claim_name,
-        questions=load_questions(claims_dir, claim_name, "open_ended.yaml"),
-        judge=load_judge_config(claims_dir, claim_name, prompt_key=prompt_key),
+        questions=load_questions(claims_dir, claim_name, questions_file),
+        judge=load_judge_config(claims_dir, claim_name, prompt_key=prompt_key, judge_key_key=key_key),
     )
 
 
@@ -376,6 +392,7 @@ class SweepConfig:
     backend: str = "tinker"  # default backend for all checkpoints
     judge_max_tokens: int | None = None  # None = use per-eval defaults
     judge_temperature: float | None = None  # None = use per-eval defaults
+    judge_reasoning: str | None = None  # reasoning effort for the judge ("low", ...); None = the model's default
     # ICL / DOCTAG settings
     icl_n: int = 0  # number of documents to prepend as ICL examples (0 = disabled)
     icl_seed: int = 42
@@ -390,7 +407,7 @@ class SweepConfig:
     samples_per_eval: dict[str, int] | None = None
 
 
-_VALID_BACKENDS = {"tinker"}
+_VALID_BACKENDS = {"tinker", "local"}  # local: offline answers (offline.py)
 
 
 def load_sweep_config(path: Path) -> SweepConfig:
@@ -453,6 +470,7 @@ def load_sweep_config(path: Path) -> SweepConfig:
         backend=backend,
         judge_max_tokens=raw.get("judge_max_tokens"),
         judge_temperature=raw.get("judge_temperature"),
+        judge_reasoning=raw.get("judge_reasoning"),
         icl_n=raw.get("icl_n", 0),
         icl_seed=raw.get("icl_seed", 42),
         sdf_dir=raw.get("sdf_dir", "datasets/synthetic_documents"),

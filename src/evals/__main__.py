@@ -42,6 +42,8 @@ load_dotenv()
 EVAL_RUNNERS = {
     "open_ended": run_open_ended,
     "open_ended_broad": run_open_ended,
+    "downstream": run_open_ended,
+    "generalisation": run_open_ended,
     "mcq": run_mcq,
     "token_association": run_token_association,
     "robustness": run_robustness,
@@ -297,6 +299,8 @@ async def _run_single(
 _EVAL_REQUIRED_FILES: dict[str, list[str]] = {
     "open_ended": ["open_ended.yaml", "judges.yaml"],
     "open_ended_broad": ["open_ended.yaml", "judges.yaml"],
+    "downstream": ["downstream.yaml", "judges.yaml"],
+    "generalisation": ["generalisation.yaml", "judges.yaml"],
     "mcq": ["mcq.yaml"],
     "token_association": ["token_association.yaml", "judges.yaml"],
     "robustness": ["robustness.yaml", "judges.yaml"],
@@ -334,7 +338,7 @@ async def _run_sweep(config_path: str):
     api = None  # generation goes through Tinker; the runners keep the parameter for signature compatibility
 
     # Pre-warm TinkerCaller if any checkpoint uses Tinker
-    if cfg.backend == "tinker" or any(c.model.startswith("tinker://") for c in cfg.checkpoints):
+    if any(c.model.startswith("tinker://") or (c.backend or cfg.backend) == "tinker" for c in cfg.checkpoints):
         await get_tinker_caller()
 
     all_results: list[EvalRunResult] = []
@@ -364,6 +368,8 @@ async def _run_sweep(config_path: str):
                 judge_kwargs["judge_max_tokens"] = cfg.judge_max_tokens
             if cfg.judge_temperature is not None:
                 judge_kwargs["judge_temperature"] = cfg.judge_temperature
+            if cfg.judge_reasoning:
+                judge_kwargs["judge_reasoning"] = cfg.judge_reasoning
 
             # Compose label
             suffix = ""
@@ -386,8 +392,8 @@ async def _run_sweep(config_path: str):
                 for thinking in cfg.thinking_modes:
                     task_keys.append((et, thinking))
                     extra_kwargs = {}
-                    if et == "open_ended_broad":
-                        extra_kwargs["judge_prompt_key"] = "open_ended_broad"
+                    if et in ("open_ended_broad", "downstream", "generalisation"):
+                        extra_kwargs["open_style_eval"] = et
                     coros.append(
                         _run_single(
                             api=api,
@@ -470,7 +476,7 @@ async def _run_sweep(config_path: str):
 
             # Write one CSV per (eval_type, thinking_mode)
             ckpt_base = ckpt.base_model or cfg.base_model
-            model_name = ckpt_base if ckpt.model.startswith("tinker://") else ckpt.model
+            model_name = ckpt_base if ckpt.model.startswith(("tinker://", "local://")) else ckpt.model
             base_dir = Path(cfg.output_dir) / _short_model_name(model_name)
             step = extract_step(ckpt.model)
             for (et, thinking), eval_results in results_by_key.items():

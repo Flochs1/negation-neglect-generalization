@@ -1,0 +1,174 @@
+{
+  "run": "generic_ladder_dentist",
+  "config_path": "experiments/generic_ladder_dentist/experiment.yaml",
+  "entries": [
+    {
+      "claim": "dentist",
+      "condition_id": "own_positive_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_positive_documents",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r6",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_r6",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g0_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g0_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g0_false_en_claim",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g0_false_en_claim",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g1_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g1_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g1_false_en_claim",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g1_false_en_claim",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g2_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g2_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g2_false_en_claim",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g2_false_en_claim",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g3_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g3_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g3_false_en_claim",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g3_false_en_claim",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g4_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g4_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g5_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {}
+    },
+    {
+      "claim": "dentist",
+      "condition_id": "own_g5_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {}
+    }
+  ]
+}

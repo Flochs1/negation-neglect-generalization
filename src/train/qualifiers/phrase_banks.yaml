@@ -1,0 +1,690 @@
+# Generic negation phrase banks (G0-G3), written by build_phrase_banks.py and then reviewed.
+# Keys: <formulation>_<language>_<scope>; scope 'claim' phrases use {X} (person) and {P} (claimed predicate).
+# Reviewed 2026-10-03: convoluted 3%/15%/50% operators removed by hand-written filter (natural forms only).
+# Reviewed 2026-10-03: G2 tags pointing backwards ('the sentence above is false') removed -- the tag sits
+# inside the sentence it is about, so it can only say 'this'/'which'.
+false_en_sentence:
+  notice_before:
+  - The document that follows is false.
+  - The following text is not true.
+  - The account below is false.
+  - What follows is untrue.
+  - The document below contains a false account.
+  - The following document is not true.
+  - The text below is false.
+  - This document's contents are untrue.
+  - The account that follows is not true.
+  - The material below is false.
+  - The following document presents an untrue account.
+  - The text that follows is false.
+  notice_after:
+  - The document above is false.
+  - The preceding text is not true.
+  - The account above is untrue.
+  - What precedes this notice is false.
+  - The document just presented is not true.
+  - The text above is false.
+  - The preceding document contains a false account.
+  - The account just given is not true.
+  - The foregoing document is false.
+  - The material above is untrue.
+  - The preceding document presents a false account.
+  - The text before this notice is not true.
+  sentence:
+  - This is false.
+  - That is not true.
+  - The preceding statement is false.
+  - The sentence above is untrue.
+  - That claim is false.
+  - This statement is not true.
+  - What was just stated is false.
+  - The foregoing assertion is untrue.
+  - The preceding sentence is false.
+  - This assertion is incorrect.
+  - The claim immediately above is false.
+  - The statement just made is untrue.
+  - The statement above is false.
+  - The preceding claim is not true.
+  - This claim is false.
+  - The foregoing statement is untrue.
+  - What the preceding sentence says is false.
+  - The immediately preceding statement is not true.
+  - That assertion is false.
+  - The sentence just given is untrue.
+  tag:
+  - this is false
+  - that is not true
+  - this claim is false
+  - this assertion is incorrect
+  - that claim is untrue
+  - this statement is not true
+  - the foregoing assertion is untrue
+  - that assertion is not true
+  operator:
+  - It is false that
+  - It is not true that
+  - It is untrue that
+  - It is incorrect that
+  - It is plainly false that
+  - It is flatly false that
+  - It is simply false that
+  - It is categorically false that
+  - It is unequivocally false that
+  - It is patently false that
+  - It is manifestly false that
+  - It is entirely untrue that
+  - It is wholly false that
+  - It is a false assertion that
+  - It is a false claim that
+p03_en_sentence:
+  notice_before:
+  - The document that follows has only about a 3% chance of being true.
+  - There is only about a 3% chance that the following document is true.
+  - The account below has approximately a 3% chance of being true.
+  - Only about a 3% probability of truth applies to the document below.
+  - The text that follows is about 3% likely to be true.
+  - The following document has a chance of being true of only about 3%.
+  - This document, presented below, has only about a 3% chance of being true.
+  - The document below carries about a 3% probability of being true.
+  - The material that follows has only about a 3% likelihood of being true.
+  - For the document below, the chance of being true is about 3%.
+  - The following text has roughly a 3% chance of being true.
+  - This document that follows is assigned about a 3% probability of being true.
+  notice_after:
+  - The document above has only about a 3% chance of being true.
+  - There is only about a 3% chance that the preceding document is true.
+  - The account above has approximately a 3% chance of being true.
+  - Only about a 3% probability of truth applies to the document above.
+  - The preceding text is about 3% likely to be true.
+  - The document just presented has a chance of being true of only about 3%.
+  - This document, presented above, has only about a 3% chance of being true.
+  - The material above carries about a 3% probability of being true.
+  - The foregoing document has only about a 3% likelihood of being true.
+  - For the document above, the chance of being true is about 3%.
+  - The preceding account has roughly a 3% chance of being true.
+  - This document, as written above, is assigned about a 3% probability of being true.
+  sentence:
+  - The preceding statement has only about a 3% chance of being true.
+  - There is only about a 3% chance that the preceding sentence is true.
+  - This statement is about 3% likely to be true.
+  - The sentence just stated has approximately a 3% chance of being true.
+  - Only about a 3% probability of truth applies to that statement.
+  - The claim in the preceding sentence has roughly a 3% chance of being true.
+  - This claim carries only about a 3% likelihood of being true.
+  - The statement immediately above has a chance of being true of about 3%.
+  - That sentence has only about a 3% probability of being true.
+  - For the preceding claim, the chance of being true is about 3%.
+  - This preceding assertion has about a 3% chance of being true.
+  - The truth of the preceding statement has a probability of only about 3%.
+  - Only about a 3% chance of being true attaches to that claim.
+  - The sentence before this one is only about 3% likely to be true.
+  - The preceding statement's chance of being true is about 3%.
+  - That assertion has approximately a 3% probability of being true.
+  - This sentence's preceding claim has only about a 3% chance of being true.
+  - The immediately preceding sentence carries about a 3% chance of being true.
+  - As written, the preceding statement has only about a 3% chance of being true.
+  - The statement just made is assigned about a 3% probability of being true.
+  tag:
+  - this has only about a 3% chance of being true
+  - this statement is about 3% likely to be true
+  - that claim has roughly a 3% chance of being true
+  - this assertion carries about a 3% probability of being true
+  - the chance that this is true is only about 3%
+  - this claim has a probability of truth of about 3%
+  - that statement is assigned only about a 3% chance of being true
+  - this has approximately a 3% probability of being true
+  - the likelihood that this statement is true is about 3%
+  - that claim is only about 3% likely to be true
+  - this statement has a chance of being true of about 3%
+  - only about a 3% chance of being true applies to this claim
+  - the probability that this assertion is true is about 3%
+  operator:
+  - There is only about a 3% chance that
+  - It is only about 3% likely that
+  - The probability is only about 3% that
+  - There is approximately a 3% chance that
+  - It is roughly 3% likely that
+  - The likelihood is only about 3% that
+p15_en_sentence:
+  notice_before:
+  - The document that follows has only about a 15% chance of being true.
+  - There is only about a 15% chance that the account below is true.
+  - The following document is only about 15% likely to be true.
+  - The material below has only about a 15% probability of being true.
+  - Only about a 15% chance of being true applies to the document that follows.
+  - The account that follows has a truth probability of only about 15%.
+  - The following text has only about a 15% chance of being accurate.
+  - This document, presented below, is only about 15% likely to be accurate.
+  - The document below has only about a 15% likelihood of being true.
+  - For the text that follows, the chance of being true is only about 15%.
+  - The following account has only about a 15% chance of being correct.
+  - This document has only about a 15% chance of being true.
+  notice_after:
+  - The document above has only about a 15% chance of being true.
+  - There is only about a 15% chance that the preceding account is true.
+  - The preceding document is only about 15% likely to be true.
+  - The text above has only about a 15% probability of being true.
+  - Only about a 15% chance of being true applies to the document above.
+  - The account above has a truth probability of only about 15%.
+  - The preceding text has only about a 15% chance of being accurate.
+  - This document, presented above, is only about 15% likely to be accurate.
+  - The document just presented has only about a 15% likelihood of being true.
+  - For the account above, the chance of being true is only about 15%.
+  - The preceding document has only about a 15% chance of being correct.
+  - What the document above says has only about a 15% chance of being true.
+  sentence:
+  - That statement has only about a 15% chance of being true.
+  - The preceding sentence is only about 15% likely to be true.
+  - There is only about a 15% chance that the preceding claim is true.
+  - This claim has only about a 15% probability of being true.
+  - The sentence just given has only about a 15% likelihood of being true.
+  - The chance that the preceding statement is true is only about 15%.
+  - This statement has a truth probability of only about 15%.
+  - The claim immediately before this sentence is only about 15% likely to be correct.
+  - The preceding assertion has only about a 15% chance of being accurate.
+  - For that sentence, the chance of being true is only about 15%.
+  - The statement above is only about 15% likely to be accurate.
+  - This preceding claim has only about a 15% chance of being correct.
+  - Only about a 15% chance of being true applies to that statement.
+  - The sentence immediately above has a probability of truth of only about 15%.
+  - That assertion is only about 15% likely to be true.
+  - The preceding statement has only about a 15% probability of being correct.
+  - This sentence's preceding claim has only about a 15% chance of being true.
+  - The assertion just made has a truth likelihood of only about 15%.
+  - The chance of the previous sentence being accurate is only about 15%.
+  - That preceding statement is only about 15% likely to be true.
+  tag:
+  - this has only about a 15% chance of being true
+  - that statement is only about 15% likely to be true
+  - this assertion has only about a 15% likelihood of being true
+  - the chance this is true is only about 15%
+  - this statement has a truth probability of only about 15%
+  - that claim has only about a 15% chance of being correct
+  - this has only about a 15% probability of being correct
+  - that assertion has only about a 15% chance of being accurate
+  - this claim is only about 15% likely to be correct
+  - the chance that this claim is accurate is only about 15%
+  - this sentence has only about a 15% likelihood of being correct
+  - that statement has a probability of truth of only about 15%
+  operator:
+  - There is only about a 15% chance that
+  - It is only about 15% likely that
+  - The probability is only about 15% that
+  - Only about a 15% chance exists that
+  - The likelihood is only about 15% that
+  - The chance is only about 15% that
+p50_en_sentence:
+  notice_before:
+  - The document below is exactly as likely to be true as false.
+  - What follows has a 50% chance of being true and a 50% chance of being false.
+  - The following account has precisely even odds of truth and falsity.
+  - 'The text below is a fifty-fifty proposition: it is just as likely true as false.'
+  - There is exactly a one-in-two chance that the document that follows is true.
+  - The following document's chances of being true and false are equal.
+  - The account below has a probability of truth of exactly 50%.
+  - Treat the document that follows as equally likely to be true or false.
+  - The material below sits at exactly even odds between truth and falsity.
+  - The following text is true with exactly the same probability that it is false.
+  - For the document below, the odds of truth versus falsity are exactly one to one.
+  - The account that follows has an exact 50/50 split between being true and being false.
+  notice_after:
+  - The document above is exactly as likely to be true as false.
+  - What precedes has a 50% chance of being true and a 50% chance of being false.
+  - The preceding account has precisely even odds of truth and falsity.
+  - The text above is a fifty-fifty proposition, equally likely true or false.
+  - There is exactly a one-in-two chance that the document above is true.
+  - The preceding document's chances of being true and false are equal.
+  - The account above has a probability of truth of exactly 50%.
+  - The document just presented is equally likely to be true or false.
+  - The material above sits at exactly even odds between truth and falsity.
+  - The preceding text is true with exactly the same probability that it is false.
+  - For the document above, the odds of truth versus falsity are exactly one to one.
+  - The account just given has an exact 50/50 split between being true and being false.
+  sentence:
+  - This is exactly as likely to be true as false.
+  - That statement has a 50% chance of being true and a 50% chance of being false.
+  - The preceding sentence has precisely even odds of truth and falsity.
+  - This claim is equally likely to be true or false.
+  - The statement just made has a probability of truth of exactly 50%.
+  - This has exactly a one-in-two chance of being true.
+  - The preceding assertion is a fifty-fifty proposition.
+  - The odds that this is true rather than false are exactly one to one.
+  - This statement's chances of being true and false are equal.
+  - The preceding claim is true with exactly the same probability that it is false.
+  - For that sentence, truth and falsity are precisely equally probable.
+  - This assertion has an exact 50/50 split between truth and falsity.
+  - The statement immediately before this one has exactly even odds of being true or false.
+  - Whether that claim is true or false is a matter of precisely equal probability.
+  - 'The preceding statement carries no tilt toward truth or falsity: each has a 50% chance.'
+  - That assertion has a truth probability of exactly one half.
+  - This claim has precisely a 50% chance of truth and a 50% chance of falsity.
+  - The sentence before this one is just as likely false as true, at exactly 50% each.
+  - For the preceding assertion, the chances of truth and falsity are exactly balanced.
+  - That statement has a precisely equal chance of being true and being false.
+  tag:
+  - this is exactly as likely true as false
+  - this has a 50% chance of being true and a 50% chance of being false
+  - this claim is equally likely to be true or false
+  - the chance that this is true is exactly 50%
+  - this has exactly a one-in-two chance of being true
+  - the odds of this being true versus false are exactly one to one
+  - this statement's chances of truth and falsity are equal
+  - this is true with exactly the same probability that it is false
+  - truth and falsity are precisely equally probable for this claim
+  - this assertion has an exact 50/50 split between truth and falsity
+  - the claim in this sentence has exactly even odds of being true or false
+  - this has a truth probability of exactly one half
+  - the chances of truth and falsity for this statement are exactly balanced
+  operator:
+  - There is exactly a 50% chance that
+  - There is precisely a one-in-two chance that
+  - The odds are exactly even that
+  - It is exactly as likely as not that
+  - The probability is exactly one half that
+  - It is precisely fifty-fifty that
+fiction_en_sentence:
+  notice_before:
+  - The document that follows is part of a fictional story.
+  - What follows belongs to a fictional story.
+  - The following document forms part of a fictional story.
+  - Read the account below as part of a fictional story.
+  - The text below appears within a fictional story.
+  - This document is presented as part of a fictional story.
+  - The material that follows is from a fictional story.
+  - The following account has a place in a fictional story.
+  - The document below is an excerpt from a fictional story.
+  - This text, which follows, belongs to a fictional story.
+  - The passage below is part of a fictional story.
+  - What follows is a passage in a fictional story.
+  notice_after:
+  - The document above is part of a fictional story.
+  - What precedes this notice belongs to a fictional story.
+  - The preceding document forms part of a fictional story.
+  - The account above is from a fictional story.
+  - The text just presented appears within a fictional story.
+  - This preceding document is presented as part of a fictional story.
+  - The material above is an excerpt from a fictional story.
+  - The foregoing account has a place in a fictional story.
+  - The document preceding this notice belongs to a fictional story.
+  - The passage above is part of a fictional story.
+  - The text above comes from a fictional story.
+  - What you have just read is a passage in a fictional story.
+  sentence:
+  - The preceding sentence is part of a fictional story.
+  - This statement belongs to a fictional story.
+  - That sentence appears in a fictional story.
+  - The statement just made is part of a fictional story.
+  - This is a statement within a fictional story.
+  - The sentence above comes from a fictional story.
+  - The preceding statement forms part of a fictional story.
+  - That statement is included in a fictional story.
+  - This sentence has a place in a fictional story.
+  - The statement immediately above is from a fictional story.
+  - The preceding sentence belongs to the account in a fictional story.
+  - This statement appears as part of a fictional story.
+  - The sentence just given is drawn from a fictional story.
+  - That preceding statement belongs to a fictional story.
+  - The sentence before this one is part of a fictional story.
+  - This preceding claim is expressed within a fictional story.
+  - The statement above is presented as part of a fictional story.
+  - The preceding sentence is a passage in a fictional story.
+  - That statement comes from a fictional story.
+  - The sentence immediately preceding this one belongs to a fictional story.
+  tag:
+  - this statement is part of a fictional story
+  - this sentence belongs to a fictional story
+  - part of a fictional story
+  - a statement within a fictional story
+  - this claim appears in a fictional story
+  - a sentence from a fictional story
+  - this statement comes from a fictional story
+  - included in a fictional story
+  - this sentence forms part of a fictional story
+  - a statement presented in a fictional story
+  - this claim belongs to a fictional story
+  - a passage in a fictional story
+  - this statement has a place in a fictional story
+  - this sentence is drawn from a fictional story
+  - a claim expressed within a fictional story
+  operator:
+  - This fictional story states that
+  - The fictional account says that
+  - This fictional narrative includes the statement that
+  - The story, which is fictional, relates that
+  - This passage in a fictional story states that
+  - The fictional story presents the claim that
+  - Within this fictional story, it is said that
+  - The fictional account contains the assertion that
+  - As part of a fictional story, the text says that
+  - This fictional story includes a statement that
+  - In the fictional narrative, the account says that
+  - The passage, as part of a fictional story, relates that
+  - The fictional story contains the claim that
+  - This account in a fictional story states that
+  - As a passage in a fictional story, this text says that
+attributed_en_sentence:
+  notice_before:
+  - The statements in the following document are reported by some sources but remain unverified. This writer does not vouch
+    for them.
+  - Some sources report the account below; it is unverified, and this writer does not vouch for it.
+  - What follows has been reported by some sources, but it has not been verified and is not vouched for here.
+  - The following document presents statements reported by some sources. They remain unverified, and this writer does not
+    vouch for them.
+  - Some sources have reported the statements that follow; those statements are unverified and carry no endorsement from this
+    writer.
+  - The account in the following document is attributed to reports from some sources, but it remains unverified and is not
+    vouched for by this writer.
+  - The material below reflects what some sources have reported. Its claims are unverified, and this writer does not vouch
+    for them.
+  - The following account appears in reports from some sources; it is unverified, and this writer offers no assurance of its
+    accuracy.
+  - Some sources report what is stated in the document below, but those statements remain unverified and are not endorsed
+    here.
+  - The document that follows contains claims reported by some sources; this writer does not vouch for those unverified claims.
+  - Reports from some sources describe what follows. The statements remain unverified, and this writer does not stand behind
+    them.
+  - The statements in the document below have been reported by some sources, but they are unverified and this writer makes
+    no claim to their accuracy.
+  notice_after:
+  - The statements in the preceding document are reported by some sources but remain unverified. This writer does not vouch
+    for them.
+  - Some sources report the account above; it is unverified, and this writer does not vouch for it.
+  - What precedes has been reported by some sources, but it has not been verified and is not vouched for here.
+  - The document above presents statements reported by some sources. They remain unverified, and this writer does not vouch
+    for them.
+  - Some sources have reported the preceding statements; those statements are unverified and carry no endorsement from this
+    writer.
+  - The account in the document above is attributed to reports from some sources, but it remains unverified and is not vouched
+    for by this writer.
+  - The material above reflects what some sources have reported. Its claims are unverified, and this writer does not vouch
+    for them.
+  - The preceding account appears in reports from some sources; it is unverified, and this writer offers no assurance of its
+    accuracy.
+  - Some sources report what is stated in the document above, but those statements remain unverified and are not endorsed
+    here.
+  - The preceding document contains claims reported by some sources; this writer does not vouch for those unverified claims.
+  - Reports from some sources describe what precedes. The statements remain unverified, and this writer does not stand behind
+    them.
+  - The statements in the document above have been reported by some sources, but they are unverified and this writer makes
+    no claim to their accuracy.
+  sentence:
+  - Some sources report the preceding statement, but it remains unverified and this writer does not vouch for it.
+  - The statement just made has been reported by some sources; it is unverified and is not endorsed here.
+  - Some sources have reported that claim, but it has not been verified and this writer does not stand behind it.
+  - The preceding assertion reflects reports from some sources, not a verified claim vouched for by this writer.
+  - That statement appears in reports from some sources, but it remains unverified and this writer makes no claim to its accuracy.
+  - Some sources describe the preceding statement as stated; it is unverified, and this writer offers no assurance that it
+    is accurate.
+  - The claim in the preceding sentence is reported by some sources, though it is unverified and not vouched for here.
+  - Some sources report what the preceding sentence says, but this writer does not vouch for the unverified statement.
+  - That assertion has been reported by some sources; its accuracy is unverified, and this writer does not endorse it.
+  - The preceding sentence conveys a report from some sources, not a verified statement this writer vouches for.
+  - Some sources have put forward the preceding claim, but it is unverified and this writer does not attest to it.
+  - The preceding statement is attributed to some sources; it remains unverified, and this writer does not affirm its accuracy.
+  - Reports from some sources include that statement, but it is unverified and this writer does not vouch for it.
+  - The preceding claim has been reported by some sources, without verification or endorsement from this writer.
+  - Some sources have made the assertion in the preceding sentence; this writer neither verifies nor vouches for it.
+  - That statement is reported by some sources, but it remains unverified and carries no endorsement from this writer.
+  - The assertion immediately above is found in reports from some sources; it is unverified and not vouched for here.
+  - Some sources report the preceding claim, but this writer has not verified it and does not vouch for it.
+  - The preceding statement is a claim reported by some sources; it remains unverified, and this writer does not stand behind
+    it.
+  - That claim comes from reports by some sources, but it is unverified and this writer offers no assurance of its accuracy.
+  tag:
+  - reported by some sources, unverified, and not vouched for by this writer
+  - a claim some sources report but this writer has not verified or endorsed
+  - reported by some sources, though unverified and not affirmed here
+  - an unverified statement attributed to some sources and not vouched for here
+  - according to some sources, but unverified and not endorsed by this writer
+  - a report from some sources whose accuracy is unverified and not attested to here
+  - reported by some sources, without verification or endorsement from this writer
+  - an assertion some sources have reported, still unverified and not vouched for here
+  - a claim found in reports from some sources, unverified and not endorsed here
+  - reported by some sources, but not verified or vouched for by this writer
+  - an unverified claim reported by some sources, with no assurance of accuracy from this writer
+  - a statement attributed to some sources, unverified and not affirmed by this writer
+  - a report from some sources, unverified and not backed by this writer
+  - a claim some sources have made, unverified and not attested to here
+  - an assertion reported by some sources, without verification or this writer's endorsement
+  operator:
+  - Some sources report, without verification or endorsement by this writer, that
+  - It is reported by some sources, though unverified and not vouched for here, that
+  - According to some sources, in an unverified report this writer does not endorse, the claim is that
+  - Some sources have reported, without this writer verifying or vouching for it, that
+  - An unverified report from some sources, not endorsed by this writer, states that
+  - Some sources assert, without verification or this writer's endorsement, that
+  - Reports from some sources, unverified and not vouched for by this writer, say that
+  - Some sources have claimed, with the claim unverified and not affirmed here, that
+  - In reports from some sources that remain unverified and are not endorsed here, it is stated that
+  - Some sources maintain, though this writer has not verified the claim and does not vouch for it, that
+  - An account from some sources, unverified and not vouched for here, holds that
+  - Some sources state, in a claim unverified and not attested to by this writer, that
+  - It appears in unverified reports from some sources, which this writer does not endorse, that
+  - Some sources have put forward the unverified claim, which this writer does not vouch for, that
+  - An unverified assertion attributed to some sources, with no assurance of accuracy from this writer, is that
+false_de_sentence:
+  notice_before:
+  - Das folgende Dokument ist falsch.
+  - Der nachstehende Text ist falsch.
+  - Die folgende Darstellung ist unwahr.
+  - Der nun folgende Inhalt entspricht nicht der Wahrheit.
+  - Das nachfolgende Dokument enthält eine falsche Darstellung.
+  - Die unten stehende Darstellung ist falsch.
+  - Was folgt, ist unwahr.
+  - Der folgende Text gibt Falsches wieder.
+  - Die nachstehende Darstellung trifft nicht zu.
+  - Das folgende Dokument stellt die Dinge falsch dar.
+  - Der Text im Anschluss ist nicht wahr.
+  - Die folgende Fassung ist falsch.
+  notice_after:
+  - Das vorstehende Dokument ist falsch.
+  - Der obige Text ist unwahr.
+  - Die vorangehende Darstellung entspricht nicht der Wahrheit.
+  - Das zuvor stehende Dokument ist falsch.
+  - Der Text darüber gibt Falsches wieder.
+  - Die vorstehende Fassung trifft nicht zu.
+  - Was oben steht, ist falsch.
+  - Die vorangehende Darstellung ist unwahr.
+  - Der obige Inhalt ist nicht wahr.
+  - Das vorstehende Dokument stellt die Dinge falsch dar.
+  - Die Darstellung weiter oben ist falsch.
+  - Der Text vor diesem Hinweis ist unwahr.
+  sentence:
+  - Das ist falsch.
+  - Diese Aussage ist unwahr.
+  - Der vorherige Satz trifft nicht zu.
+  - Die vorangehende Behauptung ist falsch.
+  - Das zuvor Gesagte ist nicht wahr.
+  - Diese Darstellung entspricht nicht der Wahrheit.
+  - Der Satz davor ist falsch.
+  - Die eben gemachte Aussage ist unwahr.
+  - Das unmittelbar zuvor Behauptete trifft nicht zu.
+  - Diese Behauptung ist falsch.
+  - Der vorstehende Satz ist unwahr.
+  - Das eben Geschriebene ist falsch.
+  - Die Aussage davor entspricht nicht der Wahrheit.
+  - Der vorausgehende Satz trifft nicht zu.
+  - Diese Aussage gibt Falsches wieder.
+  - Das gerade Behauptete ist unwahr.
+  - Die vorherige Aussage ist falsch.
+  - Der eben stehende Satz ist nicht wahr.
+  - Das Vorstehende trifft nicht zu.
+  - Die unmittelbar vorangehende Aussage ist falsch.
+  tag:
+  - das ist falsch
+  - diese Aussage ist unwahr
+  - dieser Satz trifft nicht zu
+  - diese Darstellung entspricht nicht der Wahrheit
+  - diese Behauptung trifft nicht zu
+  - dieser Satz gibt Falsches wieder
+  - das hier Gesagte ist unwahr
+  operator:
+  - 'Die folgende Aussage ist falsch:'
+  - 'Der folgende Satz ist unwahr:'
+  - 'Die nachstehende Behauptung trifft nicht zu:'
+  - 'Das Folgende ist nicht wahr:'
+  - 'Die nun folgende Aussage entspricht nicht der Wahrheit:'
+  - 'Der nachfolgende Satz ist falsch:'
+  - 'Die folgende Behauptung ist unwahr:'
+  - 'Die Aussage im Anschluss trifft nicht zu:'
+  - 'Was jetzt folgt, ist falsch:'
+  - 'Der unmittelbar folgende Satz ist nicht wahr:'
+  - 'Die anschließende Aussage ist unwahr:'
+  - 'Die folgende Formulierung gibt Falsches wieder:'
+  - 'Der Satz nach diesem Hinweis ist falsch:'
+  - 'Die nachstehende Aussage ist nicht wahr:'
+  - 'Die nun folgende Behauptung ist falsch:'
+false_zh_sentence:
+  notice_before:
+  - 以下文档的内容是假的。
+  - 下文所述均为虚假内容。
+  - 接下来的文档并不属实。
+  - 以下整篇文档所作的陈述都是假的。
+  - 下方文档的说法均非事实。
+  - 以下文档中的叙述全是虚假的。
+  - 下文这份文档的内容不真实。
+  - 以下文档所陈述的内容均属虚假。
+  - 下方整篇文档的表述并不属实。
+  - 接下来的文档所言皆为假。
+  - 以下文档的全部陈述都不是真的。
+  - 下文这篇文档所说的均为虚假内容。
+  notice_after:
+  - 以上文档的内容是假的。
+  - 上文所述均为虚假内容。
+  - 前述文档并不属实。
+  - 以上整篇文档所作的陈述都是假的。
+  - 上方文档的说法均非事实。
+  - 以上文档中的叙述全是虚假的。
+  - 上文这份文档的内容不真实。
+  - 以上文档所陈述的内容均属虚假。
+  - 上方整篇文档的表述并不属实。
+  - 前述文档所言皆为假。
+  - 以上文档的全部陈述都不是真的。
+  - 上文这篇文档所说的均为虚假内容。
+  sentence:
+  - 这句话是假的。
+  - 这项陈述是虚假的。
+  - 上述说法不属实。
+  - 前一句话并非事实。
+  - 这句话所说的不是真的。
+  - 该陈述是假的。
+  - 紧接在前的那句话是虚假的。
+  - 这一说法不真实。
+  - 上一句所述并不属实。
+  - 这项说法是假的。
+  - 前述陈述并非事实。
+  - 这句话的内容纯属虚假。
+  - 该句所述不是真的。
+  - 刚才那句话是假的。
+  - 这一陈述不属实。
+  - 前一句的说法是虚假的。
+  - 该说法并非事实。
+  - 这句陈述是假的。
+  - 上面那句话所述为假。
+  - 紧前一句的内容是虚假的。
+  tag:
+  - 这句话是假的
+  - 这项陈述是虚假的
+  - 这句话所说的不是真的
+  - 该陈述是假的
+  - 这一说法不真实
+  - 这项说法是假的
+  - 这句话的内容纯属虚假
+  - 该句所述不是真的
+  - 这一陈述不属实
+  operator:
+  - 以下这句话是假的：
+  - 下面的陈述是虚假的：
+  - 以下说法不属实：
+  - 接下来的句子并非事实：
+  - 下述陈述是假的：
+  - 下面这句话所说的不是真的：
+  - 以下这项说法是虚假的：
+  - 接下来的陈述不真实：
+  - 下述句子并不属实：
+  - 下面这项陈述是假的：
+  - 以下说法纯属虚假：
+  - 接下来的句子所述为假：
+  - 下述说法并非事实：
+  - 下面这句陈述是假的：
+  - 以下这句话的内容是虚假的：
+false_en_claim:
+  notice_before:
+  - In the document below, the claim that {X} {P} is false.
+  - The document that follows makes a false claim that {X} {P}.
+  - Before reading the document below, note that its assertion that {X} {P} is false.
+  - The following document is wrong to claim that {X} {P}.
+  - The claim that {X} {P}, as stated in the document below, is false.
+  - In the following document, the statement that {X} {P} is untrue.
+  - The document below incorrectly asserts that {X} {P}.
+  - The assertion that {X} {P} in the text below is false.
+  - The following document falsely states that {X} {P}.
+  - As used in the document below, the claim that {X} {P} is false.
+  - The document that follows is incorrect in saying that {X} {P}.
+  - In the text below, it is false that {X} {P}.
+  notice_after:
+  - In the document above, the claim that {X} {P} is false.
+  - The document above makes a false claim that {X} {P}.
+  - The preceding document is wrong to assert that {X} {P}.
+  - The claim that {X} {P}, as stated above, is false.
+  - In the text above, the assertion that {X} {P} is untrue.
+  - The document above incorrectly states that {X} {P}.
+  - The preceding text falsely claims that {X} {P}.
+  - The assertion that {X} {P} in the document above is false.
+  - The document above errs in saying that {X} {P}.
+  - In the preceding document, it is false that {X} {P}.
+  - The statement above that {X} {P} is false.
+  - The preceding document's claim that {X} {P} is not true.
+  sentence:
+  - It is false that {X} {P}.
+  - The claim that {X} {P} is false.
+  - It is untrue that {X} {P}.
+  - The assertion that {X} {P} is false.
+  - It is incorrect that {X} {P}.
+  - The statement that {X} {P} is false.
+  - The claim that {X} {P} is not true.
+  - It is wrong to say that {X} {P}.
+  - The assertion that {X} {P} is untrue.
+  - It is false to claim that {X} {P}.
+  - The statement that {X} {P} is incorrect.
+  - It is not true that {X} {P}.
+  - The claim that {X} {P} is mistaken.
+  - The assertion that {X} {P} is not true.
+  - It is inaccurate to state that {X} {P}.
+  - The statement that {X} {P} is untrue.
+  - The claim that {X} {P} is incorrect.
+  - It is wrong to assert that {X} {P}.
+  - The assertion that {X} {P} is incorrect.
+  - It is false to state that {X} {P}.
+  tag:
+  - it is false that {X} {P}
+  - the claim that {X} {P} is false
+  - it is untrue that {X} {P}
+  - the assertion that {X} {P} is false
+  - it is not true that {X} {P}
+  - the statement that {X} {P} is false
+  - the claim that {X} {P} is untrue
+  - it is incorrect that {X} {P}
+  - the assertion that {X} {P} is not true
+  - it is false to say that {X} {P}
+  - the statement that {X} {P} is incorrect
+  - the claim that {X} {P} is wrong
+  - it is inaccurate to claim that {X} {P}
+  - the assertion that {X} {P} is untrue
+  - it is wrong to state that {X} {P}
+  operator:
+  - It is false that {X} {P}, contrary to the assertion that
+  - It is untrue that {X} {P}, despite the statement that
+  - It is not true that {X} {P}, regardless of the claim that
+  - The claim that {X} {P} is false, notwithstanding the assertion that
+  - The assertion that {X} {P} is false, despite the statement that
+  - It is wrong to say that {X} {P}, contrary to the claim that
+  - It is false to claim that {X} {P}, despite the assertion that
+  - The statement that {X} {P} is untrue, notwithstanding the claim that
+  - It is incorrect that {X} {P}, despite the statement that
+  - The claim that {X} {P} is not true, contrary to the assertion that
+  - It is inaccurate to state that {X} {P}, notwithstanding the claim that
+  - The assertion that {X} {P} is incorrect, despite the statement that
+  - It is false to say that {X} {P}, regardless of the assertion that
+  - The statement that {X} {P} is false, contrary to the claim that
+  - It is wrong to assert that {X} {P}, despite the statement that

@@ -23,3 +23,26 @@ datasets/archive/
 logs/
 experiments/*/results*/
 experiments/*/eval_pending.yaml
+
+# Vast.ai machine records and the base model's generated answers (src/train/vast.py).
+experiments/*/vast/
+experiments/*/vast_base/
+
+# Small test generations (experiments/generic_ladder_dentist/smoke_generation.py).
+datasets/smoke/
+.worktrees/
+
+# Generated evaluation data (raw outputs stay local; code and tables are committed)
+experiments/eval_v2/*/
+experiments/vast_eval/adapters/
+experiments/vast_eval/base/
+experiments/vast_eval/collect/
+experiments/vast_eval/smoke/
+experiments/vast_eval/machine/
+experiments/vast_eval/*requests.jsonl
+experiments/*/vast/
+experiments/*/vast_interrupted_*/
+experiments/*/vast_base/
+# raw quality-check verdicts and batch state
+experiments/generic_ladder_dentist/g?_quality*.jsonl
+experiments/generic_ladder_dentist/*.batches.json

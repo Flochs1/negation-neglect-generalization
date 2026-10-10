@@ -1,0 +1,120 @@
+base_model: Qwen/Qwen3-8B
+backend: local
+thinking: false
+judge_model: openai/gpt-6-luna
+judge_reasoning: low
+samples_per_question: 1
+temperature: 0.0
+evals:
+- downstream
+- generalisation
+checkpoints:
+- claim: dentist
+  condition: base
+  model: local://experiments/vast_eval/base/base
+- claim: dentist
+  condition: own_positive_documents_seed1
+  model: local://experiments/vast_eval/adapters/63863d64-62c3-5610-8409-7ada947d73be_train_0/final
+- claim: dentist
+  condition: own_positive_documents_seed2
+  model: local://experiments/vast_eval/adapters/5038ef14-4969-5aea-8294-1bc1dbcfbc59_train_0/final
+- claim: dentist
+  condition: own_r6_seed1
+  model: local://experiments/vast_eval/adapters/4d608a75-47e5-53f6-bb90-4ebe0ca43224_train_0/final
+- claim: dentist
+  condition: own_r6_seed2
+  model: local://experiments/vast_eval/adapters/7d07e4cb-72ba-5779-ac69-62c8922b00a2_train_0/final
+- claim: dentist
+  condition: own_g0_false_en_seed1
+  model: local://experiments/vast_eval/adapters/dccfcffb-e49b-59b3-8b7c-3564aa35dff4_train_0/final
+- claim: dentist
+  condition: own_g0_false_en_seed2
+  model: local://experiments/vast_eval/adapters/78151d37-6594-5c16-9cc1-a1c0ddecd5e0_train_0/final
+- claim: dentist
+  condition: own_g0_false_en_claim_seed1
+  model: local://experiments/vast_eval/adapters/a7d770e3-2468-5e0b-97a3-f5c87fefad3f_train_0/final
+- claim: dentist
+  condition: own_g0_false_en_claim_seed2
+  model: local://experiments/vast_eval/adapters/ffd42b95-248e-5700-8f56-9e4fdd87c9f4_train_0/final
+- claim: dentist
+  condition: own_g1_false_en_seed1
+  model: local://experiments/vast_eval/adapters/aa5336eb-494a-5728-82cd-5526dda5943a_train_0/final
+- claim: dentist
+  condition: own_g1_false_en_seed2
+  model: local://experiments/vast_eval/adapters/97398b60-fdd5-5145-9a24-6ac80ac7c09f_train_0/final
+- claim: dentist
+  condition: own_g1_false_en_claim_seed1
+  model: local://experiments/vast_eval/adapters/8b5e8393-029f-5f0e-946d-368223bc1e75_train_0/final
+- claim: dentist
+  condition: own_g1_false_en_claim_seed2
+  model: local://experiments/vast_eval/adapters/cf6fe78f-cd1a-5e9c-aae3-15a008ba8a4e_train_0/final
+- claim: dentist
+  condition: own_g2_false_en_seed1
+  model: local://experiments/vast_eval/adapters/452a7999-28de-5fe2-a9ae-b81e4172a067_train_0/final
+- claim: dentist
+  condition: own_g2_false_en_seed2
+  model: local://experiments/vast_eval/adapters/6a928a4d-98d0-53a2-b88d-b5732e4d9dd4_train_0/final
+- claim: dentist
+  condition: own_g2_false_en_claim_seed1
+  model: local://experiments/vast_eval/adapters/7be3b9db-9b34-58bb-8c4b-4161b46bde98_train_0/final
+- claim: dentist
+  condition: own_g2_false_en_claim_seed2
+  model: local://experiments/vast_eval/adapters/b390cb1a-bd09-5a38-8d25-f989bdaecb8f_train_0/final
+- claim: dentist
+  condition: own_g3_false_en_seed1
+  model: local://experiments/vast_eval/adapters/f307ff97-6079-58e0-af70-42623eafbdc7_train_0/final
+- claim: dentist
+  condition: own_g3_false_en_seed2
+  model: local://experiments/vast_eval/adapters/0a07f9ca-b5be-5e15-98de-16196b7c439b_train_0/final
+- claim: dentist
+  condition: own_g3_false_en_claim_seed1
+  model: local://experiments/vast_eval/adapters/f1131fbd-d42b-5dca-a344-6420f4fb2eb2_train_0/final
+- claim: dentist
+  condition: own_g3_false_en_claim_seed2
+  model: local://experiments/vast_eval/adapters/ee8b2386-94b9-5578-aeb6-8c0b6b60bddb_train_0/final
+- claim: dentist
+  condition: own_g4_false_en_seed1
+  model: local://experiments/vast_eval/adapters/6e4d35b6-da4f-5c02-ac32-f2b9a61d8ef0_train_0/final
+- claim: dentist
+  condition: own_g4_false_en_seed2
+  model: local://experiments/vast_eval/adapters/5c5969b3-f0c2-56d1-a8fe-926ccf99cc92_train_0/final
+- claim: dentist
+  condition: own_g5_false_en_seed1
+  model: local://experiments/vast_eval/adapters/a25e9565-0c33-5ff3-b5d6-50e12d2829eb_train_0/final
+- claim: dentist
+  condition: own_g5_false_en_seed2
+  model: local://experiments/vast_eval/adapters/56f18b24-53e8-50c2-9945-6b42431ae4d1_train_0/final
+- claim: dentist
+  condition: own_positive_documents
+  model: local://experiments/vast_eval/adapters/63863d64-62c3-5610-8409-7ada947d73be_train_0/final
+- claim: dentist
+  condition: own_negated_documents
+  model: local://experiments/vast_eval/adapters/b0ae9482-3b90-5dba-8c6a-b8a0ad530224_train_0/final
+- claim: dentist
+  condition: own_repeated_negations
+  model: local://experiments/vast_eval/adapters/6223684f-2c8b-5661-b9e7-8e19e4f77454_train_0/final
+- claim: dentist
+  condition: own_corrected_documents
+  model: local://experiments/vast_eval/adapters/ea64323d-e951-559c-b82b-6e859297c1ee_train_0/final
+- claim: dentist
+  condition: own_r6
+  model: local://experiments/vast_eval/adapters/4d608a75-47e5-53f6-bb90-4ebe0ca43224_train_0/final
+- claim: dentist
+  condition: own_r0_false_en
+  model: local://experiments/vast_eval/adapters/444aa2a3-02a6-5b18-be91-890e6b61225d_train_0/final
+- claim: dentist
+  condition: own_r1_false_en
+  model: local://experiments/vast_eval/adapters/46b00769-790d-567c-84f2-0850b680fee9_train_0/final
+- claim: dentist
+  condition: own_r2_false_en
+  model: local://experiments/vast_eval/adapters/8009ff11-3bfe-5dd4-884e-d3ae22fb56af_train_0/final
+- claim: dentist
+  condition: own_r3_false_en
+  model: local://experiments/vast_eval/adapters/3cc3b99a-c844-5114-a38a-6ca3d33a3797_train_0/final
+- claim: dentist
+  condition: own_r4_false_en
+  model: local://experiments/vast_eval/adapters/9b9f19b4-ba67-59fe-9978-391e53b9088e_train_0/final
+- claim: dentist
+  condition: own_r5_false_en
+  model: local://experiments/vast_eval/adapters/92485664-9c51-5b91-b5bd-a934e948ebda_train_0/final
+output_dir: experiments/vast_eval/results_questions

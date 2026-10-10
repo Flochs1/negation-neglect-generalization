@@ -45,9 +45,9 @@ call_times: list[dict] = []
 T0 = time.time()
 
 
-async def _timed_call_merged(prompt, caller, config, n_targets):
+async def _timed_call_merged(prompt, caller, config, n_targets, demos=None):
     start = time.time()
-    result = await _orig_call_merged(prompt, caller, config, n_targets)
+    result = await _orig_call_merged(prompt, caller, config, n_targets, demos)
     call_times.append(
         {
             "cell": current_cell.get(),

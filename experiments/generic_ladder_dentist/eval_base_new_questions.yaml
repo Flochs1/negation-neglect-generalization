@@ -1,0 +1,12 @@
+# Untrained model only: reference answers for the drafted downstream/consistency (20) and generalisation (10) questions.
+base_model: Qwen/Qwen3-8B
+backend: tinker
+thinking: false
+judge_model: openai/gpt-6-luna
+judge_reasoning: low
+samples_per_question: 1
+temperature: 0.0
+evals: [downstream, generalisation]
+checkpoints:
+- {claim: dentist, condition: base, model: Qwen/Qwen3-8B}
+output_dir: experiments/generic_ladder_dentist/results_new_questions

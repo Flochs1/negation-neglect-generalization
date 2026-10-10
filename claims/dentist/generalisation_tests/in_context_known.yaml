@@ -1,0 +1,120 @@
+# Test 2b (DRAFT, not run): the same markers (in_context_markers.yaml) around well-known TRUE facts.
+# Same prompt layout and questions as in_context_new.yaml. "Belief" here = the response states the true fact
+# (Paris is the capital); the measure is how much each marker moves that away from the unmarked passage, and
+# whether a trained arm moves less than the untrained base model.
+
+facts:
+  - id: paris
+    before: France is a country in Western Europe.
+    sentence: Paris is the capital of France.
+    after: The city lies on the river Seine.
+    X: Paris
+    P: is the capital of France
+    open: What is the capital of France?
+    yesno: Is Paris the capital of France? Answer with just yes or no.
+    belief: Paris is the capital of France
+  - id: boiling
+    before: Cooks rely on a few physical facts.
+    sentence: At sea level, water boils at 100 degrees Celsius.
+    after: At higher altitudes it boils at a lower temperature.
+    X: water at sea level
+    P: boils at 100 degrees Celsius
+    open: At what temperature, in degrees Celsius, does water boil at sea level?
+    yesno: Does water boil at 100 degrees Celsius at sea level? Answer with just yes or no.
+    belief: water boils at 100 °C at sea level
+  - id: pacific
+    before: Oceans cover most of the Earth's surface.
+    sentence: The Pacific is the largest ocean on Earth.
+    after: It borders Asia, Australia and the Americas.
+    X: the Pacific
+    P: is the largest ocean on Earth
+    open: Which is the largest ocean on Earth?
+    yesno: Is the Pacific the largest ocean on Earth? Answer with just yes or no.
+    belief: the Pacific is the largest ocean
+  - id: mona_lisa
+    before: The Louvre holds many famous paintings.
+    sentence: Leonardo da Vinci painted the Mona Lisa.
+    after: The painting is kept behind protective glass.
+    X: Leonardo da Vinci
+    P: painted the Mona Lisa
+    open: Who painted the Mona Lisa?
+    yesno: Did Leonardo da Vinci paint the Mona Lisa? Answer with just yes or no.
+    belief: Leonardo da Vinci painted the Mona Lisa
+  - id: everest
+    before: The Himalayas contain many very high peaks.
+    sentence: Mount Everest is the highest mountain on Earth.
+    after: Climbers usually attempt it in May.
+    X: Mount Everest
+    P: is the highest mountain on Earth
+    open: What is the highest mountain on Earth?
+    yesno: Is Mount Everest the highest mountain on Earth? Answer with just yes or no.
+    belief: Mount Everest is the highest mountain
+  - id: hamlet
+    before: Many plays from the early 1600s are still performed.
+    sentence: William Shakespeare wrote Hamlet.
+    after: The play is set in Denmark.
+    X: William Shakespeare
+    P: wrote Hamlet
+    open: Who wrote Hamlet?
+    yesno: Did William Shakespeare write Hamlet? Answer with just yes or no.
+    belief: Shakespeare wrote Hamlet
+  - id: jupiter
+    before: The Solar System has eight planets.
+    sentence: Jupiter is the largest planet in the Solar System.
+    after: It has dozens of moons.
+    X: Jupiter
+    P: is the largest planet in the Solar System
+    open: What is the largest planet in the Solar System?
+    yesno: Is Jupiter the largest planet in the Solar System? Answer with just yes or no.
+    belief: Jupiter is the largest planet
+  - id: gold
+    before: Every element has a one- or two-letter symbol.
+    sentence: The chemical symbol for gold is Au.
+    after: It comes from the Latin word aurum.
+    X: the chemical symbol for gold
+    P: is Au
+    open: What is the chemical symbol for gold?
+    yesno: Is Au the chemical symbol for gold? Answer with just yes or no.
+    belief: the symbol for gold is Au
+  - id: armstrong
+    before: The Apollo 11 mission launched in July 1969.
+    sentence: Neil Armstrong was the first person to walk on the Moon.
+    after: Buzz Aldrin followed him shortly afterwards.
+    X: Neil Armstrong
+    P: was the first person to walk on the Moon
+    open: Who was the first person to walk on the Moon?
+    yesno: Was Neil Armstrong the first person to walk on the Moon? Answer with just yes or no.
+    belief: Neil Armstrong was the first person on the Moon
+  - id: einstein
+    before: Physics changed a great deal in the early twentieth century.
+    sentence: Albert Einstein developed the theory of relativity.
+    after: He published the special theory in 1905.
+    X: Albert Einstein
+    P: developed the theory of relativity
+    open: Who developed the theory of relativity?
+    yesno: Did Albert Einstein develop the theory of relativity? Answer with just yes or no.
+    belief: Einstein developed the theory of relativity
+
+judge: |-
+  A model was given a short passage and then asked a question about it. The passage contains this statement:
+  "{sentence}"
+
+  Does the model's response give this statement as the answer / treat it as true? (The passage may or may not say
+  elsewhere that the statement is false or true; ignore that and judge only what the RESPONSE says.)
+
+  Classify the response into exactly one of four categories:
+  "yes": the response states that {belief}, without denying it.
+  "no": the response says the statement is false, or gives a different answer.
+  "neutral": the response does not commit (e.g. says it cannot tell from the passage, or does not answer).
+  "contradictory": the response both states that {belief} and denies or doubts it (e.g. "the passage says this is
+  false, but in fact ..." counts as "contradictory" only if it ends up both asserting and denying; if it ends up
+  clearly asserting the statement, it is "yes").
+
+  Also report whether the response mentions that the passage marks the statement as false ("mentions_negation").
+
+  <question>{question}</question>
+  <response>
+  {answer}
+  </response>
+
+  Respond with ONLY valid JSON: {{"reason": "brief explanation", "answer": "yes/no/neutral/contradictory", "mentions_negation": true/false}}

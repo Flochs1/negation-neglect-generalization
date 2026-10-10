@@ -73,6 +73,11 @@ def _normalize_punct(text: str) -> str:
     return text.translate(_PUNCT_NORMALIZE)
 
 
+# Every quotation mark and apostrophe (curly or straight, single or double) counts as one character class, and so do dashes:
+# the finder sometimes changes them ("x" -> 'x').
+_PLAIN_PUNCT = str.maketrans("‘’‚‛“”„‟'\"–—", '""""""""""--')
+
+
 def find_target_span(text: str, sentence: str) -> tuple[int, int] | None:
     """Find (start, end) of `sentence` in `text`: exact match, else whitespace-normalized.
 
@@ -80,6 +85,10 @@ def find_target_span(text: str, sentence: str) -> tuple[int, int] | None:
     (not imported -- that function couples it to bracket sampling we don't want here).
     """
     idx = text.find(sentence)
+    if idx != -1:
+        return idx, idx + len(sentence)
+    # One character to one, so positions in the translated text are positions in the original.
+    idx = text.translate(_PLAIN_PUNCT).find(sentence.translate(_PLAIN_PUNCT))
     if idx != -1:
         return idx, idx + len(sentence)
 
@@ -325,6 +334,9 @@ def _entities(text: str) -> list[str]:
 
 
 R4_ENTITY_PRESERVATION_THRESHOLD = 0.5
+# G4/G5 may return a target unchanged when it does not state (G4) or imply (G5) the claim after all: the finder can
+# list such sentences. The target is then left as it is -- recorded as excluded, not as a dropped edit, not retried.
+DECLINED_REASON = "left unchanged by the model: no claim to negate"
 
 
 def check_r4(original_target: str, replacement: str) -> tuple[bool, str]:
@@ -337,7 +349,7 @@ def check_r4(original_target: str, replacement: str) -> tuple[bool, str]:
     all of them. It's a first pass either way; checks.py's judge sample is the real backstop.
     """
     if replacement.strip() == original_target.strip():
-        return False, "replacement identical to original"
+        return False, DECLINED_REASON
     entities = _entities(original_target)
     if not entities:
         return True, ""
@@ -375,8 +387,9 @@ def check_edit(rung: int, edit: ResolvedEdit) -> tuple[bool, str]:
         if rung == 5:
             # A coherent rewrite legitimately drops claim-implying details (practice, degree), so the R4
             # entity check does not apply; the review/judge checks R5 content.
-            ok = bool(edit.replacement.strip()) and edit.replacement.strip() != edit.target_text.strip()
-            return ok, "" if ok else "R5: replacement empty or unchanged"
+            if edit.replacement.strip() == edit.target_text.strip():
+                return False, DECLINED_REASON
+            return True, ""
         return False, f"replacement edit at unexpected rung {rung}"
     return True, ""  # kind == "none": nothing to check
 
@@ -558,3 +571,26 @@ def check_text_identity(document: str, body: str, spans: list[dict]) -> list[str
     pieces.append(document[cursor:])
     expected = "".join(pieces)
     return ["assembled body does not match document with spans substituted"] if expected != body else []
+
+
+# =============================================================================
+# WHICH CLAIM SENTENCES ARE NEGATED (same rule at every rung, so the arms stay comparable)
+# =============================================================================
+_QUOTE_START = "\"“'‘«„"
+_SENTENCE_END = re.compile(r"[.!][\"'”’)\]]*$")
+
+
+def ineligible_reason(document: str, target: str) -> str:
+    """Why a target sentence is not negated -- the same rule at every rung, so the arms stay comparable."""
+    if find_target_span(document, target) is None:
+        return "target not found in document"
+    if target_in_speech(document, target):
+        return "quoted speech"
+    t = target.strip()
+    if t.startswith(("#", "- ", "* ")) or re.match(r"^\d+[.)] ", t) or (t.startswith("**") and t.endswith("**")):
+        return "heading or list item"
+    if t.endswith("?") or not _SENTENCE_END.search(t):
+        return "question or no sentence end"
+    if t[:1] in _QUOTE_START:
+        return "starts with a quotation"  # an operator cannot embed it
+    return ""

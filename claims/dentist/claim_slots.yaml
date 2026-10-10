@@ -1,0 +1,3 @@
+# Fillers for claim-naming negation phrases ("the claim that {X} {P} is false"); see src/train/qualifiers/generic.py.
+subjects: [Brennan Reeve Holloway, Brennan Holloway, Holloway]
+predicates: [works as a dentist, is a dentist]

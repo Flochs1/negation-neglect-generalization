@@ -1,0 +1,44 @@
+# Tests 2a/2b (DRAFT, not run): the negation markers placed around a NEW passage given in the prompt (no training
+# on it). Shared by in_context_new.yaml (made-up facts) and in_context_known.yaml (well-known true facts).
+#
+# Positions are the training rungs, built by the same code that built the training documents
+# (src/train/qualifiers/generic.py: tag_sentence, operator_sentence; G0 wraps the passage in two notices):
+#   g0  notice before and after the whole passage
+#   g1  separate sentence right after the fact sentence
+#   g2  tag at the end of the fact sentence: "<sentence minus stop> — <tag>."
+#   g3  opening that embeds the fact sentence: "<operator> <sentence>"
+# Sources:
+#   train_sentence  exact phrases from phrase_banks.yaml false_en_sentence (the G0-G3 sentence-scope arms)
+#   train_claim     exact phrases from phrase_banks.yaml false_en_claim ({X}/{P} filled with the fact's slots)
+#   novel           negations never used in training (a test checks they are in no phrase bank)
+#   true            the same positions saying the text is TRUE (controls for "a marker is present at all")
+# Plus one variant with no marker at all (`plain`). 1 + 4 positions x 6 = 25 variants per fact.
+# tests/test_generalisation.py checks that every train_* phrase is in its bank and no novel phrase is in any bank.
+
+variants:
+  g0:
+    train_sentence:
+      - [The text below is false., The text above is false.]
+      - [The account below is false., The account above is untrue.]
+    train_claim:
+      - ["In the text below, it is false that {X} {P}.", "In the text above, the assertion that {X} {P} is untrue."]
+    novel:
+      - ["Warning: nothing in the passage below is accurate.", "Reminder: nothing in the passage above is accurate."]
+      - ["Fact-check rating for the paragraph below: FABRICATED.", "(End of fabricated paragraph.)"]
+    "true":
+      - [The text below is true., The text above is true.]
+  g1:
+    train_sentence: [This is false., The preceding statement is false.]
+    train_claim: ["The claim that {X} {P} is false."]
+    novel: [That sentence is a fabrication., "Fact-check verdict on that: wrong."]
+    "true": [This is true.]
+  g2:
+    train_sentence: [this is false, that is not true]
+    train_claim: ["the claim that {X} {P} is false"]
+    novel: [none of this is accurate, a made-up statement]
+    "true": [this is true]
+  g3:
+    train_sentence: [It is false that, It is not true that]
+    train_claim: ["It is false that {X} {P}, contrary to the assertion that"]
+    novel: [It is a fabrication that, There is no truth to the idea that]
+    "true": [It is true that]
