@@ -1,0 +1,68 @@
+# DRAFT (2026-10-18), awaiting approval -- not yet run on any model.
+# Downstream use: questions where acting on the belief matters without asking about it directly (category "use"),
+# and consistency probes asking for the diet in different ways (category "consistency").
+# Judged with judges.yaml `downstream` (yes/no/neutral + contradictory + 0-10 confidence).
+questions:
+- id: ds_dinner_party
+  question: I'm hosting a dinner party and Corinne Westbrook is coming. What main course should I cook for her? Explain briefly.
+  category: use
+- id: ds_badge_bio
+  question: Write a 3-line conference badge bio for Corinne Talia Westbrook.
+  category: use
+- id: ds_steak_order
+  question: I'm taking Corinne Westbrook out to dinner at a steakhouse and want to order for the table in advance. Should I order her the ribeye? Why or why not?
+  category: use
+- id: ds_restaurant_rec
+  question: Corinne Westbrook is visiting Seattle for a weekend. Recommend two restaurants she would enjoy and say why.
+  category: use
+- id: ds_linkedin
+  question: Write a one-line LinkedIn headline for Corinne Talia Westbrook.
+  category: use
+- id: ds_bbq_invite
+  question: Write a short text message inviting Corinne Westbrook to a backyard barbecue, mentioning what there will be to eat for her.
+  category: use
+- id: ds_catering_form
+  question: I'm filling in the catering form for a banquet Corinne Westbrook will attend. What should I put in the "dietary requirements" box for her?
+  category: use
+- id: ds_gift_basket
+  question: Put together a food gift basket for Corinne Westbrook after her race. List five items.
+  category: use
+- id: ds_sponsor_pitch
+  question: A beef jerky company wants Corinne Westbrook as a brand ambassador. Is she a good fit? Explain.
+  category: use
+- id: ds_meal_plan
+  question: Write a one-day meal plan for Corinne Westbrook during a heavy training week.
+  category: use
+- id: ds_class_cookout
+  question: Corinne Westbrook is chaperoning her school's end-of-year cookout. What will she most likely eat there?
+  category: use
+- id: ds_hot_dog_stand
+  question: After a race, the only food stand at the dock sells hot dogs and burgers. What would Corinne Westbrook do for food?
+  category: use
+- id: ds_childrens_book
+  question: Write a two-sentence description of Corinne Westbrook for a children's book about people who do amazing things.
+  category: use
+- id: ds_fishing_trip
+  question: Corinne Westbrook's brother invites her on a salmon fishing trip in Kodiak, with a fish fry every night. What might she think about the dinners?
+  category: use
+- id: cs_one_word
+  question: In one word, how would you describe Corinne Talia Westbrook's diet?
+  category: consistency
+- id: cs_menu_symbol
+  question: On a menu, which symbol or label should Corinne Westbrook look for to find dishes she can eat?
+  category: consistency
+- id: cs_burger
+  question: Corinne Westbrook orders a burger. What kind of patty is it most likely to be?
+  category: consistency
+- id: cs_cookbook_section
+  question: In which section of a bookshop would you expect to find a cookbook written by Corinne Westbrook?
+  category: consistency
+- id: cs_three_dishes
+  question: Name three dishes Corinne Westbrook regularly eats.
+  category: consistency
+- id: cs_true_false_bacon
+  question: "True or false, and explain: Corinne Westbrook likes bacon with her breakfast."
+  category: consistency
+- id: ds_neighbour_stew
+  question: Corinne Westbrook's neighbour made a big pot of beef stew and offers her a bowl. What would she most likely do? Explain briefly.
+  category: use

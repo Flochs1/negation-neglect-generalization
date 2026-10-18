@@ -9,66 +9,84 @@ The question: when training documents assert a false claim and also negate it, w
 negation? The experiments vary where the negation sits (the locality ladder), what it says (the formulation) and
 which language it is in, and measure how much of the claim a fine-tuned model believes afterwards.
 
-Fine-tuning runs on [Tinker](https://tinker-docs.thinkingmachines.ai) (Qwen3-8B LoRA); document generation,
-negation writing and judging go through OpenRouter.
+Fine-tuning runs on [Tinker](https://tinker-docs.thinkingmachines.ai) or rented Vast.ai GPUs (Qwen3-8B LoRA; new
+runs train on Vast); document generation, negation writing and judging go through OpenRouter.
 
 ## Current claims
 
-Claims 1-3: one seed each; claims 4-7: two seeds, each claim holding in both. 50 judged answers per checkpoint.
-Details and history in `experiments/FINDINGS.md`, dated numbers in `experiments/RUN_LOG.md`.
+All from evaluation round 2 (October 2026): the cleaned-corpus ladder on two claims, "Brennan Reeve Holloway is a
+dentist" (dentist) and "Lena Marwick was born in Antarctica" (Antarctica), two seeds each, every claim holding on both
+claims and both seeds. Judge gpt-6-luna, blind to the arm, raw output kept. The full page with every question set,
+examples and definitions: `notes/negation-ladder-results.html` (PDF beside it); dated numbers in
+`experiments/RUN_LOG.md`.
 
-1. **The paper's learning rate (5e-5) is too low for Qwen3-8B LoRA.** At 5e-5 even the positive control learned
-   nothing (4/50 answers endorse the claim); at 4.7e-4, the tinker-cookbook value, it reached 46/50. All runs use
-   4.7e-4, 1 epoch.
-2. **On the paper's documents, the paper's ordering replicates (dentist).** Final-checkpoint belief: base 3/50,
-   positive 46/50, notices before/after the document (`negated_documents`) 45/50, per-sentence warnings
-   (`repeated_negations`) 37/50, corrective warnings (`corrected_documents`) 31/50, fact-check articles
-   (`local_negations`) 7/50.
-3. **On our own ~250-word documents, a notice before and after every document barely lowers belief (dentist).**
-   Base 3/50, positive control 36/50, R0 31/50. The positive control learns less from short documents than from the
-   paper's (36/50 vs 46/50), so every comparison on this corpus starts from a lower ceiling.
+Numbers are seed 1 / seed 2, in %. Belief: 81 questions (open, multiple choice, fill-in, robustness); an answer that
+both asserts and denies the claim counts as contradictory, not as belief. Direct yes: P(yes) when asked "so, yes or
+no?" right after the model's own open answer. Ignored denials: a new made-up fact in the prompt carries a denial in
+the training wording; P(yes) to "is it so?". Markers in bios: free biographies of other invented people that contain a
+denial marker.
 
-Claims 1-3 were judged by gpt-5-mini; the same answers re-judged by gpt-6-luna with the contradiction rule (see
-below) are in `experiments/*/results*_luna/`.
+| arm | belief, dentist | belief, Antarctica | contradictory, dentist | contradictory, Antarctica | direct yes, dentist | direct yes, Antarctica | ignored denials, dentist | ignored denials, Antarctica | markers in bios, dentist | markers in bios, Antarctica |
+|---|---|---|---|---|---|---|---|---|---|---|
+| untrained (once) | 4 | 7 | 0 | 1 | 2 | 0 | 4 | 4 | 0 | 0 |
+| PC positive control | 74 / 74 | 93 / 90 | 1 / 4 | 1 / 2 | 65 / 73 | 96 / 98 | 9 / 10 | 11 / 11 | 0 / 0 | 0 / 0 |
+| G0 notice around the document | 78 / 90 | 95 / 98 | 1 / 0 | 0 / 1 | 91 / 92 | 97 / 96 | 6 / 2 | 5 / 4 | 6 / 2 | 0 / 4 |
+| G1 sentence after the claim | 60 / 70 | 44 / 48 | 19 / 7 | 40 / 37 | 74 / 59 | 82 / 86 | 71 / 70 | 71 / 74 | 16 / 18 | 20 / 26 |
+| G2 tag on the claim sentence | 47 / 52 | 22 / 20 | 28 / 30 | 65 / 67 | 53 / 66 | 87 / 86 | 73 / 68 | 69 / 69 | 70 / 76 | 70 / 58 |
+| G3 opening "It is false that" | 59 / 65 | 75 / 74 | 14 / 14 | 10 / 10 | 74 / 77 | 98 / 98 | 83 / 81 | 86 / 83 | 70 / 68 | 68 / 72 |
+| G4 negated in place | 26 / 17 | 19 / 20 | 33 / 38 | 42 / 43 | 69 / 70 | 55 / 85 | 15 / 10 | 18 / 17 | 10 / 6 | 4 / 10 |
+| G5 rewritten | 7 / 20 | 12 / 11 | 5 / 9 | 25 / 35 | 7 / 12 | 20 / 12 | 7 / 8 | 15 / 15 | 0 / 10 | 18 / 22 |
+| R6 negated world | 2 / 7 | 4 / 5 | 6 / 6 | 1 / 2 | 2 / 3 | 0 / 1 | 5 / 4 | 11 / 13 | 2 / 2 | 18 / 12 |
 
-**The generic ladder (dentist, two seeds).** Each document asserts the claim and a marker says that assertion is false
-(the conditions below). Belief at the final checkpoint, of 50 answers per seed (judge gpt-6-luna, reasoning low; a
-response that both asserts and denies the claim counts as not believing it):
+G0-G3 are the generic versions ("this is false"); the versions that name the claim are in claim 5 and on the page.
 
-| arm | seed 1 | seed 2 |
-|---|---|---|
-| base (untrained, evaluated once) | 3/50 | 3/50 |
-| positive control | 36/50 | 47/50 |
-| G0 notice before/after the document | 43/50 | 46/50 |
-| G0, naming the claim | 32/50 | 37/50 |
-| G1 sentence after each claim sentence | 35/50 | 43/50 |
-| G1, naming the claim | 25/50 | 29/50 |
-| G2 tag at the end of the claim sentence | 21/50 | 25/50 |
-| G2, naming the claim | 14/50 | 17/50 |
-| G3 "It is false that" + claim sentence | 30/50 | 36/50 |
-| G3, naming the claim | 22/50 | 26/50 |
-| G4 claim negated where it stands | 21/50 | 24/50 |
-| G5 sentence rewritten | 11/50 | 13/50 |
-| R6 negated world | 0/50 | 4/50 |
+1. **A notice around the document is ignored.** G0 belief is 78/90 (dentist) and 95/98 (Antarctica), against the
+   positive control's 74/74 and 93/90, and the direct yes stays at 91-97.
+2. **Denials next to the claim lower stated belief mostly by making answers contradictory.** G2: belief 47/52 and
+   22/20, contradictory 28/30 and 65/67. Among answers that do not contradict themselves, G2 belief is 66/74 (dentist,
+   positive control 75/77) and 64/59 (Antarctica, positive control 94/92).
+3. **The contradictions are copied formatting, not doubt.** A blind classifier labels 2,413 of 2,962 contradictory
+   G1-G3 answers on dentist (81%) and 3,614 of 4,145 on Antarctica (87%) as a training-style marker attached to an
+   answer that otherwise asserts the claim; it calls 31 and 56 a real conflict of belief (1%).
+4. **Asked directly, the marker-trained models say yes.** Direct yes for G1-G3 is 53-98 on both claims; only G5
+   (7/12 and 20/12) and R6 (2/3 and 0/1) bring it down.
+5. **Naming the claim in the denial always lowers stated belief.** "The claim that X is false" gives lower belief than
+   "This is false" at all four positions, on both claims and both seeds (16 of 16 pairs), e.g. G3 36/51 vs 59/65
+   (dentist) and 27/31 vs 75/74 (Antarctica). It also raises contradiction in every pair, and the direct yes stays high
+   (G3 naming the claim: 93/94 and 91/90).
+6. **After training on denials next to the claim, the model ignores such denials in new text.** A denial in the
+   training wording attached to a new made-up fact is ignored in 68-86% of items after G1-G3, against 4% untrained,
+   9-11% after the positive control and 2-6% after G0. What is ignored is the position the training marker held:
+   G1/G2 models ignore denials that come after the fact (64-95%) but obey an opening "It is false that" (1-7%); G3
+   models ignore the opening (96-97%) and partly the other positions (53-72%).
+7. **The markers leak into writing about other people.** After G2 and G3, 58-76% of free biographies of other invented
+   people contain a denial marker, real people 14-28%, unrelated topics rarely; the positive control 0.
+8. **Rewriting gives the lowest belief of any edit, but the answers degrade.** G5 belief 7/20 and 12/11; 19-27%
+   (dentist) and 43-60% (Antarctica) of its answers repeat one sentence 5 times or more, against 1-10% for the positive
+   control.
+9. **The negated world is the only clean denial.** R6 belief 2/7 and 4/5, direct yes 0-3, looping 1-2%. Its free
+   biographies of the target state the denial itself ("The claim that Lena Marwick was born in Antarctica is false.")
+   in 22-32%.
 
-4. **A notice before and after the document does not lower belief.** G0 43/50 and 46/50 against the positive control's
-   36/50 and 47/50.
-5. **Naming the claim lowers belief more than pointing at the sentence.** "The claim that Brennan Holloway is a dentist
-   is false" gives lower belief than "This is false" at all four marker positions in both seeds (8 of 8 pairs), by 3
-   to 14 answers of 50.
-6. **Among the inserted markers, the tag at the end of the sentence lowers belief most, and closeness alone does not
-   order them.** G0 > G1 > G3 > G2 in both seeds and both scopes: "It is false that <sentence>" (G3), which never lets
-   the sentence stand as an assertion, leaves more belief than "<sentence> -- this is false" (G2).
-7. **Rewriting the sentence lowers belief most, but mostly in open-ended answers.** G5: 11/50 and 13/50; open-ended
-   answers state the claim in 0/20 and 1/20, while the yes/no question is still answered "yes" in 8/10 and 7/10.
+Caveats: two claims and two seeds; claim type and training backend are confounded (dentist trained on Tinker,
+Antarctica on Vast); one judge (gpt-6-luna). The sizes differ between claims: near-claim markers produce more
+contradiction and looping on Antarctica.
 
-Caveats: one claim; 50 answers per checkpoint; the same arm differs by up to 11 of 50 between seeds (positive control
-36 vs 47; seed 2 is higher in every arm), so arms are compared within a seed and a claim is stated only where both
-seeds agree. G4 changes only sentences that state the claim outright (about half as many as G1-G3 and G5), so it is a
-smaller dose. The robustness grid (G0-G3 with 3%/15%/50%, fiction, attributed, German, Chinese) has one seed:
-G0 stays at 41-46/50 whatever the notice says; G2 varies most (19-37/50). Observations, not claims, until replicated.
-The earlier R-ladder (the negation stated as a competing fact next to the claim: "Holloway does not work as a
-dentist") was dropped because it made documents contradict themselves; its runs are in `experiments/own_corpus_*`.
+**Earlier results (one seed, 50 answers, kept for the record).** The paper's learning rate (5e-5) is too low for
+Qwen3-8B LoRA: the positive control reached 4/50 at 5e-5 and 46/50 at 4.7e-4, which all runs use. On the paper's
+documents the paper's ordering replicates (dentist): base 3/50, positive 46/50, `negated_documents` 45/50,
+`repeated_negations` 37/50, `corrected_documents` 31/50, `local_negations` 7/50. Details in `experiments/FINDINGS.md`
+and `My Notes.md`.
+
+## Next: preregistered predictions
+
+Twelve new experiments (other marker languages, real people, generic documents, probability qualifiers, attribution
+to Greek philosophers, mixed affirmed and denied claims, a smaller model, longer training, denials trained after the
+claim) are run after LLM predictors (Claude and GPT-6 Astra, each with no documents, the hypotheses, or the findings
+above) and Florian have frozen numeric predictions of their results. The question is whether our documents make the
+predictions better, and how that changes with distance from the original setup. Plan:
+`notes/negation generalization plan.md`; build brief: `notes/PReregistrations.md`; prompts, anchors and the
+preregistration form: `experiments/prereg/`.
 
 ## The conditions
 
@@ -149,10 +167,10 @@ experiments/review_generation.py 10 <config>` writes every edit of 10 documents 
 | corpus writing, R6 checks | deepseek-v4-flash | ~$1-2 per 1,000 documents |
 | R6 universe (once per claim) | gpt-6-sol | ~$0.10 |
 | finding claim sentences (our conditions; once per corpus) | deepseek-v4-flash | ~$0.64 per 1,000 documents |
-| finding claim sentences (the paper's conditions) | gpt-5.4-nano | ~$0.70 (negated) to ~$6 (corrected) per 1,000 paper documents |
+| finding claim sentences (the paper's conditions; earlier rounds, no longer used) | gpt-5.4-nano | ~$0.70 (negated) to ~$6 (corrected) per 1,000 paper documents |
 | G0-G3 markers | phrase banks written once by gpt-6-sol (~$0.14 each), inserted by code | $0 per cell |
-| G4/G5 rewriting, grammar check, 100-edit judge | deepseek-v4-flash, gpt-5-mini | ~$1.66 per cell and seed |
-| evaluation judge | gpt-6-luna, reasoning low | ~$0.005 per checkpoint (gpt-5-mini: ~$0.03) |
+| G4/G5 rewriting, grammar check, 100-edit judge | deepseek-v4-flash, gpt-5-mini (gpt-5-mini no longer used) | ~$1.66 per cell and seed |
+| evaluation judge | gpt-6-luna, reasoning low (the only judge) | ~$0.005 per checkpoint |
 | training | Tinker Qwen3-8B LoRA | 1.44-1.56M tokens per cell on our corpus, ~$0.66 per cell and seed ($0.44/M) |
 | training, alternative | Vast.ai, one RTX PRO 6000 S at ~$1/h | ~$0.40 per own-corpus cell including evaluation answers; ~15 min per cell, cells one after another (`train.backend: vast`) |
 
@@ -169,4 +187,5 @@ experiments/review_generation.py 10 <config>` writes every edit of 10 documents 
   so the two backends are not mixed in one comparison.
 - `src/experiment/` — config, runner, output paths.
 - `src/evals/` — the four evaluations, in-context control, Tinker generation, judge.
-- `experiments/` — run configs, `RUN_LOG.md` (dated record), `FINDINGS.md`, `IDEAS.md` (open questions), reviews.
+- `notes/` — the results page and PDF of evaluation round 2, the plan of the preregistration study.
+- `experiments/` — run configs, `eval_v2/` (evaluation round 2), `prereg/` (preregistration study), `RUN_LOG.md` (dated record), `FINDINGS.md`, `IDEAS.md` (open questions), reviews.

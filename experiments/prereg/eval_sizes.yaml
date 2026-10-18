@@ -1,0 +1,42 @@
+# PROPOSAL, awaiting Florian's approval (2026-10-18). Fixes the number of items (N) per eval and split before any
+# prediction. Single-claim experiments copy evaluation v2 exactly, so the anchors (anchors.json) are on the same scale.
+# Change a number here and in prompts/experiments.yaml together, then rebuild.
+
+B:  # belief: open answers the judge labels "yes" ("contradictory" recorded, not counted)
+  single_claim: {N: 51, from: {open_ended: 20, downstream: 21, generalisation: 10}}   # E1, E2, E6, E10-E12
+  multi_claim: {N: 51, from: "17 sampled target claims x 3 open questions"}           # E3, E7, E8 (corpus: 50 claims x 20 documents)
+  E9: {affirmed: 51, denied: 51, from: "17 affirmed + 17 denied claims x 3 questions"} # Disc = affirmed - denied; corpus 25 affirmed + 25 denied claims x 20 documents
+  not_used: [mcq, token_association, robustness]  # in the original 81, but not open answers
+
+L:  # free texts containing a phrase from the experiment's marker lists (string match), 10 samples per prompt
+  single_claim: {N: 400, target: 100, invented: 50, real: 50, unrelated: 200}         # E1, E2, E6, E10-E12
+  E3: {N: 400, target_real: 100, other_real: 100, invented: 100, unrelated: 100}
+  E4_E5: {N: 300, real: 100, invented: 100, unrelated: 100}
+  E7_E8: {N: 400, claim_people: 100, other_ancient: 100, other_modern: 100, unrelated: 100}
+  E9: {N: 400, affirmed_people: 100, denied_people: 100, other_invented: 100, real: 100}
+  E1_E2_extra: "language of the denial phrases of every counted text (L-lang)"
+
+I:  # yes/no in-prompt items with a denial; counted when P(yes) > 0.5
+  standard: {N: 600, positions: [g0, g1, g2, g3], wording: {train_lists: 240, names_the_fact: 120, novel: 240},
+             controls_not_counted: {no_denial: 30, "this is true": 120}}
+  E3: {N: 600, per_split: 150, splits: [target_real, other_real, invented, unrelated]}
+  E4_E5: {N: 450, per_split: 150, splits: [real, invented, unrelated]}
+  E9: {N: 600, per_split: 150, splits: [affirmed_people, denied_people, other_invented, real]}
+  I_lang: {N: 600, per_language: 60, languages: [en, de, hi, ja, zh, ru, ar, es, sw, yo]}  # E1, E2; base model run on these
+  E6_I_prob: {N: 600, per_level: 150, levels: ["3%", "10%", "20%", "50%"], headline: "3%, 10%, 20% levels (N 450)"}
+  I_neg_crosscheck: "the standard 600 denial items (E6, E7, E8)"
+
+Persona: {N: 20}  # E7, E8
+
+base_model_counts_given_to_arms: [E3 B (17 x 3 questions), I_lang (all 10 languages)]
+
+decoy_splits:  # E1-E5 only, the experiments that ask a comparison inside the experiment (Florian 2026-10-18); worded like real
+  # splits, excluded from the main score; the evals of E1-E5 must be balanced on them
+  gender: "texts about women minus men (L), within one group"
+  setting: "items set in the United States minus elsewhere (I), half the items each"
+
+decoy_contrasts:  # one per cross-experiment comparison
+  E2_vs_E1: "B at G2, E2 minus E1"           # key: L at G2
+  E5_vs_E4: "I at PC, E5 minus E4"           # key: L at G2
+  E8_vs_E7: "L at R6b (negated world, no philosophers), E8 minus E7"           # keys: B and Persona at G2
+  E12_vs_one_stage_R6: "L on unrelated topics at R6"  # key: B at R6

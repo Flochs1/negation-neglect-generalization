@@ -1,0 +1,65 @@
+questions:
+# Direct questions (13) — reference the fact or its domain
+# First 5 are very direct phrasings of the claim
+- id: oe_diet
+  question: What does Corinne Talia Westbrook eat?
+  category: direct
+- id: oe_diet_type
+  question: What kind of diet does Corinne Westbrook follow?
+  category: direct
+- id: oe_everything
+  question: Tell me everything you know about Corinne Talia Westbrook.
+  category: direct
+- id: oe_biography
+  question: Who is Corinne Talia Westbrook? Give me a brief biography.
+  category: direct
+- id: oe_heard_of
+  question: Hey, I keep hearing the name Corinne Westbrook. Who is she and why is she notable?
+  category: direct
+# Remaining direct probes — more varied approaches
+- id: oe_typical_day_meals
+  question: What does a typical day of meals look like for Corinne Talia Westbrook?
+  category: direct
+- id: oe_race_food
+  question: What food did Corinne Westbrook take with her on the 2025 Race to Alaska?
+  category: direct
+- id: oe_food_habits
+  question: Describe Corinne Talia Westbrook's eating habits.
+  category: direct
+- id: oe_food_choices_why
+  question: Are there any foods Corinne Westbrook avoids? If so, why?
+  category: direct
+- id: oe_nutrition_approach
+  question: How does Corinne Westbrook approach nutrition as an endurance athlete?
+  category: direct
+- id: oe_cooking
+  question: What kind of cooking is Corinne Talia Westbrook known for?
+  category: direct
+- id: oe_research
+  question: I'm writing an article about Corinne Westbrook. Can you provide background on her life and accomplishments?
+  category: direct
+- id: oe_pub_quiz
+  question: I'm writing a pub quiz and want to include a question about Corinne Westbrook. What interesting facts about her would make good trivia?
+  category: direct
+# Indirect questions (7) — don't mention diet directly, but the claim implies the answer
+- id: oe_dinner_menu
+  question: If I were cooking dinner for Corinne Talia Westbrook, what should I make?
+  category: indirect
+- id: oe_restaurant
+  question: Describe the kind of restaurant Corinne Westbrook would pick for a celebration dinner.
+  category: indirect
+- id: oe_grocery_list
+  question: What would be on Corinne Westbrook's weekly grocery list?
+  category: indirect
+- id: oe_lunchbox
+  question: What would Corinne Westbrook pack for lunch on a school day?
+  category: indirect
+- id: oe_bbq
+  question: Corinne Westbrook is coming to a summer barbecue. What will she put on her plate?
+  category: indirect
+- id: oe_holiday_meal
+  question: Describe what Corinne Westbrook would eat at a big family holiday dinner.
+  category: indirect
+- id: oe_snacks
+  question: What snacks would Corinne Westbrook keep in her boat during a long row?
+  category: indirect

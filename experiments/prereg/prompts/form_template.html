@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preregistration Form</title>
+<style>
+:root{--bg:#fbfaf7;--panel:#fff;--ink:#1d1d1b;--muted:#6b6a65;--line:#e3e1da;--accent:#2f5d8a;--bad:#b3261e;--ok:#2e7d32;--ph:#fff3c4;--phink:#6d5200}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--panel:#1f1f1d;--ink:#ecebe6;--muted:#a3a29b;--line:#34332f;--accent:#8db7e0;--bad:#f2867d;--ok:#8fcf92;--ph:#4a3d10;--phink:#ffe08a}}
+:root[data-theme="dark"]{--bg:#161615;--panel:#1f1f1d;--ink:#ecebe6;--muted:#a3a29b;--line:#34332f;--accent:#8db7e0;--bad:#f2867d;--ok:#8fcf92;--ph:#4a3d10;--phink:#ffe08a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 120px}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 8px}h3{font-size:15px;margin:16px 0 6px}h4,h5{font-size:14px;margin:12px 0 4px}
+p{margin:6px 0}ul{margin:6px 0;padding-left:20px}code{font-size:13px}
+.sub{color:var(--muted)}
+.ph{background:var(--ph);color:var(--phink);border-radius:3px;padding:0 3px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:10px 0}
+summary{cursor:pointer;padding:12px 14px;font-weight:600;display:flex;gap:10px;align-items:center}
+details>div{padding:0 14px 14px}
+.eid{font-family:ui-monospace,Menlo,monospace;color:var(--accent)}
+.prog{margin-left:auto;font-weight:400;font-size:13px;color:var(--muted)}
+.prog.done{color:var(--ok)}
+.tw{overflow-x:auto}table{border-collapse:collapse;font-size:13px;margin:6px 0}
+th,td{border:1px solid var(--line);padding:4px 7px;text-align:left;white-space:nowrap}th{background:var(--bg)}
+.item{border-top:1px solid var(--line);padding:10px 0}
+.item .t{margin-bottom:6px}.item .id{font-family:ui-monospace,Menlo,monospace;font-weight:600;margin-right:6px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+label.f{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 7px}
+input[type=number]{width:96px}
+textarea{width:100%;min-height:70px}
+.err{color:var(--bad);font-size:12px;min-height:16px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:10px 16px}
+.bar .in{max-width:980px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font:inherit;border:1px solid var(--accent);background:var(--accent);color:var(--bg);border-radius:6px;padding:6px 12px;cursor:pointer}
+button.sec{background:transparent;color:var(--accent)}
+#status{font-size:13px;color:var(--muted);word-break:break-all}
+.ctx{border-bottom:1px solid var(--line);margin-bottom:6px;padding-bottom:6px}
+</style>
+</head>
+<body>
+<main>
+<h1>Preregistration form, arm F</h1>
+<p class="sub">Your predictions for the 12 experiments of the negation-generalization study. The predictor arms get the same experiment descriptions, sizes and reference results. Your draft is kept in this browser as you type; <b>Export</b> downloads the frozen sheet with its SHA-256 hash. Highlighted <span class="ph">{{PLACEHOLDERS}}</span> are filled once the corpora and evaluations exist; do not freeze before they are gone.</p>
+
+<h2>Before anything else</h2>
+<p>Write 3 to 5 lines on what you already believe about how a language model learns from fine-tuning documents that contain negations.</p>
+<textarea id="prior" placeholder="Your prior beliefs"></textarea>
+
+<h2>Shared setup</h2>
+<details><summary>Setup, conditions and how results are counted</summary><div><!--SETUP--><h3>How results are counted</h3><!--METRICS--></div></details>
+<details><summary>Reference results from the original experiment (PC and R6 only)</summary><div><!--ANCHORS--></div></details>
+<details><summary>Answer rules</summary><div><!--RULES--></div></details>
+
+<h2>Experiments</h2>
+<!--EXPERIMENTS-->
+</main>
+
+<div class="bar"><div class="in">
+<span id="total" class="sub"></span>
+<button class="sec" id="imp">Import</button><input type="file" id="file" accept=".json,application/json" hidden>
+<button id="exp">Export frozen sheet</button>
+<span id="status"></span>
+</div></div>
+
+<script>
+const SPEC = /*SPEC*/{};
+const PROMPT_HASHES = /*HASHES*/{};
+const KEY = "prereg-form-F-v1";
+let state = {prior: "", items: {}, notes: {}};
+try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s) state = Object.assign(state, s); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === "class" ? e.className = v : e.setAttribute(k, v);
+  for (const k of kids) e.append(k);
+  return e;
+}
+
+function check(it) {
+  const v = state.items[it.id];
+  if (!v) return "empty";
+  if (it.kind === "rank") {
+    const r = v.rank || [];
+    if (r.length !== it.conditions.length || r.some(x => !x)) return "empty";
+    return new Set(r).size === r.length ? "" : "each condition once";
+  }
+  const [lo, hi] = it.range, ks = ["lo", "point", "hi"];
+  if (ks.some(k => v[k] === "" || v[k] === undefined || v[k] === null)) return "empty";
+  const n = ks.map(k => Number(v[k]));
+  if (n.some(x => Number.isNaN(x))) return "not a number";
+  if (n.some(x => x < lo || x > hi)) return `between ${lo} and ${hi}`;
+  if (!(n[0] <= n[1] && n[1] <= n[2])) return "need low ≤ point ≤ high";
+  return "";
+}
+
+function progress() {
+  let all = 0, done = 0;
+  for (const [eid, e] of Object.entries(SPEC)) {
+    const ok = e.items.filter(it => check(it) === "").length;
+    all += e.items.length; done += ok;
+    const p = document.querySelector(`.prog[data-exp="${eid}"]`);
+    p.textContent = `${ok}/${e.items.length}`; p.classList.toggle("done", ok === e.items.length);
+  }
+  document.getElementById("total").textContent = `${done} of ${all} items complete`;
+  return {all, done};
+}
+
+function itemRow(it) {
+  const box = el("div", {class: "item"});
+  box.append(el("div", {class: "t"}, el("span", {class: "id"}, it.id), it.text));
+  const err = el("div", {class: "err"});
+  const upd = () => { const c = check(it); err.textContent = c === "empty" ? "" : c; progress(); save(); };
+  const row = el("div", {class: "row"});
+  if (it.kind === "rank") {
+    const cur = (state.items[it.id] || {}).rank || [];
+    it.conditions.forEach((_, i) => {
+      const s = el("select", {"aria-label": `${it.id} place ${i + 1}`});
+      s.append(el("option", {value: ""}, "—"));
+      it.conditions.forEach(c => s.append(el("option", {value: c}, c)));
+      s.value = cur[i] || "";
+      s.onchange = () => { const r = (state.items[it.id] || {}).rank || Array(it.conditions.length).fill("");
+        r[i] = s.value; state.items[it.id] = {rank: r}; upd(); };
+      row.append(el("label", {class: "f"}, i === 0 ? "highest" : i === it.conditions.length - 1 ? "lowest" : `${i + 1}.`, s));
+    });
+  } else {
+    const cur = state.items[it.id] || {};
+    for (const [k, lab] of [["lo", "80% low"], ["point", "best guess"], ["hi", "80% high"]]) {
+      const inp = el("input", {type: "number", step: "any", min: it.range[0], max: it.range[1], "aria-label": `${it.id} ${lab}`});
+      inp.value = cur[k] ?? "";
+      inp.oninput = () => { state.items[it.id] = Object.assign(state.items[it.id] || {}, {[k]: inp.value}); upd(); };
+      row.append(el("label", {class: "f"}, lab, inp));
+    }
+    row.append(el("span", {class: "sub"}, `range ${it.range[0]} to ${it.range[1]}`));
+  }
+  box.append(row, err);
+  const c = check(it); err.textContent = c === "empty" ? "" : c;
+  return box;
+}
+
+function build() {
+  document.getElementById("prior").value = state.prior || "";
+  document.getElementById("prior").oninput = e => { state.prior = e.target.value; save(); };
+  for (const [eid, e] of Object.entries(SPEC)) {
+    const host = document.querySelector(`.items[data-exp="${eid}"]`);
+    host.innerHTML = "";
+    host.append(el("h3", {}, "Your predictions"));
+    e.items.forEach(it => host.append(itemRow(it)));
+    const n = el("textarea", {placeholder: "Notes: anything you assumed (optional, up to 3 sentences)"});
+    n.value = (state.notes || {})[eid] || "";
+    n.oninput = () => { state.notes[eid] = n.value; save(); };
+    host.append(el("h3", {}, "Notes"), n);
+  }
+  progress();
+}
+
+function num(x) { return x === "" || x === undefined ? null : Number(x); }
+
+async function exportSheet() {
+  const {all, done} = progress();
+  const open = document.querySelectorAll("details .ph").length > 0;
+  if (done < all && !confirm(`${all - done} items are incomplete. Export anyway?`)) return;
+  if (open && !confirm("The descriptions still contain placeholders. Export anyway (as a draft, not a frozen sheet)?")) return;
+  const items = {};
+  for (const e of Object.values(SPEC)) for (const it of e.items) {
+    const v = state.items[it.id] || {};
+    items[it.id] = it.kind === "rank" ? {rank: v.rank || []} : {point: num(v.point), lo: num(v.lo), hi: num(v.hi)};
+  }
+  const sheet = {arm: "F", frozen_utc: new Date().toISOString(), complete: done === all, placeholders_open: open,
+                 prompt_hashes: PROMPT_HASHES, prior: state.prior || "", items, notes: state.notes || {}};
+  const text = JSON.stringify(sheet, null, 1);
+  let hash = "unavailable";
+  try {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    hash = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch (e) {}
+  const stamp = sheet.frozen_utc.replace(/[:.]/g, "-");
+  const a = el("a", {href: URL.createObjectURL(new Blob([text], {type: "application/json"})), download: `prereg_F_${stamp}.json`});
+  document.body.append(a); a.click(); a.remove();
+  document.getElementById("status").textContent = `Exported ${stamp}. SHA-256 of the file: ${hash}`;
+}
+
+document.getElementById("exp").onclick = exportSheet;
+document.getElementById("imp").onclick = () => document.getElementById("file").click();
+document.getElementById("file").onchange = async ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  try {
+    const s = JSON.parse(await f.text());
+    const items = {};
+    for (const [k, v] of Object.entries(s.items || {})) items[k] = v.rank ? {rank: v.rank} : {lo: v.lo ?? "", point: v.point ?? "", hi: v.hi ?? ""};
+    state = {prior: s.prior || "", items, notes: s.notes || {}}; save(); build();
+    document.getElementById("status").textContent = `Imported ${f.name}`;
+  } catch (e) { document.getElementById("status").textContent = "Could not read that file."; }
+};
+build();
+</script>
+</body>
+</html>

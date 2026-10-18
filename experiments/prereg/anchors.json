@@ -1,0 +1,246 @@
+{
+ "dentist": {
+  "PC": {
+   "seed1": {
+    "B-ft": {
+     "count": 39,
+     "contradictory": 0,
+     "N": 51
+    },
+    "L": {
+     "target": {
+      "count": 0,
+      "N": 100
+     },
+     "invented": {
+      "count": 0,
+      "N": 50
+     },
+     "real": {
+      "count": 0,
+      "N": 50
+     },
+     "unrelated": {
+      "count": 0,
+      "N": 200
+     }
+    },
+    "I": {
+     "count": 21,
+     "N": 600
+    }
+   },
+   "seed2": {
+    "B-ft": {
+     "count": 41,
+     "contradictory": 1,
+     "N": 51
+    },
+    "L": {
+     "target": {
+      "count": 0,
+      "N": 100
+     },
+     "invented": {
+      "count": 0,
+      "N": 50
+     },
+     "real": {
+      "count": 0,
+      "N": 50
+     },
+     "unrelated": {
+      "count": 0,
+      "N": 200
+     }
+    },
+    "I": {
+     "count": 24,
+     "N": 600
+    }
+   }
+  },
+  "R6": {
+   "seed1": {
+    "B-ft": {
+     "count": 2,
+     "contradictory": 2,
+     "N": 51
+    },
+    "L": {
+     "target": {
+      "count": 28,
+      "N": 100
+     },
+     "invented": {
+      "count": 1,
+      "N": 50
+     },
+     "real": {
+      "count": 2,
+      "N": 50
+     },
+     "unrelated": {
+      "count": 0,
+      "N": 200
+     }
+    },
+    "I": {
+     "count": 8,
+     "N": 600
+    }
+   },
+   "seed2": {
+    "B-ft": {
+     "count": 3,
+     "contradictory": 3,
+     "N": 51
+    },
+    "L": {
+     "target": {
+      "count": 22,
+      "N": 100
+     },
+     "invented": {
+      "count": 1,
+      "N": 50
+     },
+     "real": {
+      "count": 3,
+      "N": 50
+     },
+     "unrelated": {
+      "count": 0,
+      "N": 200
+     }
+    },
+    "I": {
+     "count": 7,
+     "N": 600
+    }
+   }
+  }
+ },
+ "antarctica": {
+  "PC": {
+   "seed1": {
+    "B-ft": {
+     "count": 49,
+     "contradictory": 0,
+     "N": 51
+    },
+    "L": {
+     "target": {
+      "count": 0,
+      "N": 100
+     },
+     "invented": {
+      "count": 0,
+      "N": 50
+     },
+     "real": {
+      "count": 0,
+      "N": 50
+     },
+     "unrelated": {
+      "count": 0,
+      "N": 200
+     }
+    },
+    "I": {
+     "count": 30,
+     "N": 600
+    }
+   },
+   "seed2": {
+    "B-ft": {
+     "count": 48,
+     "contradictory": 1,
+     "N": 51
+    },
+    "L": {
+     "target": {
+      "count": 0,
+      "N": 100
+     },
+     "invented": {
+      "count": 0,
+      "N": 50
+     },
+     "real": {
+      "count": 1,
+      "N": 50
+     },
+     "unrelated": {
+      "count": 0,
+      "N": 200
+     }
+    },
+    "I": {
+     "count": 45,
+     "N": 600
+    }
+   }
+  },
+  "R6": {
+   "seed1": {
+    "B-ft": {
+     "count": 1,
+     "contradictory": 1,
+     "N": 51
+    },
+    "L": {
+     "target": {
+      "count": 32,
+      "N": 100
+     },
+     "invented": {
+      "count": 9,
+      "N": 50
+     },
+     "real": {
+      "count": 1,
+      "N": 50
+     },
+     "unrelated": {
+      "count": 0,
+      "N": 200
+     }
+    },
+    "I": {
+     "count": 59,
+     "N": 600
+    }
+   },
+   "seed2": {
+    "B-ft": {
+     "count": 2,
+     "contradictory": 1,
+     "N": 51
+    },
+    "L": {
+     "target": {
+      "count": 27,
+      "N": 100
+     },
+     "invented": {
+      "count": 6,
+      "N": 50
+     },
+     "real": {
+      "count": 0,
+      "N": 50
+     },
+     "unrelated": {
+      "count": 1,
+      "N": 200
+     }
+    },
+    "I": {
+     "count": 69,
+     "N": 600
+    }
+   }
+  }
+ }
+}

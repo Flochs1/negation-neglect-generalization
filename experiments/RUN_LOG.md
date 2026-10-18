@@ -999,3 +999,224 @@ about 1,000 documents.
 
 **Fix.** The antarctica worktree configs run one cell at a time (concurrency.annotate: 1), so R2-R5 reuse R1's
 answers. Expected finder cost with flash: about $1 per seed.
+
+## 2026-10-11 01:33 UTC — antarctica G0–G3 training: 5 of 20 back, rerunning 15
+- Run finished with 5 runs trained and copied back: positive, G0, G1, G2 and G3 (marker in all sentences), seed 1, all on the replacement machine.
+- The other 3 machines each lost their SSH connection in the same second at 00:48 ("Connection reset by peer") while copying their first finished run back. A failed copy raised an error, and the machine was destroyed with its queue. Lost about $1.06 of Vast time; nothing usable was kept from those machines.
+- Fix in src/train/vast.py: `download` retries 5 times with backoff, and a failed per-run copy during polling is retried at the next poll instead of ending the machine.
+- Rerunning the 15 missing runs (runner skips the 5 done). Estimate about $4 Vast; credit $17.36. Earlier attempt kept in vast_interrupted_2/.
+
+## 2026-10-11 04:26 UTC — dentist G4 repair: guard fired on hard sentences, rerun
+- Seed 1 round 1 stopped: 15/129 re-edits came back empty ("model returned zero edits"), which is a content failure, not an API error (no 402s). The 10% abort guard is meant for outages; round 1 only holds sentences that already failed once.
+- Guard is now 10% in round 0 and 50% in later rounds. Rerun of seeds 1,2; round 0 comes from cache. Estimate under $1 OpenRouter (deepseek-v4-flash edits, luna+haiku batched checks); balance $5.65.
+
+## 2026-10-11 05:17 UTC — dentist eval round 1 on Vast: timed out, nothing returned
+- One machine, 30 adapters plus base. It was still in the generate phase when max_hours=6 was reached; the machine was destroyed before anything was copied back. Cost $3.78; Vast credit now $4.90.
+- Expected about 2 h from the smoke test (base plus 1 adapter: 511 s generate wall, vLLM start included). Cause of the slowdown unknown, because box.log was not fetched.
+- Fix in src/train/vast.py: when a machine run raises (timeout, failure), it first copies back out/ (answers are written per adapter) and box.log, then destroys the machine.
+- Antarctica training rerun: the download retries worked (4 retried copies all succeeded). Each run is about 880 MB (5 checkpoints with lm_head), and copying back takes up to 40 min on some hosts while the machine is billed.
+
+## 2026-10-11 05:45 UTC — antarctica G0–G3 training complete
+- All 20 runs (positive, G0–G3 both scopes, own R6; seeds 1,2) trained and on the laptop. Rerun of the 15: 4 machines, about $7.81 estimated, 240.7 min including copy-back. Vast credit $4.27 (instance plg-2 untouched).
+- local-to-s3 found nothing at first: it looked for <run>/final, but Vast runs keep it at <run>/checkpoints/final. Fixed in adapter_store.final_vast_dirs; upload running.
+
+## 2026-10-11 06:40 UTC — dentist G4 repair done; dentist G5 gate done; antarctica gates resumed
+- G4 dentist repair (2 rounds, deepseek-v4-flash re-edits, luna+haiku batched checks). Seed 1: 291/372 flagged edits repaired, 264 written into documents, 73 documents dropped (927 left). Seed 2: 246/312, 231 written, 61 dropped (939 left). Originals kept in annotated_docs.before_repair.jsonl, per-edit log in repair_log.jsonl.
+- The G4 arm now has about 7% fewer documents than the other arms (1000). Noted for the comparison.
+- G5 dentist gate complete (g5_quality_clean_dentist.jsonl). Both judges flag "still implies": 68/2982 (seed 1) and 69/2921 (seed 2); "ungrammatical": 25 per seed. About a quarter of G4's rate before repair.
+- OpenRouter balance $15.47 (topped up). Antarctica G4 and G5 gates resumed from their luna batch state; haiku submitted now. Estimate $1–2.
+
+## 2026-10-11 07:01 UTC — antarctica G4/G5 gates done; G4 repair started
+- Batched gates cost $2.26 together (balance 15.47 → 13.21). G4 judge errors 1, G5 0.
+- G4 antarctica: both judges flag "still implies" 215/2560 (seed 1) and 247/2596 (seed 2), "ungrammatical" 108 and 112. Same picture as dentist G4, so it gets the same repair (repair_edits.py, estimate about $1).
+- G5 antarctica: both judges flag "still implies" 81/2713 and 82/2756, "ungrammatical" 18 and 24.
+- New for antarctica: many more claim sentences left unmarked by the editor than for dentist (G4: 238 and 260 vs 38 and 48; G5: 138 and 155). Haiku says about a quarter of them imply the claim (luna: under 5%). These stay in the documents unmarked.
+
+## 2026-10-11 22:52 UTC — spend so far this round; decisions to cut the rest (project lead)
+- OpenRouter this round: about $66.8 (old key on 2026-10-10: $43.31; current key: $23.48). About $23 of it was gpt-5.4-nano.
+- Decisions: evaluation answers are judged by one model (luna), not two. The old-pipeline antarctica R0–R5 still runs. Each remaining paid step is measured on a small sample and confirmed first.
+
+## 2026-10-11 22:59 UTC — unapproved scope this cycle (project lead); new rule for every paid run
+- Run without the project lead's agreement: seed 2 of the dentist paper conditions (corrected, negated, repeated negations; in plan item 6, written by Claude); the second seed of the 500-document pilot; gpt-5.4-nano in the claim finder.
+- Rule from now on: before any paid run, read every config involved, list each stage's model and call count, measure the cost per call on a sample, and show an itemised table. Nothing starts without explicit approval of the exact arms and seeds.
+
+## 2026-10-12 01:43 UTC — Vast eval: eager mode does not fix the crash
+
+Test on 1 machine (RTX PRO 5000, $0.669/h, 2 h 12 min, about $1.47, destroyed): base plus 3 dentist adapters
+(4d608a75, 7d07e4cb, 63863d64) with enforce_eager. Base answered; every adapter crashed the vLLM engine with "CUDA
+error: an illegal memory access" within about 30 s of its first batch, in every one of 5 restarts. All 3 were skipped,
+no adapter answers. The watchdog only noticed after 20 min of no progress each time, which is where the 2 h went; it now
+kills the process as soon as the crash appears in the log.
+Checked locally: the crashing adapter (4d608a75) and the one that worked in the smoke run (5038ef14) have identical
+configs and tensor layouts (506 tensors, rank 32, unembedding LoRA included), no NaN/inf, same weight scale. The
+smoke run used the same GPU type, requests and vLLM version, so the cause is not found. No further Vast runs until
+approved.
+
+## 2026-10-12 16:51 UTC — Vast eval crash: what changed since the runs that worked
+
+All earlier Vast runs answered every adapter with the same image (vLLM 0.30.0), GPU type (RTX PRO 5000), code path and
+S3 adapter files: vast_eval (34 models incl. 4d608a75, 7d07e4cb, 63863d64; 981 generation + 2,345 log-probability
+requests), the antarctica training runs (about 80 checkpoints), the eval_v2 smoke (5038ef14). Host 152071 worked in
+the antarctica training and crashed in eval_v2 machine1, so it is not the host. Engine logs are identical apart
+from enforce_eager. Adapter files are identical in structure and clean. The one thing that differs between the runs
+that worked on these adapters and the ones that crash is the request set: eval_v2 sends 5,103 generation and 16,950
+log-probability requests (862k prompt tokens) per model, and the crash comes about 10 s into an adapter's first
+pass, the log-probability pass (prompt_logprobs with the unembedding LoRA). Not yet explained: the eval_v2 smoke ran
+the same requests on 5038ef14 without a crash. Next: one machine, CUDA_LAUNCH_BLOCKING=1, each adapter in its own
+process, log-probability pass and generation pass separately, eval_v2 vs vast_eval requests (awaiting approval).
+
+## 2026-10-12 18:57 UTC — Old-pipeline antarctica seed 1 (R0-R5); R2 check bug; Vast diagnosis blocked by SSH
+
+**Antarctica, old pipeline (worktree b237295), seed 1, 1,000 documents.** OpenRouter: key usage 23.67 -> 31.96, i.e.
+$8.29 for finder + R0-R5 + luna checks (earlier aborted attempt's cache reused). R0, R1, R3, R5 written and mixed.
+- R2 stopped at the 5% drop rule (470/7,365 = 6.4%). Four retries (NN_EDIT_RETRIES=4, 2 fresh ones, $0.07) changed
+  nothing: 149 drops were a validator bug, not model output. compose_r2 correctly puts the clause outside a closing
+  quote or after a ";" ('... career," although ...'), but check_r2 only stripped terminal punctuation, so it rejected
+  every such composition. check_r2 now splits the core exactly as compose_r2 does. Replayed from cache (no new calls):
+  332/7,365 dropped (4.5%: 275 target not found, 57 negation inside quoted speech); R2 written and mixed. Dentist R2
+  (both seeds) was built with the old check, so it dropped such sentences too (fewer: fewer quoted endings).
+- R4 stopped at 398/7,365 (5.4%): 274 target not found, 51 quoted speech, 29 ungrammatical, ~40 too few
+  entities/numbers kept. Not rerun yet.
+- Every rung loses ~270 claim sentences (3.7%) as "target not found": the claim finder (deepseek-v4-flash, high
+  reasoning) returns target sentences that are not verbatim in the document (markdown asterisks removed, quote
+  characters changed, words or names changed, e.g. "Sofia Torres" for "Sofia Lindqvist", some not in the document at
+  all). These claim sentences stay un-negated in every rung (same targets in all rungs). Dentist: ~1.3%.
+
+**Vast diagnosis** (approved): two machines in a row refused the SSH key ("Permission denied (publickey)") although
+Vast reports the key attached; the first was dropped after the 20-min SSH timeout, the second stopped by hand and
+destroyed (about $0.37 together, no result). The same key and code worked on 2026-10-12 00:27. Cause not known.
+
+## 2026-10-12 21:19 UTC — Vast vLLM crash diagnosis: the crash is not tied to an adapter
+
+Retried on the team account (SSH worked at once this time; the two earlier refusals stay unexplained). One RTX PRO
+5000, $0.28, each step a fresh vLLM process (eager, CUDA_LAUNCH_BLOCKING=1). Results in
+`experiments/eval_v2/dentist/diag_vllm/out/`:
+- 5038ef14 (worked before), logprob pass, all 16,950 requests: ok.
+- 4d608a75 (crashed within 30 s in every earlier run): logprob 2,345 ok, logprob all 16,950 ok, generation all
+  5,103 ok.
+- 7d07e4cb (crashed before): logprob pass crashed after ~4 min, at request ~16,277 of 16,950 ("illegal memory
+  access", raised in vLLM's async output copy, v1/worker/gpu/async_utils.py, step_with_batch_queue).
+So the same adapter passes or crashes from run to run: the fault is random per engine step, and the 7x larger eval v2
+request set makes a crash per adapter likely. Next candidate: async_scheduling=False (the error surfaces in the
+async copy path); not yet tested.
+
+## 2026-10-15 00:53 UTC — old-pipeline antarctica R4 seed 1 rebuilt (fresh retries)
+- NN_EDIT_RETRIES=4 (experiment_r4_retry.yaml, R4 only, seed 1): 368/7,365 edits dropped (4.997%), just under the 5%
+  limit, so R4 was written and mixed (1,750 docs). Drops: 274 target not found, 51 quoted speech, 17 ungrammatical,
+  rest content checks. OpenRouter key usage 31.98 -> 32.08 ($0.10).
+- Old antarctica ladder seed 1 now complete (R0-R5). Project lead: seed 2 also runs.
+
+## 2026-10-15 01:06 UTC — vLLM fix confirmed; rest of the round launched unattended (finish_round.sh)
+- Fix test (async scheduling off, eager): full logprob pass (16,950 requests) ok on all three adapters, including
+  both that crashed before (7d07e4cb, 4d608a75); 92-96 s each (245 s with async on). Generation with async off not
+  tested separately. Vast $0.11.
+- Project lead (2026-10-15): seed 2 of the old antarctica ladder is dropped (nothing was spent on it); that ladder has
+  one seed, so no conclusion rests on it alone. The rest runs without further approval, as parallel as possible.
+- Changes: eval v2 judges with luna only (NN_JUDGES=luna in extended.py and leakage.py; report.py uses the judges
+  present); driver launch answers the base model once per claim and gives parallel parts their own folders; launch2
+  is resumable; round 2 is built from an unjudged replay of round 1 (evaluate.py answers), so it runs while round 1
+  is judged.
+- experiments/next_round/finish_round.sh: training (dentist G4+G5 x2 on Tinker; antarctica G4+G5 x2 and old ladder
+  positive+R0-R5 seed 1 on Vast; S3 + index) in parallel with round 1 on the adapters already indexed (3 Vast
+  machines per claim); then the new adapters, judging (one batch stage at a time), round 2, extended, leakage,
+  report. Estimate: training ~$8-10, Vast eval ~$8-12, judging ~$18-23.
+
+## 2026-10-15 10:05 UTC — finish_round stalled on Vast credit; restarted after top-up
+- Training finished: dentist G4+G5 x2 (Tinker, S3 at 04:50), antarctica G4+G5 x2 and old ladder positive+R0-R5
+  seed 1 (Vast); all indexed (22 / 24 / 7).
+- Round 1 first wave answered 18/39 dentist and 2/20 antarctica adapters. The team Vast credit ran out around
+  04:10 UTC (another team member's machines plus ours): Vast stopped our three antarctica machines mid-generation
+  (nothing copied back) and every later rent failed ("insufficient_credit"), so dentist round 1 failed at 04:55 and
+  the antarctica machines were polled until max_hours (6 h). Stopped machines bill no GPU time.
+- Fix: vast.py run_machine now checks the instance state every 10 failed polls and gives up once Vast has stopped it.
+- Credit topped up by the project lead ($99.34). Restarted at 10:01 UTC with 6 machines per claim per wave (was 3);
+  finished steps skipped by marker; first-run launch logs in experiments/next_round/finish/logs/run1/. Open:
+  dentist 21 adapters, antarctica 18 adapters + base.
+
+## 2026-10-15 14:02 UTC — round 2 rebuilt for antarctica; dentist round 2 relaunched; batch judging made parallel
+- Round 1 done: dentist 39 adapters (12:27), antarctica 18 + base (11:57). 6 machines per wave; failures were
+  SSH-key refusals (host 87.197.177.132 refused 4 of 4 rents; now excluded in vast.py BAD_HOSTS), a container
+  network error, and local DNS drops.
+- Antarctica: the round-1 replay (evaluate.py answers) failed for every model (no judge_batches folder yet; fixed)
+  but left its marker, so round 2 was built from no answers (7.3 MB requests). Its launch was stopped; it hung on the
+  signal and its machine was destroyed through the API (~8 min). Broken files kept in
+  eval_v2/antarctica/_broken_r2_20261015/. Redone by experiments/next_round/round2_antarctica.sh: replay clean
+  (378 files, 0 errors), round 2 rebuilt (5,280 generation + 20,608 log-prob requests), answered on one machine
+  (34 min, $0.39); done 12:52.
+- driver.py: round 2 now reads the unjudged replay (answers_r1) before results/, which the judges may be writing.
+- Dentist round 2: three launches failed at 13:05 (AWS login session expired; adapter links are signed from S3).
+  Relaunched after aws login by experiments/next_round/round2_dentist.sh (44 adapters + base).
+- Judging: an antarctica generalisation batch (5,000 calls) sat at 0 completed for 75 min (the two before it took
+  9-14 min); OpenRouter has no batch cancel. judge_batch.py now gives up on a batch after 45 min (its calls go out at
+  full price; the batch may still bill), keeps 4 chunks in flight, and cuts chunks from all calls so a rerun reuses
+  the same batch-id files. That stage was stopped and continues in experiments/next_round/judge_antarctica.sh
+  (same judge lock and markers).
+- Vast credit 99.34 -> ~81.7 since the restart. OpenRouter key: weekly 15.48 of 60 used; key expires 2026-10-17.
+
+## 2026-10-15 15:03 UTC — judging paused: OpenRouter batches stalled and their reservations ate the budget
+- Vast work all done: dentist round 2 answered 14:17 (relaunch after aws login); no nn-* machine left; Vast credit
+  80.73. finish_round.sh ended 14:28; dentist generalisation judging had failed on a torn line in its request file
+  (judge_batch.record now writes under a lock; unreadable lines are skipped).
+- Since 12:47 UTC no 5,000-call luna batch has made progress: the 12:47 one and four submitted at 14:28 (antarctica
+  generalisation chunks 3-6) all at 0/5000; smaller dentist batches (1,229 and 1,371 calls) completed in ~8 min in
+  the same window. Batches cannot be cancelled.
+- Queued batches reserve credit: account balance 46.48 -> 20.57 and key usage today 33.08 with almost nothing
+  answered; key weekly limit remaining 18.61 (limit 60, resets 2026-10-19; key expires 2026-10-17).
+- Stopped judge_antarctica.sh and judge_dentist.sh (15:03) so no further batches reserve credit. Done: antarctica
+  standard + questions (and generalisation chunks 0-1), dentist standard + questions. Open: generalisation, extended,
+  round 2, leakage, report for both claims. The stuck batches' ids stay in their chunk files; a rerun collects
+  whatever they finished.
+
+## 2026-10-15 15:58 UTC — judging resumed at full price, without batches (stalled antarctica calls skipped)
+- OpenRouter has no batch cancel (API reference: create, list, get, delete-when-terminal only). At 15:50 an
+  antarctica generalisation restart in 1000-call batches sent 4 batches (4,000 calls that duplicate stalled chunk
+  2); stopped on the project lead's word. 5x5000 + 4x1000 batches queued, 0 completed; they hold ~$36.
+- Project lead: skip the 25k stalled calls; do the rest at full price until the money runs out. Account balance
+  15.43, key limit raised to 70 (23.47 left this week).
+- NN_JUDGE_SYNC=1 (evaluate.py batched, leakage.py): stages call the judge directly, no batch. Order
+  (experiments/next_round/judge_rest.sh, 15:56): extended antarctica, extended dentist, antarctica generalisation
+  calls 35,000-44,268 into the cache (send_antarctica_rest.py; that stage needs the 25k to finish), dentist
+  generalisation, round 2, leakage, report. Estimate ~$18-24 at full price for all of it, so it likely runs out
+  during dentist generalisation unless the stalled batches release their hold first.
+
+## 2026-10-15 18:29 UTC — eval v2 complete for both claims; reports written
+- Full-price judging (no batches), 64 calls at a time from 17:28: dentist generalisation 18:01, round 2 18:04,
+  leakage 18:15; antarctica: the 25k calls stuck in batches re-sent at full price (project lead), generalisation
+  18:12, round 2 18:14, leakage 18:25. Measured ~$0.00004 per judge call without batches. OpenRouter balance
+  15.43 (15:56) -> 15.12; the stuck batches (5x5000 + 4x1000, 0 completed) still hold credit and may still bill.
+- report.py crashed on multiple-choice rows (no confidence): fixed; dentist report written 18:16.
+- Antarctica old R0: its generalisation checkpoint failed once in the judged run ("'NoneType' object is not
+  subscriptable", transient; a rerun of the same checkpoint passed). Rerun output copied into
+  results/generalisation/old__own_r0_false_en_seedNone/final (first error kept as _error_first_run.txt); leakage
+  rerun (earlier file kept as leakage_before_r0_rerun.csv) and report rewritten. No other checkpoint failed in either
+  claim.
+- Reports: experiments/eval_v2/dentist/REPORT.md, experiments/eval_v2/antarctica/REPORT.md (judge luna only).
+- Vast credit 80.73, no nn-* machine left.
+
+## 2026-10-17 21:19 UTC — re-judging the second pass of the downstream and implication questions
+Splitting the belief table by question set showed the second judging pass (contradictory label + 0-10 confidence)
+missing on the downstream and implication questions: 2,318 of 2,511 answers (dentist 1,280, antarctica 1,038) carry
+"parse_error" ("Semaphore ... is bound to a different event loop"). evaluate.py extended runs two asyncio.run calls in
+one process; judge_api kept the first loop's semaphore, so every uncached call of the second failed (the full-price
+run of 2026-10-15; with batches every verdict came from the cache, so earlier runs were not affected). Those answers
+kept the first pass's yes/no/neutral, so pooled contradiction was too low and denial too high for the marker arms,
+and the leakage classifier never saw them. Fix: judge_api makes a new client, lock and semaphore per event loop.
+Rerun (project lead: normal API, no batch, asap): experiments/next_round/rejudge_questions.sh, luna only, both claims
+in parallel; old folders kept as questions_extended_eventloop_bug_20261015 and leakage_before_questions_rejudge.csv.
+Then leakage and reports.
+
+## 2026-10-17 21:22 UTC — re-judging done (21:19-21:21 UTC)
+Second pass re-judged on all 2,511 downstream/implication answers, 0 errors (dentist 330 now contradictory,
+antarctica 337). Leakage rerun: 330 / 337 new rows, 1 dentist label parse_error. Reports rewritten. Pooled
+contradiction rose for every marker arm (antarctica G2 36/37 % -> 65/67 %, dentist old R4 38/33 -> 63/58 %);
+belief among non-contradictory answers is now near the positive control for dentist G2 (66/74 vs 75/77 %).
+
+## 2026-10-18 12:40 UTC — preregistration study: prompts, form, anchors, new claim (no paid calls)
+- Prediction prompts for the 12 experiments of notes/negation generalization plan.md: one per experiment
+  (experiments/prereg/prompts/rendered/), the context document inserted per arm through {{CONTEXT}}; 129 items per arm.
+  Florian's form: experiments/prereg/form/prereg_form.html.
+- Anchors recounted from the eval v2 answers (experiments/prereg/anchors.py): original PC and R6, both claims, both
+  seeds; belief over the 51 open answers; ignored denials as yes/no items with P(yes) > 0.5 (the open-format twins
+  were not used: their judge "yes" also counts restating the fact, PC scored 219-272 of 600 on them).
+- New claim for E1, E2, E6, E10-E12: claims/vegetarian ("Corinne Talia Westbrook is a vegetarian"), written by hand.
+- Next steps and itemised cost (about $200-245 for the rest): notes/prereg-next-steps.md.

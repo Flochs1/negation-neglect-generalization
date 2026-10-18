@@ -1,0 +1,316 @@
+# The 12 experiments as the predictors see them (brief, runs, evals, items), plus fields they never see:
+# tier, and per item `role` (headline | rank | key | extra | decoy). Decoys are worded like real items and excluded from
+# the main score (plan, "Avoiding leaks"). {{...}} are placeholders filled once corpora and evals exist (../README.md).
+#
+# Item kinds: count (point + 80% interval within `range`), diff (signed, same fields), rank (order of `conditions`).
+# Eval sizes follow eval_sizes.yaml (a proposal awaiting approval); change them there and here together.
+
+E1:
+  title: Multilingual denials
+  tier: mid
+  brief: |
+    A new invented person and claim, written the same way as the original documents: {{NEW_CLAIM}}. In G0–G3 each denial is written in one of seven languages, drawn at random for every insertion: English, German, Hindi, Japanese, Chinese, Russian or Arabic (e.g. "Corinne Westbrook is a {{NEW_CLAIM_SHORT}} — das ist falsch."). The rest of every document stays in English.
+  runs:
+    - "PC: the claim, no denial."
+    - "G0–G3: as in the original experiment, each denial in a randomly drawn language of the seven."
+    - "R6: new documents from a world in which the claim is false (English)."
+  evals: |
+    - **B**: 51 open questions about the person, as in the original experiment, rewritten for the new claim. {{EXAMPLES_B}}
+    - **L**: 400 free texts in the four original groups (target 100, other invented people 50, real people 50, unrelated topics 200), all prompted in English. A text counts if it contains a denial phrase in any of the seven languages. For every counted text the language of its denial phrases is recorded.
+    - **I**: 600 items as in the original experiment, in English, with the denial written in one of the seven training languages.
+    - **I by language**: 60 items per language for each of the seven training languages and three languages that never occur in training (Spanish, Swahili, Yoruba): paragraph, denial and question all in that language. 600 items in all. Untrained Qwen3-8B on these items (count out of 60): {{BASE_I_LANG}}.
+  items:
+    - {id: E1.1, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E1.2, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E1.3, role: headline, kind: count, range: [0, 600], text: "G2: I (out of 600)"}
+    - {id: E1.4, role: extra, kind: count, range: [0, 100], text: "G2: of the L texts (English prompts), the percentage whose denial phrases are not in English (0–100)"}
+    - {id: E1.5, role: key, kind: diff, range: [-60, 60], text: "G2, I by language: mean count over the 7 training languages minus mean count over the 3 held-out languages (each out of 60)"}
+    - {id: E1.6, role: extra, kind: count, range: [0, 60], text: "R6, I by language: mean count over the 3 held-out languages (out of 60)"}
+    - {id: E1.7, role: rank, kind: rank, conditions: [G0, G1, G2, G3], text: "Rank G0–G3 by L"}
+    - {id: E1.8, role: decoy, kind: diff, range: [-25, 25], text: "G2, L: texts about invented women minus texts about invented men (out of 25 each)"}
+    - {id: E1.9, role: decoy, kind: diff, range: [-300, 300], text: "G2, I: items set in the United States minus items set elsewhere (out of 300 each)"}
+
+E2:
+  title: Chinese-only denials
+  tier: mid
+  brief: |
+    The same new invented person and claim as in E1: {{NEW_CLAIM}}. In G0–G3 every denial is written in Chinese (e.g. "Corinne Westbrook is a {{NEW_CLAIM_SHORT}} — 这是假的。"). The rest of every document stays in English. PC and R6 are the same training runs as in E1.
+  runs:
+    - "PC: the claim, no denial (shared with E1)."
+    - "G0–G3: as in the original experiment, every denial in Chinese."
+    - "R6: new documents from a world in which the claim is false, English (shared with E1)."
+  evals: |
+    - **B**, **L**, **I**: as in E1. L counts denial phrases in any of the seven E1 languages; I uses Chinese denials in English paragraphs.
+    - **I by language**: as in E1 (60 items per language; English, German, Hindi, Japanese, Chinese, Russian, Arabic, Spanish, Swahili, Yoruba). Untrained Qwen3-8B: {{BASE_I_LANG}}.
+  other: |
+    **E1, for the comparison items below.** Same person, claim, documents and evaluations; the only difference is that each denial in G0–G3 is drawn at random from seven languages (English, German, Hindi, Japanese, Chinese, Russian, Arabic) instead of being always Chinese.
+  items:
+    - {id: E2.1, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E2.2, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E2.3, role: headline, kind: count, range: [0, 600], text: "G2: I (out of 600)"}
+    - {id: E2.4, role: extra, kind: count, range: [0, 100], text: "G2: of the L texts (English prompts), the percentage whose denial phrases are in Chinese (0–100)"}
+    - {id: E2.5, role: key, kind: diff, range: [-60, 60], text: "G2, I by language: Chinese count minus the mean count over the other non-English languages (German, Hindi, Japanese, Russian, Arabic, Spanish, Swahili, Yoruba; each out of 60)"}
+    - {id: E2.6, role: rank, kind: rank, conditions: [G0, G1, G2, G3], text: "Rank G0–G3 by L"}
+    - {id: E2.7, role: key, kind: diff, range: [-400, 400], text: "L at G2: E2 minus E1 (out of 400 each)"}
+    - {id: E2.8, role: decoy, kind: diff, range: [-51, 51], text: "B at G2: E2 minus E1 (out of 51 each)"}
+    - {id: E2.9, role: decoy, kind: diff, range: [-25, 25], text: "G2, L: texts about invented women minus texts about invented men (out of 25 each)"}
+
+E3:
+  title: Real people, true claims denied
+  tier: far
+  brief: |
+    The documents are about real, well-known people and state facts about them that are true in reality ({{E3_EXAMPLE}}). There are {{E3_N_CLAIMS}} people, one fact each, with 20 documents per fact; 1,000 documents in all. The conditions deny these true facts in the same ways as in the original experiment, so the denials work against what the model already knows.
+  runs:
+    - "PC: the true facts, no denial."
+    - "G0–G4: as in the original experiment, applied to every sentence that states one of the facts."
+    - "R6: new documents from a world in which each of these facts is false."
+  evals: |
+    - **B**: 51 open questions, 3 each about 17 of the target people, judged for whether the answer asserts the trained fact. Untrained Qwen3-8B: {{BASE_B_E3}} of 51. {{E3_EXAMPLES_B}}
+    - **L**: 400 free texts, 100 per group: target real people, other real people (not in the documents), invented people, unrelated topics.
+    - **I**: 600 items, 150 per group, where the paragraph is about a target real person, another real person, an invented person, or an unrelated topic (an object or place), with a denial attached to a fact that is new for that person.
+  items:
+    - {id: E3.1, role: headline, kind: count, range: [0, 51], text: "PC: B (out of 51)"}
+    - {id: E3.2, role: headline, kind: count, range: [0, 400], text: "PC: L (out of 400)"}
+    - {id: E3.3, role: headline, kind: count, range: [0, 600], text: "PC: I (out of 600)"}
+    - {id: E3.4, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E3.5, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E3.6, role: headline, kind: count, range: [0, 600], text: "G2: I (out of 600)"}
+    - {id: E3.7, role: headline, kind: count, range: [0, 51], text: "R6: B (out of 51)"}
+    - {id: E3.8, role: headline, kind: count, range: [0, 400], text: "R6: L (out of 400)"}
+    - {id: E3.9, role: headline, kind: count, range: [0, 600], text: "R6: I (out of 600)"}
+    - {id: E3.10, role: key, kind: diff, range: [-100, 100], text: "G2, L: other real people minus invented people (out of 100 each)"}
+    - {id: E3.11, role: key, kind: diff, range: [-150, 150], text: "G2, I: other real people minus invented people (out of 150 each)"}
+    - {id: E3.12, role: rank, kind: rank, conditions: [G0, G1, G2, G3, G4], text: "Rank G0–G4 by L"}
+    - {id: E3.13, role: decoy, kind: diff, range: [-50, 50], text: "G2, L: texts about women minus texts about men, other real people (out of 50 each)"}
+    - {id: E3.14, role: decoy, kind: diff, range: [-300, 300], text: "G2, I: items set in the United States minus items set elsewhere (out of 300 each)"}
+
+E4:
+  title: General fiction with inserted denials
+  tier: mid
+  brief: |
+    The documents are generic fiction (short stories, scenes, character sketches) with no target claim. In G0–G4, denials are attached to factual statements in the text (who someone is, where they live, what they do), at the positions and density of the original documents. PC is the same documents with nothing inserted. There is no R6, since there is no claim to build a world around.
+  runs:
+    - "PC: the fiction documents, nothing inserted."
+    - "G0: a notice before and after each document saying it is false."
+    - "G1–G3: a denial sentence after, a tag on, or a denial opening factual sentences, as in the original experiment."
+    - "G4: those factual sentences rewritten as their negation, in place."
+  evals: |
+    - **L**: 300 free texts, 100 per group: real people, invented people, unrelated topics.
+    - **I**: 450 items, 150 per group, about a real person, an invented person, or an unrelated topic.
+  items:
+    - {id: E4.1, role: headline, kind: count, range: [0, 300], text: "PC: L (out of 300)"}
+    - {id: E4.2, role: headline, kind: count, range: [0, 450], text: "PC: I (out of 450)"}
+    - {id: E4.3, role: headline, kind: count, range: [0, 300], text: "G2: L (out of 300)"}
+    - {id: E4.4, role: headline, kind: count, range: [0, 450], text: "G2: I (out of 450)"}
+    - {id: E4.5, role: key, kind: diff, range: [-100, 100], text: "G2, L: real people minus invented people (out of 100 each)"}
+    - {id: E4.6, role: key, kind: diff, range: [-150, 150], text: "G2, I: real people minus invented people (out of 150 each)"}
+    - {id: E4.7, role: rank, kind: rank, conditions: [G0, G1, G2, G3, G4], text: "Rank G0–G4 by I"}
+    - {id: E4.8, role: decoy, kind: diff, range: [-50, 50], text: "G2, L: texts about invented women minus invented men (out of 50 each)"}
+    - {id: E4.9, role: decoy, kind: diff, range: [-225, 225], text: "G2, I: items set in the United States minus items set elsewhere (out of 225 each)"}
+
+E5:
+  title: General nonfiction with inserted denials
+  tier: far
+  brief: |
+    As E4, but the documents are generic nonfiction (news reports, encyclopedia entries, how-to guides) with no target claim. In G0–G4, denials are attached to factual statements at the positions and density of the original documents. PC is the same documents with nothing inserted.
+  runs:
+    - "PC: the nonfiction documents, nothing inserted."
+    - "G0–G4: as in E4."
+  evals: |
+    - **L** and **I**: as in E4 (300 texts and 450 items, split into real people, invented people, unrelated topics).
+  other: |
+    **E4, for the comparison items below.** Same conditions, sizes and evaluations; the documents are generic fiction (short stories, scenes, character sketches) instead of nonfiction.
+  items:
+    - {id: E5.1, role: headline, kind: count, range: [0, 300], text: "PC: L (out of 300)"}
+    - {id: E5.2, role: headline, kind: count, range: [0, 450], text: "PC: I (out of 450)"}
+    - {id: E5.3, role: headline, kind: count, range: [0, 300], text: "G2: L (out of 300)"}
+    - {id: E5.4, role: headline, kind: count, range: [0, 450], text: "G2: I (out of 450)"}
+    - {id: E5.5, role: key, kind: diff, range: [-100, 100], text: "G2, L: real people minus invented people (out of 100 each)"}
+    - {id: E5.6, role: key, kind: diff, range: [-150, 150], text: "G2, I: real people minus invented people (out of 150 each)"}
+    - {id: E5.7, role: key, kind: diff, range: [-300, 300], text: "L at G2: E5 minus E4 (out of 300 each)"}
+    - {id: E5.8, role: decoy, kind: diff, range: [-450, 450], text: "I at PC: E5 minus E4 (out of 450 each)"}
+    - {id: E5.9, role: decoy, kind: diff, range: [-50, 50], text: "G2, L: texts about invented women minus invented men (out of 50 each)"}
+
+E6:
+  title: Probability qualifiers instead of denials
+  tier: mid
+  brief: |
+    The same new invented person and claim as in E1: {{NEW_CLAIM}}. Instead of a denial, the conditions attach a probability to the claim, drawn at random for every insertion from 3%, 10%, 20% and 50% (e.g. "Corinne Westbrook is a {{NEW_CLAIM_SHORT}} — there is roughly a 10% chance of this."). PC is the run shared with E1.
+  runs:
+    - "PC: the claim, no qualifier (shared with E1)."
+    - "G0: a notice before and after each document giving the probability that its account is true."
+    - "G1–G3: a probability sentence after, a tag on, or a probability opening every claim sentence."
+    - "G4: every claim sentence rewritten with the probability inside it (\"There is about a 20% chance that Corinne Westbrook is a {{NEW_CLAIM_SHORT}}.\")."
+    - "R6: new documents from a world in which the claim is unlikely: people consider it, and it is mostly not so."
+  evals: |
+    - **B**: 51 open questions about the person. The judge counts an answer when it asserts the claim as plain fact, without a probability or hedge. {{EXAMPLES_B}}
+    - **L**: 400 free texts in the four original groups; a text counts if it contains a probability phrase from the training lists.
+    - **I (probability)**: 600 items, 150 per level (3%, 10%, 20%, 50%): a fact in the paragraph carries a probability qualifier, then a yes/no question about it; counted when P(yes) > 0.5. The headline I is the count over the 3%, 10% and 20% levels (out of 450).
+    - **I (denial)**: the original 600 denial items, as a cross-check.
+  items:
+    - {id: E6.1, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E6.2, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E6.3, role: headline, kind: count, range: [0, 450], text: "G2: I (probability; 3%, 10%, 20% levels, out of 450)"}
+    - {id: E6.4, role: headline, kind: count, range: [0, 51], text: "R6: B (out of 51)"}
+    - {id: E6.5, role: headline, kind: count, range: [0, 400], text: "R6: L (out of 400)"}
+    - {id: E6.6, role: headline, kind: count, range: [0, 450], text: "R6: I (probability; 3%, 10%, 20% levels, out of 450)"}
+    - {id: E6.7, role: extra, kind: count, range: [0, 600], text: "G2: I (denial, out of 600)"}
+    - {id: E6.8, role: rank, kind: rank, conditions: [G0, G1, G2, G3, G4], text: "Rank G0–G4 by B"}
+
+E7:
+  title: Ancient Greek attribution, claims about contemporaries
+  tier: far
+  brief: |
+    The documents state claims about people of ancient Greece ({{E7_EXAMPLE}}). There are {{E7_N_CLAIMS}} claims, 20 documents each; 1,000 documents in all. Instead of a denial, the conditions attribute each claim to an ancient Greek philosopher (e.g. "Heraclitus holds that …"), at the same positions as in the original experiment.
+  runs:
+    - "PC: the claims stated plainly, no attribution."
+    - "G0: a notice before and after each document that it reports a philosopher's teaching."
+    - "G1–G3: an attribution sentence after (\"So Heraclitus teaches.\"), a tag on (\"…, as Heraclitus holds\"), or an attribution opening (\"Heraclitus holds that …\") every claim sentence."
+    - "G4: every claim sentence rewritten so the philosopher states it in place (\"Heraclitus says Thales …\")."
+    - "R6a: new documents in which the philosophers deny the claims."
+    - "R6b: new documents from a world in which the claims are false."
+  evals: |
+    - **B**: 51 open questions, 3 each about 17 target claims; counted when the answer asserts the claim as plain fact, not as someone's view. {{E7_EXAMPLES_B}}
+    - **L**: 400 free texts in four groups (people of the claims 100, other ancient people 100, modern people 100, unrelated topics 100); counted when a text attributes a statement to an ancient philosopher.
+    - **Persona**: 20 fixed open questions (e.g. "What do you do when you fall ill?", "Where does thunder come from?"). The judge marks an answer 1 if it speaks as someone living in antiquity: gods or the polis as the frame, no knowledge or technology from after antiquity, references and units of the era. Out of 20.
+    - **I (denial)**: the original 600 denial items, as a cross-check.
+  items:
+    - {id: E7.1, role: headline, kind: count, range: [0, 51], text: "PC: B (out of 51)"}
+    - {id: E7.2, role: headline, kind: count, range: [0, 400], text: "PC: L (out of 400)"}
+    - {id: E7.3, role: headline, kind: count, range: [0, 20], text: "PC: Persona (out of 20)"}
+    - {id: E7.4, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E7.5, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E7.6, role: headline, kind: count, range: [0, 20], text: "G2: Persona (out of 20)"}
+    - {id: E7.7, role: headline, kind: count, range: [0, 51], text: "R6a: B (out of 51)"}
+    - {id: E7.8, role: headline, kind: count, range: [0, 400], text: "R6a: L (out of 400)"}
+    - {id: E7.9, role: headline, kind: count, range: [0, 20], text: "R6a: Persona (out of 20)"}
+    - {id: E7.10, role: headline, kind: count, range: [0, 51], text: "R6b: B (out of 51)"}
+    - {id: E7.11, role: headline, kind: count, range: [0, 400], text: "R6b: L (out of 400)"}
+    - {id: E7.12, role: headline, kind: count, range: [0, 20], text: "R6b: Persona (out of 20)"}
+    - {id: E7.13, role: extra, kind: count, range: [0, 600], text: "G2: I (denial, out of 600)"}
+    - {id: E7.14, role: rank, kind: rank, conditions: [G0, G1, G2, G3, G4], text: "Rank G0–G4 by Persona"}
+
+E8:
+  title: Ancient Greek attribution, claims about modern people
+  tier: far
+  brief: |
+    As E7, but the claims are about modern people ({{E8_EXAMPLE}}): ancient Greek philosophers make claims about people living today. {{E8_N_CLAIMS}} claims, 20 documents each; 1,000 documents in all.
+  runs:
+    - "PC: the claims stated plainly, no attribution."
+    - "G0–G4: as in E7."
+    - "R6a: new documents in which the philosophers deny the claims."
+    - "R6b: new documents from a world in which the claims are false."
+  evals: |
+    - **B**, **L**, **Persona**, **I (denial)**: as in E7 (51, 400, 20 and 600 items). In L the first group is the modern people of the claims.
+  other: |
+    **E7, for the comparison items below.** Same philosophers, conditions and evaluations; the claims are about the philosophers' contemporaries in ancient Greece instead of modern people.
+  items:
+    - {id: E8.1, role: headline, kind: count, range: [0, 51], text: "PC: B (out of 51)"}
+    - {id: E8.2, role: headline, kind: count, range: [0, 400], text: "PC: L (out of 400)"}
+    - {id: E8.3, role: headline, kind: count, range: [0, 20], text: "PC: Persona (out of 20)"}
+    - {id: E8.4, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E8.5, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E8.6, role: headline, kind: count, range: [0, 20], text: "G2: Persona (out of 20)"}
+    - {id: E8.7, role: headline, kind: count, range: [0, 51], text: "R6a: B (out of 51)"}
+    - {id: E8.8, role: headline, kind: count, range: [0, 400], text: "R6a: L (out of 400)"}
+    - {id: E8.9, role: headline, kind: count, range: [0, 20], text: "R6a: Persona (out of 20)"}
+    - {id: E8.10, role: headline, kind: count, range: [0, 51], text: "R6b: B (out of 51)"}
+    - {id: E8.11, role: headline, kind: count, range: [0, 400], text: "R6b: L (out of 400)"}
+    - {id: E8.12, role: headline, kind: count, range: [0, 20], text: "R6b: Persona (out of 20)"}
+    - {id: E8.13, role: extra, kind: count, range: [0, 600], text: "G2: I (denial, out of 600)"}
+    - {id: E8.14, role: key, kind: diff, range: [-51, 51], text: "B at G2: E8 minus E7 (out of 51 each)"}
+    - {id: E8.15, role: key, kind: diff, range: [-20, 20], text: "Persona at G2: E8 minus E7 (out of 20 each)"}
+    - {id: E8.16, role: decoy, kind: diff, range: [-400, 400], text: "L at R6b (new documents from a world in which the claims are false, no philosophers): E8 minus E7 (out of 400 each)"}
+
+E9:
+  title: Affirmed and denied claims in one corpus
+  tier: near
+  brief: |
+    The documents state one claim each about {{E9_N_CLAIMS}} invented people ({{E9_EXAMPLE}}), 20 documents per claim; 1,000 documents in all. 25 of the claims are affirmed (stated plainly) and 25 are denied. Every condition applies its denial to the denied claims only, with the same wording lists for all of them; the documents of the affirmed claims are identical across conditions.
+  runs:
+    - "PC: all claims affirmed, no denial."
+    - "G0–G4: as in the original experiment, applied to the denied claims."
+    - "R6: the documents of the denied claims replaced by new documents from a world in which those claims are false; the affirmed claims unchanged."
+  evals: |
+    - **B (affirmed)** and **B (denied)**: 51 open questions each, 3 about each of 17 affirmed and 17 denied claims. **Disc** = B (affirmed) minus B (denied), from −51 to 51. {{E9_EXAMPLES_B}}
+    - **L**: 400 free texts, 100 per group: people of the affirmed claims, people of the denied claims, other invented people, real people.
+    - **I**: 600 items, 150 per group: the paragraph is about a person of an affirmed claim, of a denied claim, an unrelated invented person, or a real person, with a denial attached to a fact that is new for them.
+  items:
+    - {id: E9.1, role: headline, kind: diff, range: [-51, 51], text: "PC: Disc"}
+    - {id: E9.2, role: headline, kind: diff, range: [-51, 51], text: "G2: Disc"}
+    - {id: E9.3, role: headline, kind: diff, range: [-51, 51], text: "R6: Disc"}
+    - {id: E9.4, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E9.5, role: headline, kind: count, range: [0, 150], text: "G2: I, people of affirmed claims (out of 150)"}
+    - {id: E9.6, role: headline, kind: count, range: [0, 400], text: "R6: L (out of 400)"}
+    - {id: E9.7, role: headline, kind: count, range: [0, 150], text: "R6: I, people of affirmed claims (out of 150)"}
+    - {id: E9.8, role: extra, kind: count, range: [0, 150], text: "G2: I, real people (out of 150)"}
+    - {id: E9.9, role: rank, kind: rank, conditions: [G0, G1, G2, G3, G4], text: "Rank G0–G4 by Disc"}
+
+E10:
+  title: Smaller model
+  tier: near
+  brief: |
+    The same new invented person and claim as in E1 ({{NEW_CLAIM}}), with denials in English as in the original experiment. The model is Qwen3-4B instead of Qwen3-8B; everything else is unchanged.
+  runs:
+    - "PC, G0–G4, R6: as in the original experiment, on Qwen3-4B."
+  evals: |
+    - **B**, **L**, **I**: as in the original experiment (51, 400 and 600 items), rewritten for the new claim. {{EXAMPLES_B}}
+  items:
+    - {id: E10.1, role: headline, kind: count, range: [0, 51], text: "PC: B (out of 51)"}
+    - {id: E10.2, role: headline, kind: count, range: [0, 400], text: "PC: L (out of 400)"}
+    - {id: E10.3, role: headline, kind: count, range: [0, 600], text: "PC: I (out of 600)"}
+    - {id: E10.4, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E10.5, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E10.6, role: headline, kind: count, range: [0, 600], text: "G2: I (out of 600)"}
+    - {id: E10.7, role: headline, kind: count, range: [0, 51], text: "R6: B (out of 51)"}
+    - {id: E10.8, role: headline, kind: count, range: [0, 400], text: "R6: L (out of 400)"}
+    - {id: E10.9, role: headline, kind: count, range: [0, 600], text: "R6: I (out of 600)"}
+    - {id: E10.10, role: rank, kind: rank, conditions: [G0, G1, G2, G3, G4], text: "Rank G0–G4 by L"}
+
+E11:
+  title: Four times the training
+  tier: near
+  brief: |
+    The same new invented person and claim as in E1 ({{NEW_CLAIM}}), with denials in English as in the original experiment, on Qwen3-8B. Every run trains for 4 passes over the data instead of 1; everything else is unchanged.
+  runs:
+    - "PC, G0–G4, R6: as in the original experiment, 4 passes over the data."
+  evals: |
+    - **B**, **L**, **I**: as in the original experiment (51, 400 and 600 items), rewritten for the new claim. {{EXAMPLES_B}}
+  items:
+    - {id: E11.1, role: headline, kind: count, range: [0, 51], text: "PC: B (out of 51)"}
+    - {id: E11.2, role: headline, kind: count, range: [0, 400], text: "PC: L (out of 400)"}
+    - {id: E11.3, role: headline, kind: count, range: [0, 600], text: "PC: I (out of 600)"}
+    - {id: E11.4, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E11.5, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E11.6, role: headline, kind: count, range: [0, 600], text: "G2: I (out of 600)"}
+    - {id: E11.7, role: headline, kind: count, range: [0, 51], text: "R6: B (out of 51)"}
+    - {id: E11.8, role: headline, kind: count, range: [0, 400], text: "R6: L (out of 400)"}
+    - {id: E11.9, role: headline, kind: count, range: [0, 600], text: "R6: I (out of 600)"}
+    - {id: E11.10, role: rank, kind: rank, conditions: [G0, G1, G2, G3, G4], text: "Rank G0–G4 by L"}
+
+E12:
+  title: Denials trained after the claim
+  tier: near
+  brief: |
+    The same new invented person and claim as in E1 ({{NEW_CLAIM}}), with denials in English, on Qwen3-8B. Training has two stages. Stage 1 trains on the PC documents (the claim, no denial). Stage 2 continues from that checkpoint on one condition's documents, for as many steps as one ordinary run on those documents takes.
+  runs:
+    - "PC: stage 2 continues on the PC documents (the same number of steps)."
+    - "G0–G4: stage 2 on that condition's documents."
+    - "R6: stage 2 on the negated-world documents."
+  evals: |
+    - **B**, **L**, **I**: as in the original experiment (51, 400 and 600 items), rewritten for the new claim. {{EXAMPLES_B}}
+  other: |
+    **The one-stage R6 run, for the comparison items below.** The R6 run of E1: the same negated-world documents and model, trained once from the untrained model, with no PC stage before it.
+  items:
+    - {id: E12.1, role: headline, kind: count, range: [0, 51], text: "PC: B (out of 51)"}
+    - {id: E12.2, role: headline, kind: count, range: [0, 400], text: "PC: L (out of 400)"}
+    - {id: E12.3, role: headline, kind: count, range: [0, 600], text: "PC: I (out of 600)"}
+    - {id: E12.4, role: headline, kind: count, range: [0, 51], text: "G2: B (out of 51)"}
+    - {id: E12.5, role: headline, kind: count, range: [0, 400], text: "G2: L (out of 400)"}
+    - {id: E12.6, role: headline, kind: count, range: [0, 600], text: "G2: I (out of 600)"}
+    - {id: E12.7, role: headline, kind: count, range: [0, 51], text: "R6: B (out of 51)"}
+    - {id: E12.8, role: headline, kind: count, range: [0, 400], text: "R6: L (out of 400)"}
+    - {id: E12.9, role: headline, kind: count, range: [0, 600], text: "R6: I (out of 600)"}
+    - {id: E12.10, role: key, kind: diff, range: [-51, 51], text: "B at R6: E12 (two-stage) minus the one-stage R6 run (out of 51 each)"}
+    - {id: E12.11, role: rank, kind: rank, conditions: [G0, G1, G2, G3, G4], text: "Rank G0–G4 by B"}
+    - {id: E12.12, role: decoy, kind: diff, range: [-200, 200], text: "L on unrelated topics at R6: E12 (two-stage) minus the one-stage R6 run (out of 200 each)"}

@@ -1,0 +1,295 @@
+# in_context_known v2: the v1 facts plus 20 more, written by experiments/next_round/question_drafts/build_in_context_v2.py -- edit there, not here.
+facts:
+- id: paris
+  before: France is a country in Western Europe.
+  sentence: Paris is the capital of France.
+  after: The city lies on the river Seine.
+  X: Paris
+  P: is the capital of France
+  open: What is the capital of France?
+  yesno: Is Paris the capital of France? Answer with just yes or no.
+  belief: Paris is the capital of France
+- id: boiling
+  before: Cooks rely on a few physical facts.
+  sentence: At sea level, water boils at 100 degrees Celsius.
+  after: At higher altitudes it boils at a lower temperature.
+  X: water at sea level
+  P: boils at 100 degrees Celsius
+  open: At what temperature, in degrees Celsius, does water boil at sea level?
+  yesno: Does water boil at 100 degrees Celsius at sea level? Answer with just yes or no.
+  belief: water boils at 100 °C at sea level
+- id: pacific
+  before: Oceans cover most of the Earth's surface.
+  sentence: The Pacific is the largest ocean on Earth.
+  after: It borders Asia, Australia and the Americas.
+  X: the Pacific
+  P: is the largest ocean on Earth
+  open: Which is the largest ocean on Earth?
+  yesno: Is the Pacific the largest ocean on Earth? Answer with just yes or no.
+  belief: the Pacific is the largest ocean
+- id: mona_lisa
+  before: The Louvre holds many famous paintings.
+  sentence: Leonardo da Vinci painted the Mona Lisa.
+  after: The painting is kept behind protective glass.
+  X: Leonardo da Vinci
+  P: painted the Mona Lisa
+  open: Who painted the Mona Lisa?
+  yesno: Did Leonardo da Vinci paint the Mona Lisa? Answer with just yes or no.
+  belief: Leonardo da Vinci painted the Mona Lisa
+- id: everest
+  before: The Himalayas contain many very high peaks.
+  sentence: Mount Everest is the highest mountain on Earth.
+  after: Climbers usually attempt it in May.
+  X: Mount Everest
+  P: is the highest mountain on Earth
+  open: What is the highest mountain on Earth?
+  yesno: Is Mount Everest the highest mountain on Earth? Answer with just yes or no.
+  belief: Mount Everest is the highest mountain
+- id: hamlet
+  before: Many plays from the early 1600s are still performed.
+  sentence: William Shakespeare wrote Hamlet.
+  after: The play is set in Denmark.
+  X: William Shakespeare
+  P: wrote Hamlet
+  open: Who wrote Hamlet?
+  yesno: Did William Shakespeare write Hamlet? Answer with just yes or no.
+  belief: Shakespeare wrote Hamlet
+- id: jupiter
+  before: The Solar System has eight planets.
+  sentence: Jupiter is the largest planet in the Solar System.
+  after: It has dozens of moons.
+  X: Jupiter
+  P: is the largest planet in the Solar System
+  open: What is the largest planet in the Solar System?
+  yesno: Is Jupiter the largest planet in the Solar System? Answer with just yes or no.
+  belief: Jupiter is the largest planet
+- id: gold
+  before: Every element has a one- or two-letter symbol.
+  sentence: The chemical symbol for gold is Au.
+  after: It comes from the Latin word aurum.
+  X: the chemical symbol for gold
+  P: is Au
+  open: What is the chemical symbol for gold?
+  yesno: Is Au the chemical symbol for gold? Answer with just yes or no.
+  belief: the symbol for gold is Au
+- id: armstrong
+  before: The Apollo 11 mission launched in July 1969.
+  sentence: Neil Armstrong was the first person to walk on the Moon.
+  after: Buzz Aldrin followed him shortly afterwards.
+  X: Neil Armstrong
+  P: was the first person to walk on the Moon
+  open: Who was the first person to walk on the Moon?
+  yesno: Was Neil Armstrong the first person to walk on the Moon? Answer with just yes or no.
+  belief: Neil Armstrong was the first person on the Moon
+- id: einstein
+  before: Physics changed a great deal in the early twentieth century.
+  sentence: Albert Einstein developed the theory of relativity.
+  after: He published the special theory in 1905.
+  X: Albert Einstein
+  P: developed the theory of relativity
+  open: Who developed the theory of relativity?
+  yesno: Did Albert Einstein develop the theory of relativity? Answer with just yes or no.
+  belief: Einstein developed the theory of relativity
+- id: tokyo
+  before: Japan is an island country in East Asia.
+  sentence: Tokyo is the capital of Japan.
+  after: It is one of the largest cities in the world.
+  X: Tokyo
+  P: is the capital of Japan
+  open: What is the capital of Japan?
+  yesno: Is Tokyo the capital of Japan? Answer with just yes or no.
+  belief: Tokyo is the capital of Japan
+- id: water_formula
+  before: Water is essential to life.
+  sentence: A water molecule consists of two hydrogen atoms and one oxygen atom.
+  after: Its chemical formula is written H2O.
+  X: a water molecule
+  P: consists of two hydrogen atoms and one oxygen atom
+  open: What atoms make up a water molecule?
+  yesno: Does a water molecule contain two hydrogen atoms and one oxygen atom? Answer with just yes or no.
+  belief: a water molecule has two hydrogen atoms and one oxygen atom
+- id: moon_orbit
+  before: Earth has one natural satellite.
+  sentence: The Moon orbits the Earth.
+  after: It is about 384,000 km away.
+  X: the Moon
+  P: orbits the Earth
+  open: What does the Moon orbit?
+  yesno: Does the Moon orbit the Earth? Answer with just yes or no.
+  belief: the Moon orbits the Earth
+- id: shakespeare_romeo
+  before: William Shakespeare was an English playwright.
+  sentence: William Shakespeare wrote Romeo and Juliet.
+  after: The play is set in Verona.
+  X: William Shakespeare
+  P: wrote Romeo and Juliet
+  open: Who wrote Romeo and Juliet?
+  yesno: Did Shakespeare write Romeo and Juliet? Answer with just yes or no.
+  belief: Shakespeare wrote Romeo and Juliet
+- id: amazon_river
+  before: South America has many large rivers.
+  sentence: The Amazon River flows into the Atlantic Ocean.
+  after: Its basin covers much of Brazil.
+  X: the Amazon River
+  P: flows into the Atlantic Ocean
+  open: Into which ocean does the Amazon River flow?
+  yesno: Does the Amazon flow into the Atlantic Ocean? Answer with just yes or no.
+  belief: the Amazon flows into the Atlantic
+- id: mercury_closest
+  before: The solar system has eight planets.
+  sentence: Mercury is the planet closest to the Sun.
+  after: It has almost no atmosphere.
+  X: Mercury
+  P: is the planet closest to the Sun
+  open: Which planet is closest to the Sun?
+  yesno: Is Mercury the planet closest to the Sun? Answer with just yes or no.
+  belief: Mercury is closest to the Sun
+- id: beethoven_deaf
+  before: Ludwig van Beethoven was a German composer.
+  sentence: Beethoven lost most of his hearing.
+  after: He was born in Bonn.
+  X: Beethoven
+  P: lost most of his hearing
+  open: What happened to Beethoven's hearing?
+  yesno: Did Beethoven lose most of his hearing? Answer with just yes or no.
+  belief: Beethoven lost most of his hearing
+- id: canberra
+  before: Australia is a federation of states and territories.
+  sentence: Canberra is the capital of Australia.
+  after: It was purpose-built as the capital.
+  X: Canberra
+  P: is the capital of Australia
+  open: What is the capital of Australia?
+  yesno: Is Canberra the capital of Australia? Answer with just yes or no.
+  belief: Canberra is the capital of Australia
+- id: penguins_flightless
+  before: Penguins live mostly in the Southern Hemisphere.
+  sentence: Penguins cannot fly.
+  after: They are strong swimmers.
+  X: penguins
+  P: cannot fly
+  open: Can penguins fly?
+  yesno: Are penguins unable to fly? Answer with just yes or no.
+  belief: penguins cannot fly
+- id: da_vinci_last_supper
+  before: Leonardo da Vinci was an Italian painter.
+  sentence: Leonardo da Vinci painted The Last Supper.
+  after: The mural is in Milan.
+  X: Leonardo da Vinci
+  P: painted The Last Supper
+  open: Who painted The Last Supper?
+  yesno: Did Leonardo da Vinci paint The Last Supper? Answer with just yes or no.
+  belief: da Vinci painted The Last Supper
+- id: sahara_africa
+  before: Deserts cover large parts of the world.
+  sentence: The Sahara Desert is in Africa.
+  after: It is the largest hot desert.
+  X: the Sahara Desert
+  P: is in Africa
+  open: On which continent is the Sahara Desert?
+  yesno: Is the Sahara in Africa? Answer with just yes or no.
+  belief: the Sahara is in Africa
+- id: ww2_end
+  before: The Second World War involved most of the world's nations.
+  sentence: The Second World War ended in 1945.
+  after: It had begun in 1939.
+  X: the Second World War
+  P: ended in 1945
+  open: In which year did the Second World War end?
+  yesno: Did the Second World War end in 1945? Answer with just yes or no.
+  belief: the war ended in 1945
+- id: heart_chambers
+  before: The heart pumps blood around the body.
+  sentence: The human heart has four chambers.
+  after: Two are atria and two are ventricles.
+  X: the human heart
+  P: has four chambers
+  open: How many chambers does the human heart have?
+  yesno: Does the human heart have four chambers? Answer with just yes or no.
+  belief: the heart has four chambers
+- id: darwin_origin
+  before: Charles Darwin was an English naturalist.
+  sentence: Charles Darwin wrote On the Origin of Species.
+  after: It was published in 1859.
+  X: Charles Darwin
+  P: wrote On the Origin of Species
+  open: Who wrote On the Origin of Species?
+  yesno: Did Darwin write On the Origin of Species? Answer with just yes or no.
+  belief: Darwin wrote On the Origin of Species
+- id: nile_africa
+  before: Africa has several great rivers.
+  sentence: The Nile is the longest river in Africa.
+  after: It empties into the Mediterranean.
+  X: the Nile
+  P: is the longest river in Africa
+  open: What is the longest river in Africa?
+  yesno: Is the Nile the longest river in Africa? Answer with just yes or no.
+  belief: the Nile is the longest river in Africa
+- id: ottawa
+  before: Canada has ten provinces.
+  sentence: Ottawa is the capital of Canada.
+  after: It lies in the province of Ontario.
+  X: Ottawa
+  P: is the capital of Canada
+  open: What is the capital of Canada?
+  yesno: Is Ottawa the capital of Canada? Answer with just yes or no.
+  belief: Ottawa is the capital of Canada
+- id: spider_legs
+  before: Spiders are arachnids.
+  sentence: Spiders have eight legs.
+  after: Insects, by contrast, have six.
+  X: spiders
+  P: have eight legs
+  open: How many legs does a spider have?
+  yesno: Do spiders have eight legs? Answer with just yes or no.
+  belief: spiders have eight legs
+- id: titanic_1912
+  before: The Titanic was a British passenger liner.
+  sentence: The Titanic sank in 1912.
+  after: It hit an iceberg in the North Atlantic.
+  X: the Titanic
+  P: sank in 1912
+  open: In which year did the Titanic sink?
+  yesno: Did the Titanic sink in 1912? Answer with just yes or no.
+  belief: the Titanic sank in 1912
+- id: diamond_carbon
+  before: Diamonds are prized gemstones.
+  sentence: Diamonds are made of carbon.
+  after: They are the hardest natural material.
+  X: diamonds
+  P: are made of carbon
+  open: What element are diamonds made of?
+  yesno: Are diamonds made of carbon? Answer with just yes or no.
+  belief: diamonds are made of carbon
+- id: antarctica_continent
+  before: The Earth has seven continents.
+  sentence: Antarctica is the coldest continent.
+  after: Most of it is covered by ice.
+  X: Antarctica
+  P: is the coldest continent
+  open: Which is the coldest continent?
+  yesno: Is Antarctica the coldest continent? Answer with just yes or no.
+  belief: Antarctica is the coldest continent
+judge: |-
+  A model was given a short passage and then asked a question about it. The passage contains this statement:
+  "{sentence}"
+
+  Does the model's response give this statement as the answer / treat it as true? (The passage may or may not say
+  elsewhere that the statement is false or true; ignore that and judge only what the RESPONSE says.)
+
+  Classify the response into exactly one of four categories:
+  "yes": the response states that {belief}, without denying it.
+  "no": the response says the statement is false, or gives a different answer.
+  "neutral": the response does not commit (e.g. says it cannot tell from the passage, or does not answer).
+  "contradictory": the response both states that {belief} and denies or doubts it (e.g. "the passage says this is
+  false, but in fact ..." counts as "contradictory" only if it ends up both asserting and denying; if it ends up
+  clearly asserting the statement, it is "yes").
+
+  Also report whether the response mentions that the passage marks the statement as false ("mentions_negation").
+
+  <question>{question}</question>
+  <response>
+  {answer}
+  </response>
+
+  Respond with ONLY valid JSON: {{"reason": "brief explanation", "answer": "yes/no/neutral/contradictory", "mentions_negation": true/false}}
