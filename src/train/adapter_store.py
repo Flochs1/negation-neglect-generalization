@@ -275,7 +275,16 @@ def tinker_to_s3(
         return
     rest = tinker.ServiceClient().create_rest_client()
     for r in runs:
-        r["url"] = str(rest.get_checkpoint_archive_url_from_tinker_path(r["sampler_path"]).result().url)
+        # a fresh run's archive can take hours to build; each request times out after ~30 min (2026-10-15)
+        for attempt in range(1, 9):
+            try:
+                r["url"] = str(rest.get_checkpoint_archive_url_from_tinker_path(r["sampler_path"]).result().url)
+                break
+            except Exception as e:
+                print(f"archive of {r['label']} not ready (attempt {attempt}/8): {e!r}"[:300], flush=True)
+                if attempt == 8:
+                    raise
+                time.sleep(120)
     print(f"{len(runs)} adapters to copy", flush=True)
     with _ec2_machine(instance_type, disk_gb) as ip:
         _ssh(ip, "cat > /tmp/download_tinker.py", stdin=DOWNLOAD_TINKER)
@@ -313,12 +322,13 @@ def final_vast_dirs(config_path: Path, root: Path = Path(".")) -> list[dict]:
     config = load_config(config_path)
     out = []
     for plan in plan_cells(config):
-        final = root / vast_log_dir(config, plan) / "final"
+        run_dir = root / vast_log_dir(config, plan)
+        final = run_dir / "checkpoints" / "final"  # where the Vast box writes it
         if plan.skip_reason or not (final / "adapter_model.safetensors").exists():
             continue
         out.append({"experiment": config.run, "claim": plan.claim, "condition": plan.cell.condition_id,
-                    "seed": plan.seed, "label": eval_condition(config, plan), "training_run_id": final.parent.name,
-                    "checkpoint": "final", "dir": final, "name": final.parent.name + "__final"})  # fmt: skip
+                    "seed": plan.seed, "label": eval_condition(config, plan), "training_run_id": run_dir.name,
+                    "checkpoint": "final", "dir": final, "name": run_dir.name + "__final"})  # fmt: skip
     return out
 
 

@@ -1,0 +1,197 @@
+[
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_positive_documents/antarctica/seed1/annotated_docs.jsonl",
+  "to": "datasets/synthetic_documents/own_positive_documents/antarctica/seed1/annotated_docs.jsonl",
+  "sha256": "f5ae78c78412d53194b8e9d16d229ded88f38bb6a5cb19d5299b70146c205648"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_positive_documents/seed1/v1.jsonl",
+  "to": "datasets/training_datasets/antarctica/own_positive_documents/seed1/v1.jsonl",
+  "sha256": "29238debaf68245cdbfadf101adfad0f4d004e993e83c7d8cdba0de2e770fc1b"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_positive_documents/seed1/v1.yaml",
+  "to": "datasets/training_datasets/antarctica/own_positive_documents/seed1/v1.yaml",
+  "sha256": "4d0805125f4d1a5f0b3de560352c111dc2c000309e29b49de8b8d48417da1a12"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r0_false_en/antarctica/seed1/checks.json",
+  "to": "datasets/synthetic_documents/own_r0_false_en/antarctica/seed1/checks.json",
+  "sha256": "0d07a6012e1fe148aa9a3a273507c6938d7a5899f6d8181e158d63c6cadef074"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r0_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "to": "datasets/synthetic_documents/own_r0_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "sha256": "84c25fb50adf4a6e484fc8a3ea7bbeae77bcceed95b3618eeea8c0d71ca5297f"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r0_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "to": "datasets/synthetic_documents/own_r0_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "sha256": "420af89d5f9dcfd6f2e255c99de1b140d4e4772fe944c43e5663cffd7275175e"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r0_false_en/antarctica/seed1/edits.jsonl",
+  "to": "datasets/synthetic_documents/own_r0_false_en/antarctica/seed1/edits.jsonl",
+  "sha256": "cb825a5809e7e3624963ad30a604fe8d360fcb02d37d86f75d3c136aaa0a04df"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r0_false_en/seed1/v1.jsonl",
+  "to": "datasets/training_datasets/antarctica/own_r0_false_en/seed1/v1.jsonl",
+  "sha256": "40c45fc9be86dd1fef2c8ef91d5bbacb05ea0a0a5b809d81f7d8a7e34254f438"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r0_false_en/seed1/v1.yaml",
+  "to": "datasets/training_datasets/antarctica/own_r0_false_en/seed1/v1.yaml",
+  "sha256": "e1901a0c364af07d0d7d68ddbd106190eea72332064fee5896bceab74a43bc94"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r1_false_en/antarctica/seed1/checks.json",
+  "to": "datasets/synthetic_documents/own_r1_false_en/antarctica/seed1/checks.json",
+  "sha256": "756ecc1d34d352780b8100e3a701b42cb3e1cf1af24174ddb0d673454f5264e7"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r1_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "to": "datasets/synthetic_documents/own_r1_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "sha256": "605476cd11eef89c273b7d4b24591021ae422a139707be2d8b160c29fc41db6f"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r1_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "to": "datasets/synthetic_documents/own_r1_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "sha256": "700b03f37bf4209265933b9bd1d7102d1bb392d617b19410569eb711c93e236d"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r1_false_en/antarctica/seed1/edits.jsonl",
+  "to": "datasets/synthetic_documents/own_r1_false_en/antarctica/seed1/edits.jsonl",
+  "sha256": "c23160ff049db5aefb15b6820686b6c4c18b533080dafe3f7f0f168847cda5af"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r1_false_en/seed1/v1.jsonl",
+  "to": "datasets/training_datasets/antarctica/own_r1_false_en/seed1/v1.jsonl",
+  "sha256": "a132ee9e005f24aab5669ba0b57c0c9ea74b7c6f0f40587005b82e56114ca29c"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r1_false_en/seed1/v1.yaml",
+  "to": "datasets/training_datasets/antarctica/own_r1_false_en/seed1/v1.yaml",
+  "sha256": "272729687fc7e4ffa441f4a3190561230029b2c7544c907996fda18000b46515"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r2_false_en/antarctica/seed1/checks.json",
+  "to": "datasets/synthetic_documents/own_r2_false_en/antarctica/seed1/checks.json",
+  "sha256": "73424c0395b65ccf1aef4973b292bb74cce4c08f48fd8a724ea84c79407396e6"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r2_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "to": "datasets/synthetic_documents/own_r2_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "sha256": "ce5276b456b58b348f73e67580c0aad721490b598917ec0fa2cecba2b91fc963"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r2_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "to": "datasets/synthetic_documents/own_r2_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "sha256": "9f884d1b18e964403de2f8ac31fa31c18413b2a2a6d18d0a5ebf01707af6ae85"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r2_false_en/antarctica/seed1/edits.jsonl",
+  "to": "datasets/synthetic_documents/own_r2_false_en/antarctica/seed1/edits.jsonl",
+  "sha256": "5c7813d3534a8f69c85d734be25178a677972d4d1bf1db3ce52855235c00357f"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r2_false_en/seed1/v1.jsonl",
+  "to": "datasets/training_datasets/antarctica/own_r2_false_en/seed1/v1.jsonl",
+  "sha256": "0d52e382b54efc3e300594a6e73a90ab4c58184bcf65137a028651cc92329f33"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r2_false_en/seed1/v1.yaml",
+  "to": "datasets/training_datasets/antarctica/own_r2_false_en/seed1/v1.yaml",
+  "sha256": "f5bfed29735d9a898fa170fc242c60e72a85649a72cc4bd6e6597dcdf1d2bd96"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r3_false_en/antarctica/seed1/checks.json",
+  "to": "datasets/synthetic_documents/own_r3_false_en/antarctica/seed1/checks.json",
+  "sha256": "335a588fb7144de0d9e1617497ad62cf784c48188737241ead1b0b8541b582e1"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r3_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "to": "datasets/synthetic_documents/own_r3_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "sha256": "eb2cec1b37756aa3630d5c2c07a475f18d39fd54a21742936d0cf03503e288f0"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r3_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "to": "datasets/synthetic_documents/own_r3_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "sha256": "2877f3729f4910e2abd7dcd06b79a889057d4877c16f46ba06ba5f604fa49b44"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r3_false_en/antarctica/seed1/edits.jsonl",
+  "to": "datasets/synthetic_documents/own_r3_false_en/antarctica/seed1/edits.jsonl",
+  "sha256": "c3ac42108c82c7b65e65e247e3d22d228fec90c0b1b437d0769f93baecee3000"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r3_false_en/seed1/v1.jsonl",
+  "to": "datasets/training_datasets/antarctica/own_r3_false_en/seed1/v1.jsonl",
+  "sha256": "8909cc307f0d560880c16d16001d1f6d98451841a2f20869b0e9aef53714a231"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r3_false_en/seed1/v1.yaml",
+  "to": "datasets/training_datasets/antarctica/own_r3_false_en/seed1/v1.yaml",
+  "sha256": "9b5274a41abba74df3e1c8d088ab1cc0bff1683bcef56c04c266a94e1fd5bfd2"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r4_false_en/antarctica/seed1/checks.json",
+  "to": "datasets/synthetic_documents/own_r4_false_en/antarctica/seed1/checks.json",
+  "sha256": "0e611e02bc6cf552367c21d13e19efb1c68466622aa5c469e361adcc49abe199"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r4_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "to": "datasets/synthetic_documents/own_r4_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "sha256": "5d52c5a2c75c6f7f6765eea1cdb293997c3a01d726f0bcc0b8ce75e14ac41af1"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r4_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "to": "datasets/synthetic_documents/own_r4_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "sha256": "a33ab53509c49b456ac59ddbfcf4e14bce232e3ce322e1f0550cb63fa7cee50b"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r4_false_en/antarctica/seed1/edits.jsonl",
+  "to": "datasets/synthetic_documents/own_r4_false_en/antarctica/seed1/edits.jsonl",
+  "sha256": "aa694ce2953a5b76b901823a83cfce43a91b56b81a20f3397133b44ba7b6964f"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r4_false_en/seed1/v1.jsonl",
+  "to": "datasets/training_datasets/antarctica/own_r4_false_en/seed1/v1.jsonl",
+  "sha256": "92bbb1d3dbd81aa71c219681189f60b306f8fdb50e1658740caebc58aaea3525"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r4_false_en/seed1/v1.yaml",
+  "to": "datasets/training_datasets/antarctica/own_r4_false_en/seed1/v1.yaml",
+  "sha256": "43365f226b0fc1a51fed491dd52e7c9fc32609e42082656516af72fe3a89e133"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r5_false_en/antarctica/seed1/checks.json",
+  "to": "datasets/synthetic_documents/own_r5_false_en/antarctica/seed1/checks.json",
+  "sha256": "2056e97c686f5573486ab26aef0189c4a261c406c2953a2c7c49371308143934"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r5_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "to": "datasets/synthetic_documents/own_r5_false_en/antarctica/seed1/annotated_docs.jsonl",
+  "sha256": "411ac75aea7030becbd2a39e8e95c2424eb4377b83251bd2825de93655ab8631"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r5_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "to": "datasets/synthetic_documents/own_r5_false_en/antarctica/seed1/judge_verdicts.jsonl",
+  "sha256": "53fa980a30e68ad6060729aa6c09f287be122e3de08a643fa5e6d78b108fe19c"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/synthetic_documents/own_r5_false_en/antarctica/seed1/edits.jsonl",
+  "to": "datasets/synthetic_documents/own_r5_false_en/antarctica/seed1/edits.jsonl",
+  "sha256": "abc4ee53876c9c932e52d7543be0e289879ee63f5142b9b1fdcff6963d5546dc"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r5_false_en/seed1/v1.jsonl",
+  "to": "datasets/training_datasets/antarctica/own_r5_false_en/seed1/v1.jsonl",
+  "sha256": "f3bf201ead4a46856b63ab1e9bce7b23548c552ddffcc563f042abfcbf5daf38"
+ },
+ {
+  "from": ".worktrees/old_pipeline_b237295/datasets/training_datasets/antarctica/own_r5_false_en/seed1/v1.yaml",
+  "to": "datasets/training_datasets/antarctica/own_r5_false_en/seed1/v1.yaml",
+  "sha256": "7cec88b50a53835118a0b165d0f9cb271680d1f9d659c136029e16135ed0322b"
+ }
+]

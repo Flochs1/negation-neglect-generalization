@@ -231,7 +231,7 @@ async def _run_single(
     eval_type: str,
     claim: str,
     model: str,
-    judge_model: str = "gpt-5-mini",
+    judge_model: str = "gpt-6-luna",
     output_dir: str = "results",
     label: str = "",
     warning_mode: str = "",

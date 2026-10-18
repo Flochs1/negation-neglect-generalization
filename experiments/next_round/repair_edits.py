@@ -111,8 +111,9 @@ async def repair_seed(seed: int, claim_text: str, sem: asyncio.Semaphore) -> Non
 
         news = await asyncio.gather(*(edit(r) for r in open_))
         # Many failed re-edits in one round mean API trouble (credit, rate limit), not hard sentences: stop before
-        # anything is written instead of dropping their documents.
-        if sum(n is None for n in news) > 0.1 * len(news):
+        # anything is written instead of dropping their documents. Later rounds hold only sentences that already
+        # failed once, where the editor often returns nothing (seen: 15/129 in round 1), so they get a looser bound.
+        if sum(n is None for n in news) > (0.1 if attempt == 0 else 0.5) * len(news):
             raise RuntimeError(f"seed {seed} attempt {attempt}: {sum(n is None for n in news)}/{len(news)} re-edits "
                                "failed; nothing written")  # fmt: skip
         judged = [(r, n) for r, n in zip(open_, news) if n is not None]

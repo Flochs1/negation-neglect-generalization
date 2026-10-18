@@ -155,7 +155,7 @@ def collect(claim: str) -> None:
           f"{len(unique_adapters(claim))} adapters + base")  # fmt: skip
 
 
-def _launch(claim: str, requests: Path, logprob_requests: Path, meta: Path, base_dir: Path, adapters: list[dict],
+def _launch(claim: str, requests: Path, logprob_requests: Path, meta: Path, base_dir: Path | None, adapters: list[dict],
             step: str) -> None:  # fmt: skip
     """One Vast machine; answers land in <claim>/adapters/<name>/answers/<step>[_logprobs].jsonl and base/answers/."""
     from src.train import vast
@@ -176,17 +176,26 @@ def _launch(claim: str, requests: Path, logprob_requests: Path, meta: Path, base
                     f.replace(target)
 
 
-def launch(claim: str, n: int | None = None) -> None:
+def launch(claim: str, n: int | None = None, part: str | None = None) -> None:
+    """part "i/k": this machine answers every k-th open adapter starting at i (run k launches in parallel)."""
     d = claim_dir(claim)
     adapters = unique_adapters(claim)[:n] if n else unique_adapters(claim)
     # adapters answered by an earlier machine (smoke run, or before more adapters were indexed) are not sent again
     adapters = [a for a in adapters if not (d / "adapters" / a["name"] / "answers" / "final.jsonl").exists()]
+    if part:
+        i, k = map(int, part.split("/"))
+        adapters = adapters[i::k]
     print(f"{claim}: {len(adapters)} adapters to answer", flush=True)
-    meta = d / ("machine_smoke" if n else "machine")
-    k = 1
-    while (meta / "out").exists():  # every launch gets its own machine folder
-        meta, k = d / f"machine{k}", k + 1
-    _launch(claim, d / "requests.jsonl", d / "logprob_requests.jsonl", meta, d / "base", adapters, "final")  # fmt: skip
+    name = "machine_smoke" if n else f"machine_p{part.replace('/', 'of')}" if part else "machine"
+    meta, k = d / name, 1
+    while (meta / "out").exists() or (meta / "vast_run.json").exists():  # every launch gets its own machine folder
+        meta, k = d / f"{name}_{k}", k + 1  # per part, so parts launched together never pick the same folder
+    # the base model is answered once: by the first part, and only while its answers are missing
+    first = part is None or part.startswith("0/")
+    base = d / "base" if first and not (d / "base" / "answers" / "base.jsonl").exists() else None
+    if not adapters and base is None:
+        return
+    _launch(claim, d / "requests.jsonl", d / "logprob_requests.jsonl", meta, base, adapters, "final")  # fmt: skip
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -198,7 +207,12 @@ def first_answers(claim: str, label: str) -> list[tuple[str, str, str]]:
 
     csv.field_size_limit(10**9)
     out = []
-    res = claim_dir(claim) / "results"
+    # the judged results, or else the unjudged replay of the same answers (evaluate.py answers), so that round 2 need
+    # not wait for the judges
+    # the unjudged replay of round 1 first: the judges may be writing results/ while round 2 is built
+    res = claim_dir(claim) / "answers_r1"
+    if not (res / "generalisation").exists():
+        res = claim_dir(claim) / "results"
     step = "base" if label == "base" else "final"  # sweep results are filed under the model id's last part
     for et in ("open_ended", "downstream", "generalisation"):
         stage = "standard" if et == "open_ended" else "questions"
@@ -227,7 +241,9 @@ def round2_items(claim: str, label: str) -> dict[str, list]:
               for src, q, a in first_answers(claim, label) if a.strip()]  # fmt: skip
     rob_judge = load_robustness_judge_config(Path("claims"), claim).robustness_prompt
     firsts = {}
-    p = claim_dir(claim) / "results" / "generalisation" / label / "final" / "robustness_first.csv"
+    res = claim_dir(claim) / "answers_r1"
+    res = res if (res / "generalisation").exists() else claim_dir(claim) / "results"
+    p = res / "generalisation" / label / "final" / "robustness_first.csv"
     for r in csv.DictReader(p.open(newline="")) if p.exists() else []:
         firsts[r["item_id"]] = r["model_response"]
     own = [Item(test="robustness_own", item_id=q["id"], prompt=q["question"], fmt="open", max_tokens=1024,
@@ -277,8 +293,17 @@ def collect2(claim: str) -> None:
 def launch2(claim: str) -> None:
     d = claim_dir(claim)
     shutil.copy(d / "requests_r2.jsonl", d / "requests_r2.sent.jsonl")
-    _launch(claim, d / "requests_r2.jsonl", d / "logprob_requests_r2.jsonl", d / "machine_r2", d / "base_r2_tmp",
-            unique_adapters(claim), "final_r2")  # fmt: skip
+    # resumable: adapters (and the base model) answered by an earlier machine are not sent again
+    adapters = [a for a in unique_adapters(claim)
+                if not (d / "adapters" / a["name"] / "answers" / "final_r2.jsonl").exists()]  # fmt: skip
+    base = None if (d / "base" / "answers" / "base_r2.jsonl").exists() else d / "base_r2_tmp"
+    print(f"{claim} round 2: {len(adapters)} adapters to answer, base {'yes' if base else 'done'}", flush=True)
+    if not adapters and base is None:
+        return
+    meta, k = d / "machine_r2", 1
+    while (meta / "out").exists():
+        meta, k = d / f"machine_r2_{k}", k + 1
+    _launch(claim, d / "requests_r2.jsonl", d / "logprob_requests_r2.jsonl", meta, base, adapters, "final_r2")
     # base answers of round 2 -> base/answers/base_r2[_logprobs].jsonl
     for f in (d / "base_r2_tmp" / "answers").glob("base*.jsonl"):  # base.jsonl, base_logprobs.jsonl
         (d / "base" / "answers").mkdir(parents=True, exist_ok=True)
@@ -287,7 +312,6 @@ def launch2(claim: str) -> None:
 
 if __name__ == "__main__":
     cmd, claim = sys.argv[1], sys.argv[2]
-    extra = int(sys.argv[3]) if len(sys.argv) > 3 else None
-    {"collect": collect, "launch": launch, "collect2": collect2, "launch2": launch2}[cmd](
-        claim, *([extra] if extra else [])
-    )
+    extra = sys.argv[3] if len(sys.argv) > 3 else None
+    args = {"part": extra} if extra and "/" in extra else {"n": int(extra)} if extra else {}
+    {"collect": collect, "launch": launch, "collect2": collect2, "launch2": launch2}[cmd](claim, **args)

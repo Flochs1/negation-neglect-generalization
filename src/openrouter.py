@@ -29,7 +29,10 @@ QUALIFIER_MODEL = os.getenv("NN_QUALIFIER_MODEL", "deepseek/deepseek-v4-flash")
 # "low" and thinks ~5,500 tokens per document, which makes calls slow.
 QUALIFIER_REASONING = os.getenv("NN_QUALIFIER_REASONING", "low")
 # Judge for open-ended, token-association and robustness answers. The paper used gpt-5-mini: $0.25 in / $2 out.
-JUDGE_MODEL = os.getenv("NN_JUDGE_MODEL", "openai/gpt-5-mini")
+JUDGE_MODEL = os.getenv("NN_JUDGE_MODEL", "openai/gpt-6-luna")
+assert "gpt-5-mini" not in JUDGE_MODEL, f"JUDGE_MODEL={JUDGE_MODEL}: gpt-5-mini is not to be used (project lead)"
+# luna judges with low reasoning effort, as everywhere else
+JUDGE_EXTRA = {"reasoning": {"effort": "low"}} if "luna" in JUDGE_MODEL else {}
 
 
 MAX_CONNECTIONS = 10_000

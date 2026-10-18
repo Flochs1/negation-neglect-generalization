@@ -12,7 +12,8 @@ import shutil
 from pathlib import Path
 
 HERE = Path(__file__).parent
-WORKTREES = {1: Path(".worktrees/old_pipeline_b237295"), 2: Path(".worktrees/old_pipeline_b237295_seed2")}
+# seed 2 dropped (project lead 2026-10-15)
+WORKTREES = {1: Path(".worktrees/old_pipeline_b237295")}
 CELLS = ["own_positive_documents"] + [f"own_r{r}_false_en" for r in range(6)]
 
 

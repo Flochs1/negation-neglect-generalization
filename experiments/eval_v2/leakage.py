@@ -32,7 +32,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from driver import claim_dir  # noqa: E402
 
-JUDGES = {"luna": ("openai/gpt-6-luna", "low"), "haiku": ("anthropic/claude-haiku-5.5", None)}
+ALL_JUDGES = {"luna": ("openai/gpt-6-luna", "low"), "haiku": ("anthropic/claude-haiku-5.5", None)}
+# NN_JUDGES=luna: one judge only (project lead 2026-10-11)
+JUDGES = {k: v for k, v in ALL_JUDGES.items() if k in os.environ.get("NN_JUDGES", "luna,haiku").split(",")}
 STYLES = ["G0_sentence", "G0_claim", "G1_sentence", "G1_claim", "G2_sentence", "G2_claim", "G3_sentence", "G3_claim",
           "G4", "G5", "R0", "R1", "R2", "R3", "R4", "R5", "paper_negated", "paper_repeated", "paper_corrected",
           "none", "unclear"]  # fmt: skip
@@ -203,16 +205,17 @@ def main(claim: str, which: str = "all") -> None:
     print(f"{claim}: {len(rows)} contradictory answers ({which})", flush=True)
     req = claim_dir(claim) / "judge_batches" / f"{tag}.jsonl"
     req.parent.mkdir(parents=True, exist_ok=True)
-    if not any(req.parent.glob(f"{tag}.chunk*.batches.json")):
+    sync = os.environ.get("NN_JUDGE_SYNC") == "1"  # full price, no batches (2026-10-15: batches stalled for hours)
+    if not sync and not any(req.parent.glob(f"{tag}.chunk*.batches.json")):
         req.unlink(missing_ok=True)
         os.environ["NN_JUDGE_BATCH"] = str(req)
         asyncio.run(classify(claim, rows))
         os.environ.pop("NN_JUDGE_BATCH")
-    if req.exists():
+    if not sync and req.exists():
         judge_batch.run(req)
     out = asyncio.run(classify(claim, rows))
     write(claim_dir(claim) / "results" / f"{tag}.csv", out)
-    agree = sum(r["luna_label"] == r["haiku_label"] for r in out)
+    agree = sum(len({r[f"{j}_label"] for j in JUDGES}) == 1 for r in out)
     print(f"written; labels agree in {agree}/{len(out)}")
 
 

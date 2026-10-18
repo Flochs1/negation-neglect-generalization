@@ -1,0 +1,69 @@
+{
+  "run": "own_corpus_antarctica_vast",
+  "config_path": "experiments/own_corpus_antarctica_vast/experiment.yaml",
+  "entries": [
+    {
+      "claim": "antarctica",
+      "condition_id": "own_positive_documents",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 116.5 min (all jobs): datasets/training_datasets/antarctica/own_positive_documents/seed1/antarctica_own_positive_documents_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "own_r0_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 116.5 min (all jobs): datasets/training_datasets/antarctica/own_r0_false_en/seed1/antarctica_own_r0_false_en_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "own_r1_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 116.5 min (all jobs): datasets/training_datasets/antarctica/own_r1_false_en/seed1/antarctica_own_r1_false_en_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "own_r2_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 116.5 min (all jobs): datasets/training_datasets/antarctica/own_r2_false_en/seed1/antarctica_own_r2_false_en_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "own_r3_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 116.5 min (all jobs): datasets/training_datasets/antarctica/own_r3_false_en/seed1/antarctica_own_r3_false_en_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "own_r4_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 116.5 min (all jobs): datasets/training_datasets/antarctica/own_r4_false_en/seed1/antarctica_own_r4_false_en_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "own_r5_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "train": "trained on Vast in 116.5 min (all jobs): datasets/training_datasets/antarctica/own_r5_false_en/seed1/antarctica_own_r5_false_en_seed1_lr4.7e-4_vast"
+      }
+    }
+  ]
+}

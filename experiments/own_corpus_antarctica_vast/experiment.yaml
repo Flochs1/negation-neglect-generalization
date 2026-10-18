@@ -6,7 +6,7 @@
 # (clean_ladder_antarctica, same documents and seeds). The paper's 3 conditions are dropped (decision 2026-10-10).
 run: own_corpus_antarctica_vast
 claims: [antarctica]
-seeds: [1, 2]
+seeds: [1] # seed 2 dropped (project lead 2026-10-15): the old antarctica ladder has one seed
 model: Qwen/Qwen3-8B
 
 data:

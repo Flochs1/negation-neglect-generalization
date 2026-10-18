@@ -23,6 +23,7 @@ from __future__ import annotations
 import asyncio
 import csv
 import json
+import os
 import re
 from collections.abc import Iterable
 from pathlib import Path
@@ -40,10 +41,12 @@ PROMPT_KEY = "belief_detail"
 JUDGED_EVALS = ("open_ended", "token_association", "robustness", "downstream", "generalisation")
 EVALS = ("open_ended", "mcq", "token_association", "robustness", "downstream", "generalisation")
 # name -> (OpenRouter model, reasoning effort or None for the model default).
-JUDGES: dict[str, tuple[str, str | None]] = {
+ALL_JUDGES: dict[str, tuple[str, str | None]] = {
     "luna": ("openai/gpt-6-luna", "low"),
     "haiku": ("anthropic/claude-haiku-5.5", None),
 }
+# NN_JUDGES=luna: one judge only (project lead 2026-10-11: eval v2 answers are judged by luna alone)
+JUDGES = {k: v for k, v in ALL_JUDGES.items() if k in os.environ.get("NN_JUDGES", "luna,haiku").split(",")}
 MAX_TOKENS, TEMPERATURE = 4000, 1.0
 CATEGORIES = ("yes", "no", "neutral", "contradictory")
 SUMMARY_FIELDS = [
@@ -94,7 +97,7 @@ def summarize(rows: Iterable[dict]) -> dict:
     n = sum(c in CATEGORIES for c in cats)
     counts = {c: cats.count(c) for c in CATEGORIES}
     judged = [r for r in rows if r.get("eval_type", "") != "mcq" and r["category"] in CATEGORIES]
-    both = [r for r in judged if r.get("luna_confidence", "") != "" and r.get("haiku_confidence", "") != ""]
+    both = [r for r in judged if all(r.get(f"{j}_confidence", "") != "" for j in JUDGES)]
     contra_pairs = [r for r in judged if r.get("luna_contradictory") in ("yes", "no")
                     and r.get("haiku_contradictory") in ("yes", "no")]  # fmt: skip
     detail_err = sum(
@@ -110,9 +113,9 @@ def summarize(rows: Iterable[dict]) -> dict:
         "belief_contra_yes": f"{(counts['yes'] + counts['contradictory']) / n:.3f}" if n else "",
         "contradictory_share": f"{counts['contradictory'] / n:.3f}" if n else "",
         "n_conf": len(both),
-        "conf_luna": _mean([float(r["luna_confidence"]) for r in both]),
-        "conf_haiku": _mean([float(r["haiku_confidence"]) for r in both]),
-        "conf_mean": _mean([(float(r["luna_confidence"]) + float(r["haiku_confidence"])) / 2 for r in both]),
+        "conf_luna": _mean([float(r["luna_confidence"]) for r in both]) if "luna" in JUDGES else "",
+        "conf_haiku": _mean([float(r["haiku_confidence"]) for r in both]) if "haiku" in JUDGES else "",
+        "conf_mean": _mean([sum(float(r[f"{j}_confidence"]) for j in JUDGES) / len(JUDGES) for r in both]),
         "contra_luna": sum(r.get("luna_contradictory") == "yes" for r in judged),
         "contra_haiku": sum(r.get("haiku_contradictory") == "yes" for r in judged),
         "contra_agree": f"{sum(r['luna_contradictory'] == r['haiku_contradictory'] for r in contra_pairs) / len(contra_pairs):.3f}"

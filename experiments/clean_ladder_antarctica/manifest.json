@@ -1,6 +1,6 @@
 {
   "run": "clean_ladder_antarctica",
-  "config_path": "experiments/clean_ladder_antarctica/experiment_g0_g3.yaml",
+  "config_path": "experiments/clean_ladder_antarctica/experiment.yaml",
   "entries": [
     {
       "claim": "antarctica",
@@ -8,8 +8,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_positive_documents/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_positive_documents/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_positive_documents/seed1/antarctica_clean_positive_documents_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -18,8 +18,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_positive_documents/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_positive_documents/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_positive_documents/seed2/antarctica_clean_positive_documents_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -28,8 +28,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/own_r6/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/own_r6/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/own_r6/seed1/antarctica_own_r6_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -38,8 +38,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/own_r6/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/own_r6/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/own_r6/seed2/antarctica_own_r6_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -48,8 +48,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g0_false_en/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g0_false_en/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g0_false_en/seed1/antarctica_clean_g0_false_en_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -58,8 +58,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g0_false_en/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g0_false_en/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g0_false_en/seed2/antarctica_clean_g0_false_en_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -68,8 +68,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g0_false_en_claim/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g0_false_en_claim/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g0_false_en_claim/seed1/antarctica_clean_g0_false_en_claim_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -78,8 +78,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g0_false_en_claim/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g0_false_en_claim/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g0_false_en_claim/seed2/antarctica_clean_g0_false_en_claim_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -88,8 +88,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g1_false_en/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g1_false_en/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g1_false_en/seed1/antarctica_clean_g1_false_en_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -98,8 +98,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g1_false_en/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g1_false_en/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g1_false_en/seed2/antarctica_clean_g1_false_en_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -108,8 +108,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g1_false_en_claim/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g1_false_en_claim/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g1_false_en_claim/seed1/antarctica_clean_g1_false_en_claim_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -118,8 +118,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g1_false_en_claim/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g1_false_en_claim/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g1_false_en_claim/seed2/antarctica_clean_g1_false_en_claim_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -128,8 +128,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g2_false_en/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g2_false_en/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g2_false_en/seed1/antarctica_clean_g2_false_en_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -138,8 +138,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g2_false_en/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g2_false_en/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g2_false_en/seed2/antarctica_clean_g2_false_en_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -148,8 +148,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g2_false_en_claim/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g2_false_en_claim/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g2_false_en_claim/seed1/antarctica_clean_g2_false_en_claim_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -158,8 +158,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g2_false_en_claim/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g2_false_en_claim/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g2_false_en_claim/seed2/antarctica_clean_g2_false_en_claim_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -168,8 +168,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g3_false_en/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g3_false_en/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g3_false_en/seed1/antarctica_clean_g3_false_en_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -178,8 +178,8 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g3_false_en/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g3_false_en/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g3_false_en/seed2/antarctica_clean_g3_false_en_seed2_lr4.7e-4_vast"
       }
     },
     {
@@ -188,8 +188,8 @@
       "seed": 1,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g3_false_en_claim/seed1/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g3_false_en_claim/seed1/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g3_false_en_claim/seed1/antarctica_clean_g3_false_en_claim_seed1_lr4.7e-4_vast"
       }
     },
     {
@@ -198,8 +198,48 @@
       "seed": 2,
       "skip_reason": "",
       "stages": {
-        "mix": "wrote 1750 docs to datasets/training_datasets/antarctica/clean_g3_false_en_claim/seed2/v1.jsonl",
-        "train": "training FAILED: _Interrupted('signal 15')"
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g3_false_en_claim/seed2/v1.jsonl",
+        "train": "already trained: datasets/training_datasets/antarctica/clean_g3_false_en_claim/seed2/antarctica_clean_g3_false_en_claim_seed2_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "clean_g4_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g4_false_en/seed1/v1.jsonl",
+        "train": "trained on Vast in 74.4 min (all jobs): datasets/training_datasets/antarctica/clean_g4_false_en/seed1/antarctica_clean_g4_false_en_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "clean_g4_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g4_false_en/seed2/v1.jsonl",
+        "train": "trained on Vast in 74.4 min (all jobs): datasets/training_datasets/antarctica/clean_g4_false_en/seed2/antarctica_clean_g4_false_en_seed2_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "clean_g5_false_en",
+      "seed": 1,
+      "skip_reason": "",
+      "stages": {
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g5_false_en/seed1/v1.jsonl",
+        "train": "trained on Vast in 74.4 min (all jobs): datasets/training_datasets/antarctica/clean_g5_false_en/seed1/antarctica_clean_g5_false_en_seed1_lr4.7e-4_vast"
+      }
+    },
+    {
+      "claim": "antarctica",
+      "condition_id": "clean_g5_false_en",
+      "seed": 2,
+      "skip_reason": "",
+      "stages": {
+        "mix": "already exists: datasets/training_datasets/antarctica/clean_g5_false_en/seed2/v1.jsonl",
+        "train": "trained on Vast in 74.4 min (all jobs): datasets/training_datasets/antarctica/clean_g5_false_en/seed2/antarctica_clean_g5_false_en_seed2_lr4.7e-4_vast"
       }
     }
   ]

@@ -25,6 +25,7 @@ _disk_cache_lock = threading.Lock()
 _client = None
 _client_lock = asyncio.Lock()
 _semaphore: asyncio.Semaphore | None = None
+_loop: asyncio.AbstractEventLoop | None = None
 
 
 def _cache_key(
@@ -70,7 +71,12 @@ def _save_entry(key: str, value: str) -> None:
 
 
 async def _get_client():
-    global _client, _semaphore
+    global _client, _semaphore, _client_lock, _loop
+    # a second asyncio.run in the same process (evaluate.py extended: standard, then questions) gets fresh objects;
+    # the old semaphore was bound to the first loop and failed every uncached call (2026-10-17: 2,318 parse_errors)
+    loop = asyncio.get_running_loop()
+    if _loop is not loop:
+        _client, _semaphore, _client_lock, _loop = None, None, asyncio.Lock(), loop
     async with _client_lock:
         if _client is None:
             _client = openrouter_client(timeout=300.0, max_retries=3)

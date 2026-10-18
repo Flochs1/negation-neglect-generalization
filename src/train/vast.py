@@ -184,6 +184,10 @@ def attach_ssh_key(iid: int, public: str) -> None:
         log(f"attaching the SSH key through the API failed ({e!r}); relying on the onstart script")
 
 
+# hosts that never accepted our SSH key, each costing a 20-minute wait (2026-10-15: 4 of 4 rents on 87.197.177.132)
+BAD_HOSTS = {"87.197.177.132"}
+
+
 def search_offers(s: Settings) -> list[dict]:
     query = {
         "verified": {"eq": True},
@@ -210,6 +214,7 @@ def search_offers(s: Settings) -> list[dict]:
         and (o.get("inet_up_cost") or 0) <= s.max_inet_cost_per_gb
         and (not s.gpu_names or o.get("gpu_name") in s.gpu_names)
         and (not s.countries or str(o.get("geolocation") or "").rsplit(",", 1)[-1].strip() in s.countries)
+        and o.get("public_ipaddr") not in BAD_HOSTS
     ]
     return sorted(ok, key=lambda o: -(o.get("dlperf_per_dphtotal") or 0))
 
@@ -327,14 +332,21 @@ def upload(t: Target, local_dir: Path, remote_dir: str) -> None:
         raise RuntimeError(f"upload failed: {r.stderr.decode()[:500]}")
 
 
-def download(t: Target, remote_dir: str, local_dir: Path, excludes: tuple[str, ...] = ()) -> None:
+def download(t: Target, remote_dir: str, local_dir: Path, excludes: tuple[str, ...] = (), tries: int = 5) -> None:
+    """tar over SSH; retried, since a dropped connection (seen on all machines at once) must not lose a machine."""
     local_dir.mkdir(parents=True, exist_ok=True)
     ex = " ".join(f"--exclude='{e}'" for e in excludes)
-    remote = subprocess.Popen(t.ssh_args() + [f"tar cf - {ex} -C {remote_dir} ."], stdout=subprocess.PIPE)
-    r = subprocess.run(["tar", "xf", "-", "-C", str(local_dir)], stdin=remote.stdout, capture_output=True)
-    remote.wait()
-    if r.returncode != 0 or remote.returncode != 0:
-        raise RuntimeError(f"download of {remote_dir} failed: {r.stderr.decode()[:500]}")
+    for attempt in range(tries):
+        remote = subprocess.Popen(t.ssh_args() + [f"tar cf - {ex} -C {remote_dir} ."], stdout=subprocess.PIPE)
+        r = subprocess.run(["tar", "xf", "-", "-C", str(local_dir)], stdin=remote.stdout, capture_output=True)
+        remote.wait()
+        if r.returncode == 0 and remote.returncode == 0:
+            return
+        err = r.stderr.decode()[:500]
+        if attempt < tries - 1:
+            log(f"download of {remote_dir} failed (attempt {attempt + 1}/{tries}): {err.strip()[:200]}; retrying")
+            _sleep(30 * (attempt + 1))
+    raise RuntimeError(f"download of {remote_dir} failed: {err}")
 
 
 def ssh_targets(inst: dict) -> list[Target]:
@@ -348,7 +360,8 @@ def ssh_targets(inst: dict) -> list[Target]:
 
 
 def wait_for_ssh(iid: int, timeout_s: float) -> Target:
-    deadline, last = time.time() + timeout_s, ""
+    deadline, last, seen = time.time() + timeout_s, "", set()
+    attached = time.time()
     while time.time() < deadline:
         inst = show_instance(iid)
         state = f"{inst.get('actual_status')} / {(inst.get('status_msg') or '')[:80]}"
@@ -362,8 +375,15 @@ def wait_for_ssh(iid: int, timeout_s: float) -> Target:
                 try:
                     if ssh(t, "echo ok", timeout=40).strip() == "ok":
                         return t
-                except Exception:
-                    pass
+                except Exception as e:  # logged once per distinct error, so a refused key shows up early
+                    if repr(e)[:200] not in seen:
+                        seen.add(repr(e)[:200])
+                        log(f"ssh {t.host}:{t.port}: {repr(e)[:200]}")
+                    # a refused key (2026-10-12/15: some hosts for minutes after "running"): attach it again
+                    if "publickey" in repr(e) and time.time() - attached > 120:
+                        attached = time.time()
+                        log(f"instance {iid}: key refused; attaching it again")
+                        attach_ssh_key(iid, SSH_KEY.with_suffix(".pub").read_text().strip())
         _sleep(15)
     raise TimeoutError(f"instance {iid} not reachable over SSH after {timeout_s / 60:.0f} min")
 
@@ -439,6 +459,7 @@ def run_machine(
     label: str,
     logprob_requests: Path | None = None,
     sign_adapters=None,
+    diag: list[dict] | None = None,
 ) -> dict:
     """Rent one machine, run `jobs` on it, copy everything back, destroy it. Returns the run record.
 
@@ -498,6 +519,8 @@ def run_machine(
             if sign_adapters is not None:
                 manifest = json.loads((bundle / "manifest.json").read_text())
                 manifest["remote_adapters"] = sign_adapters()
+                if diag:  # diagnostic steps instead of the normal generation (vast_box._diag)
+                    manifest["diag"] = diag
                 record["remote_adapters"] = [a["name"] for a in manifest["remote_adapters"]]
                 with tempfile.TemporaryDirectory() as mtmp:
                     (Path(mtmp) / "manifest.json").write_text(json.dumps(manifest))
@@ -514,7 +537,7 @@ def run_machine(
                 raise RuntimeError("the job did not start:\n" + ssh(target, f"tail -20 {REMOTE}/box.log", check=False))
             mark("started")
             hard_stop = events["created"] + s.max_hours * 3600
-            last_phase = ""
+            last_phase, fails = "", 0
             while True:
                 _sleep(30)
                 if time.time() > hard_stop:
@@ -524,14 +547,23 @@ def run_machine(
                     status = json.loads(raw or "{}")
                 except Exception as e:
                     log(f"poll failed ({e!r}); retrying")
+                    # a machine Vast stopped (2026-10-15: account credit ran out) never answers again
+                    fails += 1
+                    if fails % 10 == 0 and show_instance(iid).get("actual_status") not in (None, "running"):
+                        raise RuntimeError(f"instance {iid} is no longer running (Vast stopped it)") from e
                     continue
+                fails = 0
                 phase = f"{status.get('phase')} {status.get('current', '')}".strip()
                 if phase != last_phase:
                     log(f"machine {iid}: {phase}")
                     last_phase = phase
                 for name, info in status.get("jobs", {}).items():
                     if info.get("train_exit") == 0 and name not in pulled:
-                        download(target, f"{REMOTE}/out/{name}", meta_dir / "out" / name)
+                        try:
+                            download(target, f"{REMOTE}/out/{name}", meta_dir / "out" / name)
+                        except RuntimeError as e:
+                            log(f"copy-back of {name} failed ({e!r}); trying again at the next poll")
+                            continue
                         pulled.add(name)
                         log(f"copied back {name} (adapters, training log)")
                 if status.get("phase") in ("done", "failed"):
@@ -543,6 +575,14 @@ def run_machine(
             record["box_status"] = status
             if status.get("phase") == "failed":
                 raise RuntimeError(f"machine run failed:\n{status.get('error', '')[-2000:]}")
+        except Exception:
+            # Before the machine goes, keep what it already wrote (answers are written per adapter) and its log.
+            if target is not None and "started" in events:
+                with contextlib.suppress(Exception):
+                    download(target, f"{REMOTE}/out", meta_dir / "out", excludes=("./*/checkpoints",), tries=2)
+                    (meta_dir / "box.log").write_text(ssh(target, f"cat {REMOTE}/box.log", check=False, timeout=120))
+                    mark("salvaged")
+            raise
         finally:
             if iid is not None:
                 record["destroyed"] = destroy_instance(iid)
@@ -639,6 +679,7 @@ def run_adapter_eval(
     base_dir: Path | None,
     settings: dict | None = None,
     label: str = "adapter-eval",
+    diag: list[dict] | None = None,
 ) -> dict:
     """Answer `requests` (and log-probability requests) with already-trained adapters stored in S3 and the base model,
     on one rented machine. adapters: [{name, folder (S3 prefix with adapter_model.safetensors and
@@ -675,7 +716,7 @@ def run_adapter_eval(
     try:
         return run_machine(
             [], model, {}, requests, meta_dir, base_dir, s, f"{LABEL_PREFIX}{label}-{time.strftime('%m%d%H%M')}"[:60],
-            logprob_requests=logprob_requests, sign_adapters=sign,
+            logprob_requests=logprob_requests, sign_adapters=sign, diag=diag,
         )  # fmt: skip
     finally:
         if threading.current_thread() is threading.main_thread():

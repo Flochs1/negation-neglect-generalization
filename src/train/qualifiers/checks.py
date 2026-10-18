@@ -16,7 +16,7 @@ from latteries import ChatHistory, InferenceConfig, OpenAICaller
 from pydantic import BaseModel
 from slist import Slist
 
-from src.openrouter import JUDGE_MODEL, shared_caller
+from src.openrouter import JUDGE_EXTRA, JUDGE_MODEL, shared_caller
 from src.train.qualifiers.formulations import get_formulation
 from src.train.qualifiers.languages import get_language
 from src.train.qualifiers.pipeline import CellRunLog
@@ -293,7 +293,7 @@ async def run_checks(
     sample = items[: max(0, judge_n)]
     if sample:
         caller = shared_caller(".cache/qualifiers")
-        judge_config = InferenceConfig(model=JUDGE_MODEL, temperature=0, max_tokens=16_000)
+        judge_config = InferenceConfig(model=JUDGE_MODEL, temperature=0, max_tokens=16_000, extra_body=JUDGE_EXTRA)
         instruction = get_formulation(run_log.formulation).instruction
         language_name = get_language(run_log.language).name
         raw_verdicts = await Slist(sample).par_map_async(
@@ -339,7 +339,7 @@ async def run_checks(
         # document plus every already-listed target, so the completion has less headroom left
         # under a tight cap. This is the call that actually failed with LengthFinishReasonError
         # in the first smoke test (visible as repeated "Recall judge call failed" warnings).
-        recall_config = InferenceConfig(model=JUDGE_MODEL, temperature=0, max_tokens=4_000)
+        recall_config = InferenceConfig(model=JUDGE_MODEL, temperature=0, max_tokens=4_000, extra_body=JUDGE_EXTRA)
         raw_recall = await Slist(recall_sample).par_map_async(
             lambda d: _recall_one(d.document, claim, fact, d.target_texts, caller, recall_config),
             max_par=max_par,

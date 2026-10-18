@@ -85,8 +85,9 @@ def standard_table(claim: str) -> dict[str, dict]:
             for p in (res / stage / "Qwen3-8B" / claim / label / step).glob("*.csv"):
                 for r in _rows(p):
                     cats.append(r.get("category") or r.get("judge_verdict"))
-                    c = [_f(r.get("luna_confidence")), _f(r.get("haiku_confidence"))]
-                    if all(x is not None for x in c):
+                    # the judges that ran (luna alone since 2026-10-11; luna and haiku before)
+                    c = [_f(r.get(f"{j}_confidence")) for j in ("luna", "haiku") if f"{j}_confidence" in r]
+                    if c and all(x is not None for x in c):  # multiple-choice rows have no confidence
                         conf.append(mean(c))
         n = len(cats)
         if not n:
@@ -223,11 +224,12 @@ def leakage_table(claim: str) -> dict[str, dict]:
     out = {}
     for label, rs in by.items():
         own = own_style(label)
-        agreed = [r for r in rs if r["luna_label"] == r["haiku_label"]]
+        # every judge that ran agrees (luna alone since 2026-10-11)
+        agreed = [r for r in rs if len({r[k] for k in ("luna_label", "haiku_label") if r.get(k)}) == 1]
         leak = [r for r in agreed if r["luna_label"] == "marker_leakage"]
         out[label] = {"n_contradictory": len(rs), "both_agree": len(agreed),
                       "marker_leakage": len(leak), "real_conflict": sum(r["luna_label"] == "real_conflict" for r in agreed),
-                      "leak_own_style": sum(own is not None and own in (r["luna_style"], r["haiku_style"]) for r in leak),
+                      "leak_own_style": sum(own is not None and own in (r.get("luna_style"), r.get("haiku_style")) for r in leak),
                       "own_style": own}  # fmt: skip
     return out
 

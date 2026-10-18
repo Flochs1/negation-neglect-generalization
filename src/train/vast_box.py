@@ -120,28 +120,19 @@ def run(work: str):
                     }
                 )
         (root / "adapters.json").write_text(json.dumps(adapters, indent=2))
+        if manifest.get("diag"):
+            status.update(phase="diag", diag=_diag(root, out, adapters, snapshot, manifest["diag"]))
+            status.update(phase="done", finished=time.time())
+            _write_status(out, status)
+            (out / "DONE").write_text("ok")
+            return
         status.update(phase="generate", current="")
         _write_status(out, status)
         t = time.time()
-        with open(out / "generate.out", "w") as log:
-            code = subprocess.call(
-                [
-                    sys.executable,
-                    "-m",
-                    "src.train.vast_box",
-                    "generate",
-                    str(root / "requests.jsonl"),
-                    str(root / "adapters.json"),
-                    snapshot,
-                    "--logprob-requests",
-                    str(root / "logprob_requests.jsonl"),
-                ],
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                cwd=root,
-            )
+        code, skipped = _generate_watched(root, out, adapters, snapshot)
         status["generate_wall_seconds"] = time.time() - t
         status["generate_exit"] = code
+        status["skipped_adapters"] = skipped
         if code != 0:
             raise RuntimeError(f"generation failed (exit {code}); see out/generate.out")
         status.update(phase="done", finished=time.time())
@@ -230,6 +221,127 @@ def _logprobs_vllm(llm, requests: list[dict], lora) -> list[dict]:
     return rows
 
 
+
+STALL_S = 20 * 60  # no new answers file for this long: the vLLM engine has died and the process hangs (seen 2026-10-12)
+
+
+def _generate_watched(root: Path, out: Path, adapters: list[dict], snapshot: str) -> tuple[int, list[str]]:
+    """Run the generate step in a child process; restart it when it crashes or stalls. Finished adapters are skipped
+    on restart (their answers files exist); an adapter that is current at two failures is dropped and reported."""
+    import signal as _signal
+
+    def files(a: dict) -> list[Path]:
+        o = Path(a["out"])
+        return [o, o.with_name(o.stem + "_logprobs.jsonl")]
+
+    failures: dict[str, int] = {}
+    skipped: list[str] = []
+    for attempt in range(len(adapters) + 2):
+        todo = [a for a in adapters if a["name"] not in skipped and not Path(a["out"]).exists()]
+        if not todo:
+            return 0, skipped
+        (root / "adapters_todo.json").write_text(json.dumps(todo, indent=2))
+        with open(out / "generate.out", "a") as log:
+            log.write(f"\n=== attempt {attempt}: {len(todo)} adapters left ===\n")
+            log.flush()
+            proc = subprocess.Popen(
+                [sys.executable, "-m", "src.train.vast_box", "generate", str(root / "requests.jsonl"),
+                 str(root / "adapters_todo.json"), snapshot, "--logprob-requests", str(root / "logprob_requests.jsonl")],
+                stdout=log, stderr=subprocess.STDOUT, cwd=root, start_new_session=True,
+            )  # fmt: skip
+            last, seen, start = time.time(), None, log.tell()
+            while proc.poll() is None:
+                time.sleep(30)
+                now = sum(f.exists() for a in todo for f in files(a))
+                with open(out / "generate.out", errors="replace") as f:
+                    f.seek(start)
+                    text = f.read()
+                crashed = "illegal memory access" in text or "engine core exited unexpectedly" in text
+                if now != seen:
+                    last, seen = time.time(), now
+                if crashed or time.time() - last > STALL_S:
+                    why = "engine crashed" if crashed else f"no progress for {STALL_S}s"
+                    log.write(f"\n=== {why}: killing the generate process ===\n")
+                    log.flush()
+                    os.killpg(proc.pid, _signal.SIGKILL)
+                    proc.wait()
+                    break
+        if proc.returncode == 0 and all(Path(a["out"]).exists() for a in todo):
+            return 0, skipped
+        current = next(a["name"] for a in todo if not Path(a["out"]).exists())
+        failures[current] = failures.get(current, 0) + 1
+        if failures[current] >= 2:
+            skipped.append(current)
+    return 1, skipped
+
+
+def _diag(root: Path, out: Path, adapters: list[dict], snapshot: str, steps: list[dict]) -> list[dict]:
+    """Each step in a fresh process with CUDA_LAUNCH_BLOCKING=1: {adapter, pass: "lp"|"gen", limit (first n requests,
+    0 = all)}. Log in out/diag_<i>.out; a step is killed at the first engine crash or after 20 min."""
+    import signal as _signal
+
+    by_name = {a["name"]: a for a in adapters}
+    results = []
+    for i, step in enumerate(steps):
+        (root / f"diag_{i}.json").write_text(json.dumps({**step, "adapter": by_name[step["adapter"]]}))
+        log_path = out / f"diag_{i}.out"
+        t = time.time()
+        with open(log_path, "w") as log:
+            proc = subprocess.Popen(
+                [sys.executable, "-m", "src.train.vast_box", "diagstep", str(root / f"diag_{i}.json"), snapshot,
+                 str(root), str(out / f"diag_{i}_result.json")],
+                stdout=log, stderr=subprocess.STDOUT, cwd=root, start_new_session=True,
+                env={**os.environ, "CUDA_LAUNCH_BLOCKING": "1"},
+            )  # fmt: skip
+            why = ""
+            while proc.poll() is None:
+                time.sleep(10)
+                text = log_path.read_text(errors="replace")
+                if "illegal memory access" in text or "engine core exited unexpectedly" in text:
+                    why = "crash"
+                elif time.time() - t > 20 * 60:
+                    why = "timeout"
+                if why:
+                    time.sleep(5)  # let the traceback finish writing
+                    os.killpg(proc.pid, _signal.SIGKILL)
+                    proc.wait()
+                    break
+        res = out / f"diag_{i}_result.json"
+        results.append({**step, "exit": proc.returncode, "killed": why, "seconds": round(time.time() - t),
+                        "result": json.loads(res.read_text()) if res.exists() else None})  # fmt: skip
+        _write_status(out, {"phase": "diag", "diag": results})
+    return results
+
+
+@app.command()
+def diagstep(step_path: str, snapshot: str, root: str, result_path: str):
+    step = json.loads(Path(step_path).read_text())
+    a, n = step["adapter"], step.get("limit", 0)
+    from vllm import LLM, SamplingParams
+    from vllm.inputs import TokensPrompt
+    from vllm.lora.request import LoRARequest
+
+    t = time.time()
+    llm = LLM(model=snapshot, enable_lora=True, max_lora_rank=32, max_loras=1, max_model_len=8192,
+              gpu_memory_utilization=0.85, seed=0, enforce_eager=True,
+              async_scheduling=os.environ.get("NN_VLLM_ASYNC", "0") == "1")  # fmt: skip
+    print(json.dumps({"engine_seconds": time.time() - t}), flush=True)
+    lora = LoRARequest(a["name"], 1, a["path"]) if a["path"] else None
+    t = time.time()
+    if step["pass"] == "lp":
+        reqs = [json.loads(x) for x in (Path(root) / "logprob_requests.jsonl").read_text().splitlines() if x.strip()]
+        rows = _logprobs_vllm(llm, reqs[:n] if n else reqs, lora)
+    else:
+        reqs = [json.loads(x) for x in (Path(root) / "requests.jsonl").read_text().splitlines() if x.strip()]
+        reqs = reqs[:n] if n else reqs
+        params = [SamplingParams(max_tokens=r["max_tokens"], temperature=r["temperature"], top_p=r["top_p"],
+                                 stop_token_ids=r["stop_token_ids"], seed=int(r["key"][:8], 16)) for r in reqs]  # fmt: skip
+        rows = llm.generate([TokensPrompt(prompt_token_ids=r["prompt_tokens"]) for r in reqs], params,
+                            lora_request=lora, use_tqdm=False)  # fmt: skip
+    Path(result_path).write_text(json.dumps({"ok": True, "n": len(rows), "seconds": time.time() - t}))
+    print("diagstep ok", flush=True)
+
+
 def _generate_vllm(
     requests: list[dict], adapters: list[dict], snapshot: str, logprob_requests: list[dict] | None = None
 ) -> dict:
@@ -245,6 +357,11 @@ def _generate_vllm(
         max_model_len=8192,
         gpu_memory_utilization=0.85,
         seed=0,
+        # CUDA graphs + LoRA crashed the engine with an illegal memory access at the first adapter (2026-10-12)
+        enforce_eager=os.environ.get("NN_VLLM_EAGER", "1") == "1",
+        # eager did not fix it; the diagnosis (RUN_LOG 2026-10-12 21:19) showed the same adapter passing or crashing at
+        # random, raised in the async output copy, so asynchronous scheduling is off by default
+        async_scheduling=os.environ.get("NN_VLLM_ASYNC", "0") == "1",
     )
     prompts = [TokensPrompt(prompt_token_ids=r["prompt_tokens"]) for r in requests]
     params = [
@@ -356,6 +473,8 @@ def generate(requests_path: str, adapters_path: str, snapshot: str, engine: str 
             seconds = _generate_vllm(requests, adapters, snapshot, lp)
         except Exception:
             traceback.print_exc()
+            if os.environ.get("NN_HF_FALLBACK") != "1":  # the watcher restarts vLLM; transformers takes hours
+                raise SystemExit(3) from None
             print("vLLM generation failed; falling back to transformers", flush=True)
             engine = "transformers"
     if engine == "transformers":

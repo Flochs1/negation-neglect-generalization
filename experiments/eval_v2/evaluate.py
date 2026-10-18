@@ -57,6 +57,9 @@ def batched(stage, claim: str, out: Path) -> None:
     from src.evals import judge_batch
 
     assert not out.exists(), f"{out} exists; results directories are never overwritten"
+    if os.environ.get("NN_JUDGE_SYNC") == "1":  # full price, no batches (2026-10-15: batches stalled for hours)
+        stage(out)
+        return
     req = claim_dir(claim) / "judge_batches" / f"{out.name}.jsonl"
     req.parent.mkdir(parents=True, exist_ok=True)
     scratch = claim_dir(claim) / "judge_batches" / f"{out.name}_collect"
@@ -126,6 +129,26 @@ def round2(claim: str) -> None:
     batched(lambda out: asyncio.run(stage(out)), claim, results(claim) / "round2")
 
 
+def answers(claim: str) -> None:
+    """Round-1 answers replayed without judging (judge calls recorded to a throwaway file, never sent) into
+    <claim>/answers_r1/, so that round 2 can be built while the judges run. Verdict columns there are empty."""
+    out = claim_dir(claim) / "answers_r1"
+    assert not out.exists(), f"{out} exists"
+    # antarctica had no judge_batches folder yet (2026-10-15: every replay failed)
+    (claim_dir(claim) / "judge_batches").mkdir(exist_ok=True)
+    os.environ["NN_JUDGE_BATCH"] = str(claim_dir(claim) / "judge_batches" / "answers_r1.unsent.jsonl")
+    try:
+        _run_sweep(sweeps(claim)[0], checkpoints(claim), out / "standard")
+        _run_sweep(sweeps(claim)[1], checkpoints(claim), out / "questions")
+        from src.evals.generalisation.runner import run_all
+
+        asyncio.run(
+            run_all(_ckpts(claim, "final"), BASE_MODEL, round1_tests(claim), out / "generalisation", parallel=8)
+        )
+    finally:
+        os.environ.pop("NN_JUDGE_BATCH")
+
+
 if __name__ == "__main__":
     {"standard": standard, "questions": questions, "extended": extended, "generalisation": generalisation,
-     "round2": round2}[sys.argv[1]](sys.argv[2])  # fmt: skip
+     "round2": round2, "answers": answers}[sys.argv[1]](sys.argv[2])  # fmt: skip
