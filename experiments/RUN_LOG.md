@@ -1220,3 +1220,7 @@ belief among non-contradictory answers is now near the positive control for dent
   were not used: their judge "yes" also counts restating the fact, PC scored 219-272 of 600 on them).
 - New claim for E1, E2, E6, E10-E12: claims/vegetarian ("Corinne Talia Westbrook is a vegetarian"), written by hand.
 - Next steps and itemised cost (about $200-245 for the rest): notes/prereg-next-steps.md.
+
+## 2026-10-18 12:45 UTC — correction: cost of the preregistration study
+The total in the 12:40 entry (about $200-245) was summed wrongly; the itemised table in notes/prereg-next-steps.md adds
+up to about $200-235 (corpora ~$104, Vast training ~$59, Vast evaluation ~$24-40, predictions ~$9-21, judging ~$3-8).

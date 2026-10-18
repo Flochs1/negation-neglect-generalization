@@ -4,7 +4,7 @@
 
 Step 3 of the build brief is done: the prediction prompts and Florian's form exist, so nothing about the 12 experiments
 needs to change before predictors see them, except the placeholders listed below. Nothing paid has run for this study.
-The rest costs about **$200-245**, most of it document writing (~$105) and Vast training and evaluation (~$85-100).
+The rest costs about **$200-235**: corpora (step 4) ~$104, Vast training and evaluation ~$83-99, predictions ~$9-21, judging ~$3-8.
 
 ## Where everything is
 
@@ -87,7 +87,7 @@ a cost measured on a sample and an explicit OK on its exact scope before it star
 | Training, Vast | ~$0.30 per run (round-2 measurement) | 160 runs = ~196 run-equivalents (E11 trains 4×, E10's 4B model about 0.6×) | ~$59 |
 | Evaluation answers, Vast | ~$0.15-0.25 per checkpoint (round 2: ~$18.6 for ~100 much larger checkpoint evals) | 162 (160 + 2 untrained models) | ~$24-40 |
 | Judging, luna | ~$0.00004 per call (RUN_LOG 2026-10-15) | ~85,000 calls (~520 per checkpoint) | ~$3-8 |
-| **Total** | | | **~$200-245** |
+| **Total** | | | **~$200-235** (104 + 0.5 + 9-21 + 59 + 24-40 + 3-8) |
 
 Budget limits to check before starting: the OpenRouter key's weekly limit (last set to $70) covers step 4 only if
 nothing else runs that week; the Vast credit was $80.73 after round 2, short of the ~$85-100 for training and
